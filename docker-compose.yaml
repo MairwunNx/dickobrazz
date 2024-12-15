@@ -1,0 +1,33 @@
+version: "3.8"
+
+services:
+  dickbot:
+    build: { context: ., dockerfile: Dockerfile }
+    restart: always
+    networks: [ base ]
+    volumes: [ ./data/bots/dickbot:/data ]
+    depends_on: [ cache, mongo ]
+    env_file: [ .env ]
+
+  cache:
+    image: redis:latest
+    restart: always
+    networks: [ base ]
+    ports: [ "${REDIS_PORT:-6379}:6379" ]
+    volumes: [ ./data/bots/dickbot/redis:/data ]
+
+  mongo:
+    image: mongo:latest
+    restart: always
+    networks: [ base ]
+    ports: [ "${MONGO_PORT:-27017}:27017" ]
+    volumes: [ ./data/bots/dickbot/mongo:/data/db ]
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
+    env_file: [ .env ]
+
+networks:
+  base:
+    driver: bridge

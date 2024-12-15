@@ -1,0 +1,13 @@
+**/.DS_Store
+**/.classpath
+**/.dockerignore
+**/.gitignore
+**/.project
+**/.settings
+**/.vs
+**/.idea
+**/.vscode
+**/bin
+*.md
+license
+golangci-lint
