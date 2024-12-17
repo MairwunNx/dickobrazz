@@ -117,4 +117,7 @@ go.work.sum
 
 # env file
 .env
+data/
+dickobot
+dickobot.zip
 

@@ -32,7 +32,11 @@ func NewLogger() *Logger {
 }
 
 func (l *Logger) With(args ...any) *Logger {
-	return &Logger{log: l.log.With(args)}
+	return &Logger{log: l.log.With(args...)}
+}
+
+func (l *Logger) D(msg string, args ...any) {
+	l.log.Debug(msg, args...)
 }
 
 func (l *Logger) I(msg string, args ...any) {

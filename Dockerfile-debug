@@ -13,7 +13,7 @@ COPY *.env ./
 COPY .version ./
 COPY .git ./
 COPY application/*.go ./application/
-RUN go build -o /app/dickobot -a -installsuffix cgo -gcflags "all=-N -l" -tags timetzdata -ldflags="-s -w -X application.application.Version="$(cat .version)" -X application.application.BuildAt="$(date +%Y-%m-%d_%H:%M:%S)" -X application.application.BuildRv="$(git describe --always --long)""
+RUN go build -o /app/dickobot -a -installsuffix cgo -gcflags "all=-N -l" -tags timetzdata -ldflags="-X application.application.Version="$(cat .version)" -X application.application.BuildAt="$(date +%Y-%m-%d_%H:%M:%S)" -X application.application.BuildRv="$(git describe --always --long)""
 RUN chmod +x /app/dickobot
 
 FROM busybox
@@ -21,4 +21,4 @@ EXPOSE 10000
 COPY --from=certs /etc/ssl/certs /etc/ssl/certs
 COPY --from=builder /app/dickobot dickobot
 COPY --from=builder /go/bin/dlv /
-CMD "./dickobot"
+CMD ["/dlv", "--listen=:10000", "--headless=true", "--api-version=2", "--accept-multiclient", "exec", "./dickobot"]
