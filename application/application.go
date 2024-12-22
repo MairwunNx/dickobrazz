@@ -6,15 +6,15 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/redis/go-redis/v9"
 	"go.mongodb.org/mongo-driver/mongo"
-	"math/rand"
 	"os"
 	"os/signal"
 	"syscall"
 )
 
-var Version = "unknown" // 1
-var BuildAt = "unknown" // 2024-06-29_15:48:20
-var BuildRv = "unknown" // 5b329d0
+var Version string   // 1
+var GoVersion string // go1.23.4
+var BuildAt string   // 2024-06-29_15:48:20
+var BuildRv string   // 5b329d0
 
 type Application struct {
 	ctx    context.Context
@@ -60,16 +60,6 @@ func (app *Application) Run() {
 			)
 
 			app.HandleInlineQuery(log, query)
-
-			//for i := 0; i < 20; i++ {
-			//  query.From.ID = randID()
-			//  query.From.UserName = uuid.New().String()
-			//  app.HandleInlineQuery(log, query)
-			//}
 		}
 	}
-}
-
-func randID() int64 {
-	return rand.Int63()
 }

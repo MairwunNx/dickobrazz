@@ -9,6 +9,7 @@ const (
 	SysVersion = "sys_version"
 	SysBuildRv = "sys_buildrv"
 	SysBuildAt = "sys_buildat"
+	SysRuntime = "sys_runtime"
 	InnerError = "inner_error"
 	UserId     = "user_id"
 	UserName   = "user_name"
@@ -25,6 +26,7 @@ func NewLogger() *Logger {
 		SysVersion, Version,
 		SysBuildRv, BuildRv,
 		SysBuildAt, BuildAt,
+		SysRuntime, GoVersion,
 	)
 	slog.SetDefault(logger)
 	logger.Info("Starting dickbot (dickobrazz) ...")

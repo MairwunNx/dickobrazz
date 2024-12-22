@@ -13,7 +13,7 @@ COPY *.env ./
 COPY .version ./
 COPY .git ./
 COPY application/*.go ./application/
-RUN go build -o /app/dickobot -a -installsuffix cgo -gcflags "all=-N -l" -tags timetzdata -ldflags="-s -w -X application.application.Version="$(cat .version)" -X application.application.BuildAt="$(date +%Y-%m-%d_%H:%M:%S)" -X application.application.BuildRv="$(git describe --always --long)""
+RUN go build -o /app/dickobot -a -installsuffix cgo -gcflags "all=-N -l" -tags timetzdata -ldflags="-s -w -X dickobot/application.Version="$(cat .version)" -X dickobot/application.BuildAt="$(date +%Y-%m-%d_%H:%M:%S)" -X dickobot/application.GoVersion="$(go version | awk '{print $3}')" -X dickobot/application.BuildRv="$(git describe --always --long)""
 RUN chmod +x /app/dickobot
 
 FROM busybox
