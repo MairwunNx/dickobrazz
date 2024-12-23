@@ -24,7 +24,7 @@ func (app *Application) HandleInlineQuery(log *Logger, query *tgbotapi.InlineQue
 		results = []any{
 			app.InlineQueryCockSize(log, query),
 			app.InlineQueryCockRace(log, query),
-			app.InlineQueryCockRaceImgStat(log, query),
+			//app.InlineQueryCockRaceImgStat(log, query),
 			app.InlineQueryCockRuler(log, query),
 		}
 	} else {
