@@ -50,6 +50,16 @@ func (app *Application) Run() {
 	updates.Timeout = 120
 
 	for update := range app.bot.GetUpdatesChan(updates) {
+		if msg := update.Message; msg != nil {
+			user := update.SentFrom()
+			app.log.With(
+				UserId, user.ID,
+				UserName, user.UserName,
+				ChatType, msg.Chat.Type,
+				ChatId, msg.Chat.ID,
+			).I("Received message")
+		}
+
 		if query := update.InlineQuery; query != nil {
 			user := update.SentFrom()
 			log := app.log.With(

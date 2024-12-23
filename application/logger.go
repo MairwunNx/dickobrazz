@@ -15,6 +15,7 @@ const (
 	UserName   = "user_name"
 	QueryId    = "query_type"
 	ChatType   = "chat_type"
+	ChatId     = "chat_id"
 )
 
 type Logger struct {
