@@ -2,6 +2,7 @@ package application
 
 import (
 	"crypto/rand"
+	"encoding/json"
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/google/uuid"
@@ -118,7 +119,7 @@ func (dp defaultColorPalette) GetSeriesColor(index int) drawing.Color {
 	return drawing.ColorFromHex("c6c6c6")
 }
 
-func (app *Application) InlineQueryCockRaceImgStat(log *Logger, query *tgbotapi.InlineQuery) tgbotapi.InlineQueryResultPhoto {
+func (app *Application) InlineQueryCockRaceImgStat(log *Logger, query *tgbotapi.InlineQuery) tgbotapi.InlineQueryResultCachedPhoto {
 	collection := app.db.Database("dickbot_db").Collection("cocks")
 
 	pipeline := mongo.Pipeline{
@@ -139,7 +140,7 @@ func (app *Application) InlineQueryCockRaceImgStat(log *Logger, query *tgbotapi.
 	cursor, err := collection.Aggregate(app.ctx, pipeline)
 	if err != nil {
 		log.E("Failed to aggregate cock sizes", InnerError, err)
-		return tgbotapi.InlineQueryResultPhoto{}
+		return tgbotapi.InlineQueryResultCachedPhoto{}
 	}
 
 	var results []struct {
@@ -148,14 +149,14 @@ func (app *Application) InlineQueryCockRaceImgStat(log *Logger, query *tgbotapi.
 	}
 	if err := cursor.All(app.ctx, &results); err != nil {
 		log.E("Failed to decode cock sizes", InnerError, err)
-		return tgbotapi.InlineQueryResultPhoto{}
+		return tgbotapi.InlineQueryResultCachedPhoto{}
 	}
 
 	log.I("Successfully aggregated cock sizes")
 
 	if len(results) == 0 {
 		log.I("No cock sizes found for user")
-		return tgbotapi.InlineQueryResultPhoto{}
+		return tgbotapi.InlineQueryResultCachedPhoto{}
 	}
 
 	startDate := results[0].ID
@@ -243,22 +244,44 @@ func (app *Application) InlineQueryCockRaceImgStat(log *Logger, query *tgbotapi.
 	outputFile, err := os.Create(filePath)
 	if err != nil {
 		log.E("Failed to create graph image file", InnerError, err)
-		return tgbotapi.InlineQueryResultPhoto{}
+		return tgbotapi.InlineQueryResultCachedPhoto{}
 	}
 	defer outputFile.Close()
 
 	if err := graph.Render(chart.PNG, outputFile); err != nil {
 		log.E("Failed to render graph image", InnerError, err)
-		return tgbotapi.InlineQueryResultPhoto{}
+		return tgbotapi.InlineQueryResultCachedPhoto{}
 	}
 
 	log.I("Successfully created graph image")
 
-	return tgbotapi.NewInlineQueryResultPhoto(
-		query.ID,
-		fmt.Sprintf("file://%s", filePath),
-		//fmt.Sprintf("Развитие размера кока"),
-	)
+	return tgbotapi.NewInlineQueryResultCachedPhoto(query.ID, app.UploadPhotoToTelegram(log, filePath))
+
+}
+func (app *Application) UploadPhotoToTelegram(log *Logger, filePath string) string {
+	photo := tgbotapi.NewPhoto(0, tgbotapi.FilePath(filePath))
+	photo.Caption = "Статистика моего кока"
+
+	msg, err := app.bot.Request(photo)
+	if err != nil {
+		log.E("Failed to upload photo to Telegram", InnerError, err)
+		return ""
+	}
+
+	// Telegram API возвращает JSON с `file_id`
+	var response struct {
+		Result struct {
+			FileID string `json:"file_id"`
+		} `json:"result"`
+	}
+
+	if err := json.Unmarshal(msg.Result, &response); err != nil {
+		log.E("Failed to parse Telegram response", InnerError, err)
+		return ""
+	}
+
+	log.I("Successfully uploaded photo to Telegram")
+	return response.Result.FileID
 }
 
 func interpolatePoints(x, y []float64, resolution int) ([]float64, []float64) {
