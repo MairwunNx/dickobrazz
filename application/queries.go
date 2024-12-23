@@ -264,7 +264,7 @@ func (app *Application) InlineQueryCockRaceImgStat(log *Logger, query *tgbotapi.
 	return tgbotapi.NewInlineQueryResultCachedPhoto(query.ID, fileID)
 }
 func (app *Application) UploadPhotoToTelegram(log *Logger, filePath string) string {
-	photo := tgbotapi.NewPhoto(8177971438, tgbotapi.FilePath(filePath)) // Используем FilePath
+	photo := tgbotapi.NewPhoto(362695653, tgbotapi.FilePath(filePath)) // Используем FilePath
 	photo.Caption = "Статистика моего кока"
 
 	msg, err := app.bot.Request(photo)
