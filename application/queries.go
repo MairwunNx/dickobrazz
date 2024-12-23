@@ -19,20 +19,10 @@ import (
 )
 
 func (app *Application) HandleInlineQuery(log *Logger, query *tgbotapi.InlineQuery) {
-	var results []any
-	if query.From.UserName == "mairwunnx" {
-		results = []any{
-			app.InlineQueryCockSize(log, query),
-			app.InlineQueryCockRace(log, query),
-			//app.InlineQueryCockRaceImgStat(log, query),
-			app.InlineQueryCockRuler(log, query),
-		}
-	} else {
-		results = []any{
-			app.InlineQueryCockSize(log, query),
-			app.InlineQueryCockRace(log, query),
-			app.InlineQueryCockRuler(log, query),
-		}
+	results := []any{
+		app.InlineQueryCockSize(log, query),
+		app.InlineQueryCockRace(log, query),
+		app.InlineQueryCockRuler(log, query),
 	}
 
 	inlines := tgbotapi.InlineConfig{
