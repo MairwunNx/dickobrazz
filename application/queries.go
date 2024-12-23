@@ -253,13 +253,18 @@ func (app *Application) InlineQueryCockRaceImgStat(log *Logger, query *tgbotapi.
 		return tgbotapi.InlineQueryResultCachedPhoto{}
 	}
 
+	fileID := app.UploadPhotoToTelegram(log, filePath)
+	if fileID == "" {
+		log.E("Failed to get file ID after uploading photo")
+		return tgbotapi.InlineQueryResultCachedPhoto{}
+	}
+
 	log.I("Successfully created graph image")
 
-	return tgbotapi.NewInlineQueryResultCachedPhoto(query.ID, app.UploadPhotoToTelegram(log, filePath))
-
+	return tgbotapi.NewInlineQueryResultCachedPhoto(query.ID, fileID)
 }
 func (app *Application) UploadPhotoToTelegram(log *Logger, filePath string) string {
-	photo := tgbotapi.NewPhoto(0, tgbotapi.FilePath(filePath))
+	photo := tgbotapi.NewPhoto(0, tgbotapi.FilePath(filePath)) // Используем FilePath
 	photo.Caption = "Статистика моего кока"
 
 	msg, err := app.bot.Request(photo)
@@ -271,7 +276,9 @@ func (app *Application) UploadPhotoToTelegram(log *Logger, filePath string) stri
 	// Telegram API возвращает JSON с `file_id`
 	var response struct {
 		Result struct {
-			FileID string `json:"file_id"`
+			Photo []struct {
+				FileID string `json:"file_id"`
+			} `json:"photo"`
 		} `json:"result"`
 	}
 
@@ -280,8 +287,14 @@ func (app *Application) UploadPhotoToTelegram(log *Logger, filePath string) stri
 		return ""
 	}
 
+	if len(response.Result.Photo) == 0 {
+		log.E("No photo found in Telegram response")
+		return ""
+	}
+
+	fileID := response.Result.Photo[len(response.Result.Photo)-1].FileID
 	log.I("Successfully uploaded photo to Telegram")
-	return response.Result.FileID
+	return fileID
 }
 
 func interpolatePoints(x, y []float64, resolution int) ([]float64, []float64) {
