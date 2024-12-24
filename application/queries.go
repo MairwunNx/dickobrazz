@@ -185,6 +185,36 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 
 	log.I("Successfully calculated global total cock size", "TotalCock", totalResult.TotalCock)
 
+	// Pipeline для подсчёта уникальных пользователей
+	uniqueUsersPipeline := mongo.Pipeline{
+		{{Key: "$group", Value: bson.D{
+			{Key: "_id", Value: "$user_id"},
+		}}},
+		{{Key: "$count", Value: "count"}}, // Подсчитываем количество уникальных групп
+	}
+
+	// Выполняем агрегацию для подсчёта уникальных пользователей
+	uniqueUsersCursor, err := collection.Aggregate(app.ctx, uniqueUsersPipeline)
+	if err != nil {
+		log.E("Failed to aggregate unique users", InnerError, err)
+		return tgbotapi.InlineQueryResultArticle{}
+	}
+
+	var uniqueUsersResult struct {
+		Count int `bson:"count"`
+	}
+	if uniqueUsersCursor.Next(app.ctx) {
+		if err := uniqueUsersCursor.Decode(&uniqueUsersResult); err != nil {
+			log.E("Failed to decode unique users data", InnerError, err)
+			return tgbotapi.InlineQueryResultArticle{}
+		}
+	} else {
+		log.E("No unique users data found")
+		return tgbotapi.InlineQueryResultArticle{}
+	}
+
+	log.I("Successfully calculated unique users", "Count", uniqueUsersResult.Count)
+
 	// Calculate metrics
 	var totalCock, totalAvgCock, totalMedianCock int
 	var userTotalCock, userAvgCock, userMaxCock, userYesterdayChangeCock int
@@ -224,7 +254,7 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 
 		// Track max cock
 		for _, size := range result.Sizes {
-			if size > userMaxCock {
+			if size >= userMaxCock {
 				userMaxCock = size
 				userMaxCockDate = result.Date
 			}
@@ -286,7 +316,7 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 	// Generate result text
 	text := NewMsgCockDynamicsTemplate(
 		// Общая динамика коков
-		totalCock, len(allCocks), totalAvgCock, totalMedianCock,
+		totalCock, uniqueUsersResult.Count, totalAvgCock, totalMedianCock,
 		// Персональная динамика кока
 		userTotalCock, userAvgCock, userIrk, userMaxCock, userMaxCockDate,
 		// Кок-активы
