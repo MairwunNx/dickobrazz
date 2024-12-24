@@ -21,6 +21,7 @@ type Application struct {
 	cancel context.CancelFunc
 	log    *Logger
 	bot    *tgbotapi.BotAPI
+	rnd    *Random
 	db     *mongo.Client
 	redis  *redis.Client
 	cache  *cache.Cache
@@ -31,10 +32,11 @@ func NewApplication() *Application {
 	log := NewLogger()
 
 	bot := InitializeTelegramBot(log)
+	rnd := InitializeRandom(log)
 	db := InitializeMongoConnection(ctx, log)
 	client, redisCache := InitializeRedisConnection(log)
 
-	return &Application{ctx, cancel, log, bot, db, client, redisCache}
+	return &Application{ctx, cancel, log, bot, rnd, db, client, redisCache}
 }
 
 func (app *Application) Shutdown() {

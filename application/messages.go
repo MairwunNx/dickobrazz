@@ -3,7 +3,7 @@ package application
 const (
 	CommonDots = "..."
 
-	MsgCockScoreboardNotFound = "\n🥀 *Тебе соболезнуем\\.\\.\\. потому что не смотрел на кок!*"
+	MsgCockScoreboardNotFound = "\n🥀 *Тебе соболезнуем... потому что не смотрел на кок!*"
 
 	MsgCockSize                    = "Мой кок: *%dсм* %s"
 	MsgCockRulerScoreboardDefault  = "%s @%s *%dсм* %s"

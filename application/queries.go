@@ -1,7 +1,6 @@
 package application
 
 import (
-	"crypto/rand"
 	"encoding/json"
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -11,7 +10,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"math"
-	"math/big"
 	"os"
 	"sort"
 	"strings"
@@ -49,8 +47,7 @@ func (app *Application) InlineQueryCockSize(log *Logger, query *tgbotapi.InlineQ
 	if cached := app.GetCockSizeFromCache(log, query.From.ID); cached != nil {
 		size = *cached
 	} else {
-		random, _ := rand.Int(rand.Reader, big.NewInt(int64(61)))
-		size = int(random.Int64())
+		size = app.rnd.IntN(60)
 
 		cock := &Cock{
 			ID:          uuid.NewString(),
