@@ -1,2 +1,2 @@
-*.go text eol=crlf
+*.go text eol=lf
 *.md text eol=crlf
