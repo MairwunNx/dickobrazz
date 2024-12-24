@@ -120,4 +120,5 @@ go.work.sum
 data/
 dickobot
 dickobot.zip
+golangci-lint
 
