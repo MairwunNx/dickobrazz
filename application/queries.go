@@ -249,7 +249,7 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 		userDailyGrowth,
 	)
 
-	return tgbotapi.NewInlineQueryResultArticleMarkdown(query.ID, "Динамика кока", strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(text, ".", "\\."), "-", "\\-"), "!", "\\!"))
+	return tgbotapi.NewInlineQueryResultArticleMarkdown(query.ID, "Динамика кока", text)
 }
 
 func sum(data []int) int {

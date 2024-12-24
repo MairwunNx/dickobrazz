@@ -76,13 +76,13 @@ _Гонка коков – это соревнование, в котором к
 
 Общий посчитанный кок: *%[7]s см* 🤯
 В среднем размер кока: *%[8]s см* %[9]s
-ИРК (Индекс Размера Кока): %[10]s
-Самый большой кок был: *%[11]s см* %[12]s (%[13]s)
+ИРК (Индекс Размера Кока): *%[10]s*
+Самый большой кок был: *%[11]s см* %[12]s (*%[13]s*)
 
 📈 *Кок-активы*
 
-%[14]s Вчерашняя динамика: *%[15]s%%* (*%[16]s см*) %[17]s
-%[18]s Средний дневной прирост: *%[19]s см/день* %[20]s
+%[14]s Вчерашняя динамика: *%[15]s%%* (*%[16]s см*)
+%[17]s Средний дневной прирост: *%[18]s см/день*
 
 ⚠️ _Могут быть недоработки, динамика коков тестируется._
 `
@@ -113,28 +113,22 @@ func NewMsgCockDynamicsTemplate(
 ) string {
 	var userYesterdayChangePercentEmoji string
 	var userYesterdayChangePercentSymbol string
-	var userYesterdayChangePercentEmojiEnd string
 	if userYesterdayChangePercent >= 0 {
 		userYesterdayChangePercentEmoji = "🟩"
 		userYesterdayChangePercentSymbol = "+"
-		userYesterdayChangePercentEmojiEnd = "🔺"
 	} else {
 		userYesterdayChangePercentEmoji = "🟥"
 		userYesterdayChangePercentSymbol = "-"
-		userYesterdayChangePercentEmojiEnd = "🔻"
 	}
 
 	var userDailyGrowthEmoji string
 	var userDailyGrowthSymbol string
-	var userDailyGrowthEmojiEnd string
 	if userDailyGrowth >= 0 {
 		userDailyGrowthEmoji = "🟩"
 		userDailyGrowthSymbol = "+"
-		userDailyGrowthEmojiEnd = "🔺"
 	} else {
 		userDailyGrowthEmoji = "🟥"
 		userDailyGrowthSymbol = "-"
-		userDailyGrowthEmojiEnd = "🔻"
 	}
 
 	return fmt.Sprintf(
@@ -152,10 +146,10 @@ func NewMsgCockDynamicsTemplate(
 		EscapeMarkdownV2(FormatDickSize(userTotalCock)),
 		EscapeMarkdownV2(FormatDickSize(userAvgCock)), EmojiFromSize(userAvgCock),
 		EscapeMarkdownV2(FormatDickIkr(userIrk)),
-		EscapeMarkdownV2(FormatDickSize(userMaxCock)), EscapeMarkdownV2(userMaxCockDate.Format("02.01.06")), EmojiFromSize(userMaxCock),
+		EscapeMarkdownV2(FormatDickSize(userMaxCock)), EmojiFromSize(userMaxCock), EscapeMarkdownV2(userMaxCockDate.Format("02.01.06")),
 
 		/* Кок-активы */
-		userYesterdayChangePercentEmoji, fmt.Sprintf("%s%s", EscapeMarkdownV2(userYesterdayChangePercentSymbol), EscapeMarkdownV2(FormatDickPercent(userYesterdayChangePercent))), EscapeMarkdownV2(FormatDickSize(userYesterdayChangeCock)), userYesterdayChangePercentEmojiEnd,
-		userDailyGrowthEmoji, fmt.Sprintf("%s%s", EscapeMarkdownV2(userDailyGrowthSymbol), EscapeMarkdownV2(FormatDickPercent(userDailyGrowth))), userDailyGrowthEmojiEnd,
+		userYesterdayChangePercentEmoji, fmt.Sprintf("%s%s", EscapeMarkdownV2(userYesterdayChangePercentSymbol), EscapeMarkdownV2(FormatDickPercent(userYesterdayChangePercent))), EscapeMarkdownV2(FormatDickSize(userYesterdayChangeCock)),
+		userDailyGrowthEmoji, fmt.Sprintf("%s%s", EscapeMarkdownV2(userDailyGrowthSymbol), EscapeMarkdownV2(FormatDickPercent(userDailyGrowth))),
 	)
 }
