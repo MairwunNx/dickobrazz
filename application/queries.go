@@ -5,6 +5,7 @@ import (
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
+	"math"
 	"sort"
 	"strings"
 	"time"
@@ -244,14 +245,20 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 
 	// Calculate IRK
 	if totalCock > 0 && userTotalCock > 0 {
-		// Dynamic w1 and w2
-		w1 := float64(userTotalCock) * k1
-		w2 := float64(totalCock) * k2
+		// Нормализуем пользовательский общий кок относительно среднего общего размера
+		normalizedUserCock := float64(userTotalCock) / float64(totalAvgCock)
 
-		// Calculate IRK
-		userIrk = (float64(userTotalCock) + w1) / (float64(totalCock) + w2)
+		// Учитываем количество записей пользователя
+		normalizedUserRecords := float64(len(userResults)) / float64(len(allCocks))
 
-		// Clamp IRK to [0.0, 1.0]
+		// Динамические весовые коэффициенты (с ограничениями)
+		w1 := math.Max(5.0, math.Min(normalizedUserCock*10, 50.0))
+		w2 := math.Max(3.0, math.Min(normalizedUserRecords*5, 30.0))
+
+		// Вычисляем IRK
+		userIrk = (normalizedUserCock + w1) / (1.0 + w2)
+
+		// Ограничиваем значение IRK в диапазоне [0.0, 1.0]
 		if userIrk > 1.0 {
 			userIrk = 1.0
 		} else if userIrk < 0.0 {
