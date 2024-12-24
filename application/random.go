@@ -9,21 +9,20 @@ import (
 type Random struct {
 	randomOrg *randomorg.Random
 	chacha8   *rand.ChaCha8
-	log       *Logger
 }
 
 func InitializeRandom(log *Logger) *Random {
 	rndorg, chacha8 := InitializeRandomOrg(log), InitializeChaCha8(log)
-	return &Random{log: log, randomOrg: rndorg, chacha8: chacha8}
+	return &Random{randomOrg: rndorg, chacha8: chacha8}
 }
 
-func (rnd *Random) IntN(maxInclusive int) int {
+func (rnd *Random) IntN(log *Logger, maxInclusive int) int {
 	if value, err := rnd.randomOrg.GenerateIntegers(1, 0, int64(maxInclusive+1)); err != nil {
-		rnd.log.E("Failed to generate random number", RndSource, "external/random.org", InnerError, err)
-		rnd.log.E("Successfully generated random number", RndSource, "native/chacha8", InnerError, err)
+		log.E("Failed to generate random number", RndSource, "external/random.org", InnerError, err)
+		log.I("Successfully generated random number", RndSource, "native/chacha8", InnerError, err)
 		return int(rnd.chacha8.Uint64() % uint64(maxInclusive+1))
 	} else {
-		rnd.log.E("Successfully generated random number", RndSource, "external/random.org", InnerError, err)
+		log.I("Successfully generated random number", RndSource, "external/random.org")
 		return int(value[0])
 	}
 }
