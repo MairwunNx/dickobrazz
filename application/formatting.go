@@ -72,9 +72,9 @@ func (app *Application) GenerateCockRaceScoreboard(log *Logger, userID int64, si
 
 		var scoreboardLine string
 		if isCurrentUser {
-			scoreboardLine = fmt.Sprintf(MsgCockRaceScoreboardSelected, emoji, EscapeMarkdownV2(user.Nickname), FormatDickSize(user.TotalSize))
+			scoreboardLine = fmt.Sprintf(MsgCockRaceScoreboardSelected, emoji, EscapeMarkdownV2(user.Nickname), FormatDickSize(int(user.TotalSize)))
 		} else {
-			scoreboardLine = fmt.Sprintf(MsgCockRaceScoreboardDefault, emoji, EscapeMarkdownV2(user.Nickname), FormatDickSize(user.TotalSize))
+			scoreboardLine = fmt.Sprintf(MsgCockRaceScoreboardDefault, emoji, EscapeMarkdownV2(user.Nickname), FormatDickSize(int(user.TotalSize)))
 		}
 
 		if index < 3 {
@@ -86,7 +86,7 @@ func (app *Application) GenerateCockRaceScoreboard(log *Logger, userID int64, si
 
 	if !isUserInScoreboard {
 		if cock := app.GetUserAggregatedCock(log, userID); cock != nil {
-			others = append(others, fmt.Sprintf(MsgCockRaceScoreboardOut, EscapeMarkdownV2(cock.Nickname), FormatDickSize(cock.TotalSize)))
+			others = append(others, fmt.Sprintf(MsgCockRaceScoreboardOut, EscapeMarkdownV2(cock.Nickname), FormatDickSize(int(cock.TotalSize))))
 		} else {
 			others = append(others, MsgCockScoreboardNotFound)
 		}
@@ -133,6 +133,14 @@ func EscapeMarkdownV2(input string) string {
 
 var p = message.NewPrinter(language.Russian)
 
-func FormatDickSize(size int32) string {
+func FormatDickPercent(size float64) string {
+	return p.Sprintf("%.1f", size)
+}
+
+func FormatDickSize(size int) string {
 	return p.Sprintf("%d", size)
+}
+
+func FormatDickIkr(ikr float64) string {
+	return p.Sprintf("%.3f", ikr)
 }

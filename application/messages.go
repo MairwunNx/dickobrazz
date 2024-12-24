@@ -1,5 +1,10 @@
 package application
 
+import (
+	"fmt"
+	"time"
+)
+
 const (
 	CommonDots = "..."
 
@@ -57,4 +62,98 @@ _Гонка коков – это соревнование, в котором к
 _Гонка коков – это соревнование, в котором коки участников суммируются за весь сезон. Период обновления коков – сутки_
   
 🚀 Текущий сезон гонки коков стартовал *16.12.2024*`
+
+	MsgCockDynamicsTemplate = `
+📊 *Общая динамика коков*
+
+Общий посчитанный кок: *%[1]s см* 🤭
+Всего уникальных коков в системе: *%[2]s* 🫡
+
+Средний кок в системе: *%[3]s см* %[4]s
+Медиана кока в системе: *%[5]s см* %[6]s
+
+📊 *Персональная динамика кока*
+
+Общий посчитанный кок: *%[7]s см* 🤯
+В среднем размер кока: *%[8]s см* %[9]s
+ИРК (Индекс Размера Кока): %[10]s
+Самый большой кок был: *%[11]s см* %[12]s (%[13]s)
+
+📈 *Кок-активы*
+
+%[14]s Вчерашняя динамика: *%[15]s%%* (*%[16]s см*) %[17]s
+%[18]s Средний дневной прирост: *%[19]s см/день* %[20]s
+`
 )
+
+func NewMsgCockDynamicsTemplate(
+	/* Общая динамика коков */
+
+	totalCock int,
+	totalUsers int,
+	totalAvgCock int,
+	totalMedianCock int,
+
+	/* Персональная динамика кока */
+
+	userTotalCock int,
+	userAvgCock int,
+	userIrk float64,
+	userMaxCock int,
+	userMaxCockDate time.Time,
+
+	/* Кок-активы */
+
+	userYesterdayChangePercent float64,
+	userYesterdayChangeCock int,
+
+	userDailyGrowth float64,
+) string {
+	var userYesterdayChangePercentEmoji string
+	var userYesterdayChangePercentSymbol string
+	var userYesterdayChangePercentEmojiEnd string
+	if userYesterdayChangePercent >= 0 {
+		userYesterdayChangePercentEmoji = "🟩"
+		userYesterdayChangePercentSymbol = "+"
+		userYesterdayChangePercentEmojiEnd = "🔺"
+	} else {
+		userYesterdayChangePercentEmoji = "🟥"
+		userYesterdayChangePercentSymbol = "-"
+		userYesterdayChangePercentEmojiEnd = "🔻"
+	}
+
+	var userDailyGrowthEmoji string
+	var userDailyGrowthSymbol string
+	var userDailyGrowthEmojiEnd string
+	if userDailyGrowth >= 0 {
+		userDailyGrowthEmoji = "🟩"
+		userDailyGrowthSymbol = "+"
+		userDailyGrowthEmojiEnd = "🔺"
+	} else {
+		userDailyGrowthEmoji = "🟥"
+		userDailyGrowthSymbol = "-"
+		userDailyGrowthEmojiEnd = "🔻"
+	}
+
+	return fmt.Sprintf(
+		MsgCockDynamicsTemplate,
+
+		/* Общая динамика коков */
+
+		FormatDickSize(totalCock),
+		FormatDickSize(totalUsers),
+		FormatDickSize(totalAvgCock), EmojiFromSize(totalAvgCock),
+		FormatDickSize(totalMedianCock), EmojiFromSize(totalMedianCock),
+
+		/* Персональная динамика кока */
+
+		FormatDickSize(userTotalCock),
+		FormatDickSize(userAvgCock), EmojiFromSize(userAvgCock),
+		FormatDickIkr(userIrk),
+		FormatDickSize(userMaxCock), userMaxCockDate.Format("02.01.06"), EmojiFromSize(userMaxCock),
+
+		/* Кок-активы */
+		userYesterdayChangePercentEmoji, fmt.Sprintf("%s%s", userYesterdayChangePercentSymbol, FormatDickPercent(userYesterdayChangePercent)), FormatDickSize(userYesterdayChangeCock), userYesterdayChangePercentEmojiEnd,
+		userDailyGrowthEmoji, fmt.Sprintf("%s%s", userDailyGrowthSymbol, FormatDickPercent(userDailyGrowth)), userDailyGrowthEmojiEnd,
+	)
+}

@@ -1,24 +1,33 @@
 package application
 
 import (
-	"encoding/json"
-	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/google/uuid"
-	"github.com/wcharczuk/go-chart"
-	"github.com/wcharczuk/go-chart/drawing"
-	"math"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 	"sort"
 	"strings"
+	"time"
 )
 
 func (app *Application) HandleInlineQuery(log *Logger, query *tgbotapi.InlineQuery) {
-	results := []any{
-		app.InlineQueryCockSize(log, query),
-		app.InlineQueryCockRace(log, query),
-		app.InlineQueryCockRuler(log, query),
-		app.InlineQueryCockRaceImgStat(log, query),
-		//app.InlineQueryCockDynamic(log, query),
+	var results []any
+	if query.From.ID == 362695653 {
+		results = []any{
+			app.InlineQueryCockSize(log, query),
+			app.InlineQueryCockRace(log, query),
+			app.InlineQueryCockRuler(log, query),
+			//app.InlineQueryCockRaceImgStat(log, query),
+			app.InlineQueryCockDynamic(log, query),
+		}
+	} else {
+		results = []any{
+			app.InlineQueryCockSize(log, query),
+			app.InlineQueryCockRace(log, query),
+			app.InlineQueryCockRuler(log, query),
+			//app.InlineQueryCockRaceImgStat(log, query),
+			//app.InlineQueryCockDynamic(log, query),
+		}
 	}
 
 	inlines := tgbotapi.InlineConfig{
@@ -74,276 +83,205 @@ func (app *Application) InlineQueryCockRace(log *Logger, query *tgbotapi.InlineQ
 	return InitializeInlineQuery("Гонка коков", strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(text, ".", "\\."), "-", "\\-"), "!", "\\!"))
 }
 
-type defaultColorPalette struct{}
+const (
+	k1 = 0.1 // Коэффициент влияния крупного размера
+	k2 = 0.5 // Коэффициент влияния количества записей
+)
 
-func (dp defaultColorPalette) BackgroundColor() drawing.Color {
-	return drawing.ColorFromHex("232323")
+func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.InlineQuery) tgbotapi.InlineQueryResultArticle {
+	collection := app.db.Database("dickbot_db").Collection("cocks")
+
+	userPipeline := mongo.Pipeline{
+		{{Key: "$match", Value: bson.D{{Key: "user_id", Value: query.From.ID}}}},
+		{{Key: "$group", Value: bson.D{
+			{Key: "_id", Value: "$requested_at"},
+			{Key: "totalSize", Value: bson.D{{Key: "$sum", Value: "$size"}}},
+			{Key: "sizes", Value: bson.D{{Key: "$push", Value: "$size"}}},
+			{Key: "avgSize", Value: bson.D{{Key: "$avg", Value: "$size"}}},
+			{Key: "count", Value: bson.D{{Key: "$sum", Value: 1}}},
+		}}},
+		{{Key: "$sort", Value: bson.D{{Key: "_id", Value: 1}}}},
+	}
+
+	cursor, err := collection.Aggregate(app.ctx, userPipeline)
+	if err != nil {
+		log.E("Failed to aggregate user cock data", InnerError, err)
+		return tgbotapi.InlineQueryResultArticle{}
+	}
+
+	var userResults []struct {
+		Date      time.Time `bson:"_id"`
+		TotalSize int       `bson:"totalSize"`
+		Sizes     []int     `bson:"sizes"`
+		AvgSize   float64   `bson:"avgSize"`
+		Count     int       `bson:"count"`
+	}
+	if err := cursor.All(app.ctx, &userResults); err != nil {
+		log.E("Failed to decode user cock data", InnerError, err)
+		return tgbotapi.InlineQueryResultArticle{}
+	}
+
+	log.I("Successfully aggregated user cock data")
+
+	// Pipeline для расчета среднего по всем пользователям
+	averagePipeline := mongo.Pipeline{
+		{{Key: "$group", Value: bson.D{
+			{Key: "_id", Value: "$user_id"},
+			{Key: "avgSize", Value: bson.D{{Key: "$avg", Value: "$size"}}},
+		}}},
+		{{Key: "$group", Value: bson.D{
+			{Key: "_id", Value: nil},
+			{Key: "totalAvgSize", Value: bson.D{{Key: "$avg", Value: "$avgSize"}}},
+		}}},
+	}
+
+	averageCursor, err := collection.Aggregate(app.ctx, averagePipeline)
+	if err != nil {
+		log.E("Failed to aggregate global average cock size", InnerError, err)
+		return tgbotapi.InlineQueryResultArticle{}
+	}
+
+	var globalResult struct {
+		TotalAvgSize float64 `bson:"totalAvgSize"`
+	}
+	if averageCursor.Next(app.ctx) {
+		if err := averageCursor.Decode(&globalResult); err != nil {
+			log.E("Failed to decode global average data", InnerError, err)
+			return tgbotapi.InlineQueryResultArticle{}
+		}
+	} else {
+		log.E("No global average data found")
+		return tgbotapi.InlineQueryResultArticle{}
+	}
+
+	log.I("Successfully calculated global average cock size", "TotalAvgSize", globalResult.TotalAvgSize)
+
+	// Calculate metrics
+	var totalCock, totalAvgCock, totalMedianCock int
+	var userTotalCock, userAvgCock, userMaxCock, userYesterdayChangeCock int
+	var userIrk, userYesterdayChangePercent, userDailyGrowth float64
+	var userMaxCockDate time.Time
+
+	var allCocks []int
+	for _, result := range userResults {
+		allCocks = append(allCocks, result.Sizes...)
+		userTotalCock += result.TotalSize
+
+		// Track max cock
+		for _, size := range result.Sizes {
+			if size > userMaxCock {
+				userMaxCock = size
+				userMaxCockDate = result.Date
+			}
+		}
+	}
+
+	// Calculate overall metrics
+	totalCock = sum(allCocks)
+	totalMedianCock = median(allCocks)
+
+	if len(userResults) > 0 {
+		userAvgCock = int(float64(userTotalCock) / float64(len(userResults)))
+	}
+
+	if len(allCocks) > 0 {
+		totalAvgCock = int(globalResult.TotalAvgSize)
+	}
+
+	// Calculate IRK
+	if totalCock > 0 && len(userResults) > 0 {
+		// Суммируем размеры коков юзера
+		sumUserCocks := 0
+		for _, result := range userResults {
+			sumUserCocks += result.TotalSize
+		}
+
+		// Находим средний размер кока
+		avgCockSize := float64(sumUserCocks) / float64(len(userResults))
+
+		// Динамические значения w1 и w2
+		w1 := avgCockSize * k1
+		w2 := float64(len(userResults)) * k2
+
+		// Вычисляем IRK
+		rawIrk := (float64(sumUserCocks) + w1) / (float64(len(userResults)) + w2)
+
+		// Ограничиваем значение IRK в диапазоне [0.0, 1.0]
+		if rawIrk > 1.0 {
+			userIrk = 1.0
+		} else if rawIrk < 0.0 {
+			userIrk = 0.0
+		} else {
+			userIrk = rawIrk
+		}
+	}
+
+	// Calculate yesterday's change
+	if len(userResults) > 1 {
+		userYesterdayChangeCock = userResults[len(userResults)-1].TotalSize - userResults[len(userResults)-2].TotalSize
+		if userResults[len(userResults)-2].TotalSize > 0 {
+			userYesterdayChangePercent = float64(userYesterdayChangeCock) / float64(userResults[len(userResults)-2].TotalSize) * 100
+		} else {
+			userYesterdayChangePercent = 100
+		}
+	} else {
+		userYesterdayChangePercent = 100
+		userYesterdayChangeCock = 0
+	}
+
+	// Calculate daily growth
+	var dailyGrowthSum float64
+	for i := 1; i < len(userResults); i++ {
+		dailyGrowthSum += float64(userResults[i].TotalSize - userResults[i-1].TotalSize)
+	}
+	if len(userResults) > 1 {
+		userDailyGrowth = dailyGrowthSum / float64(len(userResults)-1)
+	}
+
+	// Generate result text
+	text := NewMsgCockDynamicsTemplate(
+		// Общая динамика коков
+		totalCock, len(allCocks), totalAvgCock, totalMedianCock,
+		// Персональная динамика кока
+		userTotalCock, userAvgCock, userIrk, userMaxCock, userMaxCockDate,
+		// Кок-активы
+		userYesterdayChangePercent, userYesterdayChangeCock,
+		userDailyGrowth,
+	)
+
+	return tgbotapi.NewInlineQueryResultArticleMarkdown(query.ID, "Динамика кока", text)
 }
 
-func (dp defaultColorPalette) BackgroundStrokeColor() drawing.Color {
-	return drawing.ColorFromHex("00ff00")
+func sum(data []int) int {
+	total := 0
+	for _, v := range data {
+		total += v
+	}
+	return total
 }
 
-func (dp defaultColorPalette) CanvasColor() drawing.Color {
-	return drawing.ColorFromHex("232323")
-}
+func median(data []int) int {
+	n := len(data)
+	if n == 0 {
+		return 0
+	}
 
-func (dp defaultColorPalette) CanvasStrokeColor() drawing.Color {
-	return drawing.ColorFromHex("ff0000")
-}
-
-func (dp defaultColorPalette) AxisStrokeColor() drawing.Color {
-	return drawing.ColorFromHex("00ff00")
-}
-
-func (dp defaultColorPalette) TextColor() drawing.Color {
-	return drawing.ColorFromHex("e9e9e9")
-}
-
-func (dp defaultColorPalette) GetSeriesColor(index int) drawing.Color {
-	return drawing.ColorFromHex("c6c6c6")
+	sort.Ints(data)
+	if n%2 == 0 {
+		return (data[n/2-1] + data[n/2]) / 2
+	}
+	return data[n/2]
 }
 
 func (app *Application) InlineQueryCockRaceImgStat(log *Logger, query *tgbotapi.InlineQuery) tgbotapi.InlineQueryResultPhoto {
-	//collection := app.db.Database("dickbot_db").Collection("cocks")
-	//
-	//pipeline := mongo.Pipeline{
-	//	{
-	//		{"$match", bson.D{{"user_id", query.From.ID}}},
-	//	},
-	//	{
-	//		{"$group", bson.D{
-	//			{"_id", "$requested_at"},
-	//			{"size", bson.D{{"$avg", "$size"}}},
-	//		}},
-	//	},
-	//	{
-	//		{"$sort", bson.D{{"_id", 1}}},
-	//	},
-	//}
-	//
-	//cursor, err := collection.Aggregate(app.ctx, pipeline)
-	//if err != nil {
-	//	log.E("Failed to aggregate cock sizes", InnerError, err)
-	//	return tgbotapi.InlineQueryResultCachedPhoto{}
-	//}
-	//
-	//var results []struct {
-	//	ID   time.Time `bson:"_id"`
-	//	Size int32     `bson:"size"`
-	//}
-	//if err := cursor.All(app.ctx, &results); err != nil {
-	//	log.E("Failed to decode cock sizes", InnerError, err)
-	//	return tgbotapi.InlineQueryResultCachedPhoto{}
-	//}
-	//
-	//log.I("Successfully aggregated cock sizes")
-	//
-	//if len(results) == 0 {
-	//	log.I("No cock sizes found for user")
-	//	return tgbotapi.InlineQueryResultCachedPhoto{}
-	//}
-	//
-	//startDate := results[0].ID
-	//endDate := results[len(results)-1].ID
-	//startDateFormatted := startDate.Format("02.01.06")
-	//endDateFormatted := endDate.Format("02.01.06")
-	//
-	//// Interpolating to 14 points
-	//timestamps := make([]float64, len(results))
-	//sizes := make([]float64, len(results))
-	//for i, result := range results {
-	//	timestamps[i] = float64(result.ID.Unix())
-	//	sizes[i] = float64(result.Size)
-	//}
-	//
-	//interpolatedX, interpolatedY := interpolatePoints(timestamps, sizes, 14)
-	//annotations := spaceAroundAnnotations(interpolatedX, interpolatedY, 3)
-	//
-	//graph := chart.Chart{
-	//	Title:      fmt.Sprintf("Развитие размера кока, текущий мой кок: %s", FormatDickSize(int32(sizes[len(sizes)-1]))),
-	//	TitleStyle: chart.Style{FontSize: 14.0, Show: true},
-	//	XAxis: chart.XAxis{
-	//		GridMajorStyle: chart.Style{
-	//			Show:        true,
-	//			StrokeWidth: 0.5,
-	//			StrokeColor: drawing.ColorFromHex("7b7b7b"),
-	//		},
-	//		GridMinorStyle: chart.Style{
-	//			Show:        true,
-	//			StrokeWidth: 0.25,
-	//			StrokeColor: drawing.ColorFromHex("9b9b9b"),
-	//		},
-	//		Name:         fmt.Sprintf("Статистика моих коков с %s по %s", startDateFormatted, endDateFormatted),
-	//		NameStyle:    chart.Style{Show: true},
-	//		Style:        chart.Style{Show: true},
-	//		TickPosition: chart.TickPositionBetweenTicks,
-	//		Ticks: func() []chart.Tick {
-	//			var ticks []chart.Tick
-	//			for _, t := range results {
-	//				ticks = append(ticks, chart.Tick{
-	//					Value: float64(t.ID.Unix()),
-	//					Label: t.ID.Format("02.01.06"),
-	//				})
-	//			}
-	//			return ticks
-	//		}(),
-	//	},
-	//	YAxis: chart.YAxis{
-	//		GridMajorStyle: chart.Style{
-	//			Show:        true,
-	//			StrokeWidth: 0.5,
-	//			StrokeColor: drawing.ColorFromHex("7b7b7b"),
-	//		},
-	//		GridMinorStyle: chart.Style{
-	//			Show:        true,
-	//			StrokeWidth: 0.25,
-	//			StrokeColor: drawing.ColorFromHex("9b9b9b"),
-	//		},
-	//		Name:      "Размер (см)",
-	//		NameStyle: chart.Style{Show: true},
-	//		Style:     chart.Style{Show: true},
-	//		ValueFormatter: func(v interface{}) string {
-	//			value := v.(float64)
-	//			return FormatDickSize(int32(value))
-	//		},
-	//	},
-	//	Series: []chart.Series{
-	//		chart.ContinuousSeries{
-	//			Name:    "Размер кока",
-	//			XValues: interpolatedX,
-	//			YValues: interpolatedY,
-	//			Style: chart.Style{
-	//				Show:        true,
-	//				StrokeWidth: 2.0,
-	//			},
-	//		},
-	//		chart.AnnotationSeries{
-	//			Annotations: annotations,
-	//		},
-	//	},
-	//	ColorPalette: defaultColorPalette{},
-	//}
-	//
-	//filePath := fmt.Sprintf("%s_graph.png", query.ID)
-	//outputFile, err := os.Create(filePath)
-	//if err != nil {
-	//	log.E("Failed to create graph image file", InnerError, err)
-	//	return tgbotapi.InlineQueryResultCachedPhoto{}
-	//}
-	//defer outputFile.Close()
-	//
-	//if err := graph.Render(chart.PNG, outputFile); err != nil {
-	//	log.E("Failed to render graph image", InnerError, err)
-	//	return tgbotapi.InlineQueryResultCachedPhoto{}
-	//}
-	//
-	//fileID := app.UploadPhotoToTelegram(log, filePath)
-	//if fileID == "" {
-	//	log.E("Failed to get file ID after uploading photo")
-	//	return tgbotapi.InlineQueryResultCachedPhoto{}
-	//}
-	//
-	//log.I("Successfully created graph image")
-	photo := tgbotapi.NewInlineQueryResultPhotoWithThumb(uuid.NewString(), "https://files.lynguard.com/raw/public/work-avatar.jpg", "https://files.lynguard.com/raw/public/work-avatar.jpg")
+	photo := tgbotapi.NewInlineQueryResultPhotoWithThumb(uuid.NewString(),
+		"https://files.lynguard.com/raw/public/work-avatar.jpg",
+		"https://files.lynguard.com/raw/public/work-avatar.jpg",
+	)
 	photo.Caption = "Тест photo.Caption"
 	photo.Description = "Тест photo.Description"
 	photo.Title = "Тест photo.Title"
 	return photo
-}
-func (app *Application) UploadPhotoToTelegram(log *Logger, filePath string) string {
-	photo := tgbotapi.NewPhoto(362695653, tgbotapi.FilePath(filePath)) // Используем FilePath
-	photo.Caption = "Статистика моего кока"
-
-	msg, err := app.bot.Request(photo)
-	if err != nil {
-		log.E("Failed to upload photo to Telegram", InnerError, err)
-		return ""
-	}
-
-	// Telegram API возвращает JSON с `file_id`
-	var response struct {
-		Result struct {
-			Photo []struct {
-				FileID string `json:"file_id"`
-			} `json:"photo"`
-		} `json:"result"`
-	}
-
-	if err := json.Unmarshal(msg.Result, &response); err != nil {
-		log.E("Failed to parse Telegram response", InnerError, err)
-		return ""
-	}
-
-	if len(response.Result.Photo) == 0 {
-		log.E("No photo found in Telegram response")
-		return ""
-	}
-
-	fileID := response.Result.Photo[len(response.Result.Photo)-1].FileID
-	log.I("Successfully uploaded photo to Telegram")
-	return fileID
-}
-
-func interpolatePoints(x, y []float64, resolution int) ([]float64, []float64) {
-	if len(x) != len(y) || len(x) < 2 {
-		return x, y
-	}
-
-	interpolatedX := make([]float64, resolution)
-	interpolatedY := make([]float64, resolution)
-
-	xMin, xMax := x[0], x[len(x)-1]
-	step := (xMax - xMin) / float64(resolution-1)
-
-	for i := 0; i < resolution; i++ {
-		interpolatedX[i] = xMin + float64(i)*step
-		interpolatedY[i] = interpolateY(interpolatedX[i], x, y)
-	}
-
-	return interpolatedX, interpolatedY
-}
-
-func spaceAroundAnnotations(xValues, yValues []float64, count int) []chart.Value2 {
-	n := len(xValues)
-	if n < count {
-		// Если точек меньше числа аннотаций, возвращаем все точки
-		annotations := make([]chart.Value2, n)
-		for i := range xValues {
-			annotations[i] = chart.Value2{
-				XValue: xValues[i],
-				YValue: yValues[i],
-				Label:  fmt.Sprintf("%.1f см", yValues[i]),
-			}
-		}
-		return annotations
-	}
-
-	// Рассчитываем равномерные отступы (space around)
-	step := float64(n-1) / float64(count+1)
-	annotations := make([]chart.Value2, count)
-
-	for i := 0; i < count; i++ {
-		index := int(math.Round(step * float64(i+1))) // Распределяем равномерно между первой и последней точкой
-		annotations[i] = chart.Value2{
-			XValue: xValues[index],
-			YValue: yValues[index],
-			Label:  fmt.Sprintf("%.1f см", yValues[index]),
-		}
-	}
-
-	return annotations
-}
-
-func interpolateY(x float64, xPoints, yPoints []float64) float64 {
-	for i := 1; i < len(xPoints); i++ {
-		if x <= xPoints[i] {
-			x1, x2 := xPoints[i-1], xPoints[i]
-			y1, y2 := yPoints[i-1], yPoints[i]
-			return y1 + (y2-y1)*(x-x1)/(x2-x1)
-		}
-	}
-	return math.NaN()
 }
 
 func (app *Application) InlineQueryCockRuler(log *Logger, query *tgbotapi.InlineQuery) tgbotapi.InlineQueryResultArticle {
