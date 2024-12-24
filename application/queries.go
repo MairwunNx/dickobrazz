@@ -7,13 +7,9 @@ import (
 	"github.com/google/uuid"
 	"github.com/wcharczuk/go-chart"
 	"github.com/wcharczuk/go-chart/drawing"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
 	"math"
-	"os"
 	"sort"
 	"strings"
-	"time"
 )
 
 func (app *Application) HandleInlineQuery(log *Logger, query *tgbotapi.InlineQuery) {
@@ -21,6 +17,8 @@ func (app *Application) HandleInlineQuery(log *Logger, query *tgbotapi.InlineQue
 		app.InlineQueryCockSize(log, query),
 		app.InlineQueryCockRace(log, query),
 		app.InlineQueryCockRuler(log, query),
+		app.InlineQueryCockRaceImgStat(log, query),
+		//app.InlineQueryCockDynamic(log, query),
 	}
 
 	inlines := tgbotapi.InlineConfig{
@@ -106,149 +104,148 @@ func (dp defaultColorPalette) GetSeriesColor(index int) drawing.Color {
 	return drawing.ColorFromHex("c6c6c6")
 }
 
-func (app *Application) InlineQueryCockRaceImgStat(log *Logger, query *tgbotapi.InlineQuery) tgbotapi.InlineQueryResultCachedPhoto {
-	collection := app.db.Database("dickbot_db").Collection("cocks")
-
-	pipeline := mongo.Pipeline{
-		{
-			{"$match", bson.D{{"user_id", query.From.ID}}},
-		},
-		{
-			{"$group", bson.D{
-				{"_id", "$requested_at"},
-				{"size", bson.D{{"$avg", "$size"}}},
-			}},
-		},
-		{
-			{"$sort", bson.D{{"_id", 1}}},
-		},
-	}
-
-	cursor, err := collection.Aggregate(app.ctx, pipeline)
-	if err != nil {
-		log.E("Failed to aggregate cock sizes", InnerError, err)
-		return tgbotapi.InlineQueryResultCachedPhoto{}
-	}
-
-	var results []struct {
-		ID   time.Time `bson:"_id"`
-		Size int32     `bson:"size"`
-	}
-	if err := cursor.All(app.ctx, &results); err != nil {
-		log.E("Failed to decode cock sizes", InnerError, err)
-		return tgbotapi.InlineQueryResultCachedPhoto{}
-	}
-
-	log.I("Successfully aggregated cock sizes")
-
-	if len(results) == 0 {
-		log.I("No cock sizes found for user")
-		return tgbotapi.InlineQueryResultCachedPhoto{}
-	}
-
-	startDate := results[0].ID
-	endDate := results[len(results)-1].ID
-	startDateFormatted := startDate.Format("02.01.06")
-	endDateFormatted := endDate.Format("02.01.06")
-
-	// Interpolating to 14 points
-	timestamps := make([]float64, len(results))
-	sizes := make([]float64, len(results))
-	for i, result := range results {
-		timestamps[i] = float64(result.ID.Unix())
-		sizes[i] = float64(result.Size)
-	}
-
-	interpolatedX, interpolatedY := interpolatePoints(timestamps, sizes, 14)
-	annotations := spaceAroundAnnotations(interpolatedX, interpolatedY, 3)
-
-	graph := chart.Chart{
-		Title:      fmt.Sprintf("Развитие размера кока, текущий мой кок: %s", FormatDickSize(int32(sizes[len(sizes)-1]))),
-		TitleStyle: chart.Style{FontSize: 14.0, Show: true},
-		XAxis: chart.XAxis{
-			GridMajorStyle: chart.Style{
-				Show:        true,
-				StrokeWidth: 0.5,
-				StrokeColor: drawing.ColorFromHex("7b7b7b"),
-			},
-			GridMinorStyle: chart.Style{
-				Show:        true,
-				StrokeWidth: 0.25,
-				StrokeColor: drawing.ColorFromHex("9b9b9b"),
-			},
-			Name:         fmt.Sprintf("Статистика моих коков с %s по %s", startDateFormatted, endDateFormatted),
-			NameStyle:    chart.Style{Show: true},
-			Style:        chart.Style{Show: true},
-			TickPosition: chart.TickPositionBetweenTicks,
-			Ticks: func() []chart.Tick {
-				var ticks []chart.Tick
-				for _, t := range results {
-					ticks = append(ticks, chart.Tick{
-						Value: float64(t.ID.Unix()),
-						Label: t.ID.Format("02.01.06"),
-					})
-				}
-				return ticks
-			}(),
-		},
-		YAxis: chart.YAxis{
-			GridMajorStyle: chart.Style{
-				Show:        true,
-				StrokeWidth: 0.5,
-				StrokeColor: drawing.ColorFromHex("7b7b7b"),
-			},
-			GridMinorStyle: chart.Style{
-				Show:        true,
-				StrokeWidth: 0.25,
-				StrokeColor: drawing.ColorFromHex("9b9b9b"),
-			},
-			Name:      "Размер (см)",
-			NameStyle: chart.Style{Show: true},
-			Style:     chart.Style{Show: true},
-			ValueFormatter: func(v interface{}) string {
-				value := v.(float64)
-				return FormatDickSize(int32(value))
-			},
-		},
-		Series: []chart.Series{
-			chart.ContinuousSeries{
-				Name:    "Размер кока",
-				XValues: interpolatedX,
-				YValues: interpolatedY,
-				Style: chart.Style{
-					Show:        true,
-					StrokeWidth: 2.0,
-				},
-			},
-			chart.AnnotationSeries{
-				Annotations: annotations,
-			},
-		},
-		ColorPalette: defaultColorPalette{},
-	}
-
-	filePath := fmt.Sprintf("%s_graph.png", query.ID)
-	outputFile, err := os.Create(filePath)
-	if err != nil {
-		log.E("Failed to create graph image file", InnerError, err)
-		return tgbotapi.InlineQueryResultCachedPhoto{}
-	}
-	defer outputFile.Close()
-
-	if err := graph.Render(chart.PNG, outputFile); err != nil {
-		log.E("Failed to render graph image", InnerError, err)
-		return tgbotapi.InlineQueryResultCachedPhoto{}
-	}
-
-	fileID := app.UploadPhotoToTelegram(log, filePath)
-	if fileID == "" {
-		log.E("Failed to get file ID after uploading photo")
-		return tgbotapi.InlineQueryResultCachedPhoto{}
-	}
-
-	log.I("Successfully created graph image")
-
-	return tgbotapi.NewInlineQueryResultCachedPhoto(query.ID, fileID)
+func (app *Application) InlineQueryCockRaceImgStat(log *Logger, query *tgbotapi.InlineQuery) tgbotapi.InlineQueryResultPhoto {
+	//collection := app.db.Database("dickbot_db").Collection("cocks")
+	//
+	//pipeline := mongo.Pipeline{
+	//	{
+	//		{"$match", bson.D{{"user_id", query.From.ID}}},
+	//	},
+	//	{
+	//		{"$group", bson.D{
+	//			{"_id", "$requested_at"},
+	//			{"size", bson.D{{"$avg", "$size"}}},
+	//		}},
+	//	},
+	//	{
+	//		{"$sort", bson.D{{"_id", 1}}},
+	//	},
+	//}
+	//
+	//cursor, err := collection.Aggregate(app.ctx, pipeline)
+	//if err != nil {
+	//	log.E("Failed to aggregate cock sizes", InnerError, err)
+	//	return tgbotapi.InlineQueryResultCachedPhoto{}
+	//}
+	//
+	//var results []struct {
+	//	ID   time.Time `bson:"_id"`
+	//	Size int32     `bson:"size"`
+	//}
+	//if err := cursor.All(app.ctx, &results); err != nil {
+	//	log.E("Failed to decode cock sizes", InnerError, err)
+	//	return tgbotapi.InlineQueryResultCachedPhoto{}
+	//}
+	//
+	//log.I("Successfully aggregated cock sizes")
+	//
+	//if len(results) == 0 {
+	//	log.I("No cock sizes found for user")
+	//	return tgbotapi.InlineQueryResultCachedPhoto{}
+	//}
+	//
+	//startDate := results[0].ID
+	//endDate := results[len(results)-1].ID
+	//startDateFormatted := startDate.Format("02.01.06")
+	//endDateFormatted := endDate.Format("02.01.06")
+	//
+	//// Interpolating to 14 points
+	//timestamps := make([]float64, len(results))
+	//sizes := make([]float64, len(results))
+	//for i, result := range results {
+	//	timestamps[i] = float64(result.ID.Unix())
+	//	sizes[i] = float64(result.Size)
+	//}
+	//
+	//interpolatedX, interpolatedY := interpolatePoints(timestamps, sizes, 14)
+	//annotations := spaceAroundAnnotations(interpolatedX, interpolatedY, 3)
+	//
+	//graph := chart.Chart{
+	//	Title:      fmt.Sprintf("Развитие размера кока, текущий мой кок: %s", FormatDickSize(int32(sizes[len(sizes)-1]))),
+	//	TitleStyle: chart.Style{FontSize: 14.0, Show: true},
+	//	XAxis: chart.XAxis{
+	//		GridMajorStyle: chart.Style{
+	//			Show:        true,
+	//			StrokeWidth: 0.5,
+	//			StrokeColor: drawing.ColorFromHex("7b7b7b"),
+	//		},
+	//		GridMinorStyle: chart.Style{
+	//			Show:        true,
+	//			StrokeWidth: 0.25,
+	//			StrokeColor: drawing.ColorFromHex("9b9b9b"),
+	//		},
+	//		Name:         fmt.Sprintf("Статистика моих коков с %s по %s", startDateFormatted, endDateFormatted),
+	//		NameStyle:    chart.Style{Show: true},
+	//		Style:        chart.Style{Show: true},
+	//		TickPosition: chart.TickPositionBetweenTicks,
+	//		Ticks: func() []chart.Tick {
+	//			var ticks []chart.Tick
+	//			for _, t := range results {
+	//				ticks = append(ticks, chart.Tick{
+	//					Value: float64(t.ID.Unix()),
+	//					Label: t.ID.Format("02.01.06"),
+	//				})
+	//			}
+	//			return ticks
+	//		}(),
+	//	},
+	//	YAxis: chart.YAxis{
+	//		GridMajorStyle: chart.Style{
+	//			Show:        true,
+	//			StrokeWidth: 0.5,
+	//			StrokeColor: drawing.ColorFromHex("7b7b7b"),
+	//		},
+	//		GridMinorStyle: chart.Style{
+	//			Show:        true,
+	//			StrokeWidth: 0.25,
+	//			StrokeColor: drawing.ColorFromHex("9b9b9b"),
+	//		},
+	//		Name:      "Размер (см)",
+	//		NameStyle: chart.Style{Show: true},
+	//		Style:     chart.Style{Show: true},
+	//		ValueFormatter: func(v interface{}) string {
+	//			value := v.(float64)
+	//			return FormatDickSize(int32(value))
+	//		},
+	//	},
+	//	Series: []chart.Series{
+	//		chart.ContinuousSeries{
+	//			Name:    "Размер кока",
+	//			XValues: interpolatedX,
+	//			YValues: interpolatedY,
+	//			Style: chart.Style{
+	//				Show:        true,
+	//				StrokeWidth: 2.0,
+	//			},
+	//		},
+	//		chart.AnnotationSeries{
+	//			Annotations: annotations,
+	//		},
+	//	},
+	//	ColorPalette: defaultColorPalette{},
+	//}
+	//
+	//filePath := fmt.Sprintf("%s_graph.png", query.ID)
+	//outputFile, err := os.Create(filePath)
+	//if err != nil {
+	//	log.E("Failed to create graph image file", InnerError, err)
+	//	return tgbotapi.InlineQueryResultCachedPhoto{}
+	//}
+	//defer outputFile.Close()
+	//
+	//if err := graph.Render(chart.PNG, outputFile); err != nil {
+	//	log.E("Failed to render graph image", InnerError, err)
+	//	return tgbotapi.InlineQueryResultCachedPhoto{}
+	//}
+	//
+	//fileID := app.UploadPhotoToTelegram(log, filePath)
+	//if fileID == "" {
+	//	log.E("Failed to get file ID after uploading photo")
+	//	return tgbotapi.InlineQueryResultCachedPhoto{}
+	//}
+	//
+	//log.I("Successfully created graph image")
+	return tgbotapi.NewInlineQueryResultPhoto(uuid.NewString(), "https://files.lynguard.com/raw/public/work-avatar.jpg")
 }
 func (app *Application) UploadPhotoToTelegram(log *Logger, filePath string) string {
 	photo := tgbotapi.NewPhoto(362695653, tgbotapi.FilePath(filePath)) // Используем FilePath
