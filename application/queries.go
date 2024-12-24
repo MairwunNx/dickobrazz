@@ -124,7 +124,6 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 
 	log.I("Successfully aggregated user cock data")
 
-	// Pipeline для расчета среднего по всем пользователям
 	averagePipeline := mongo.Pipeline{
 		{{Key: "$group", Value: bson.D{
 			{Key: "_id", Value: "$user_id"},
@@ -248,22 +247,18 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 		// Нормализуем пользовательский общий кок относительно среднего общего размера
 		normalizedUserCock := float64(userTotalCock) / float64(totalAvgCock)
 
-		// Учитываем количество записей пользователя
+		// Нормализуем количество записей пользователя
 		normalizedUserRecords := float64(len(userResults)) / float64(len(allCocks))
 
-		// Динамические весовые коэффициенты (с ограничениями)
-		w1 := math.Max(5.0, math.Min(normalizedUserCock*10, 50.0))
-		w2 := math.Max(3.0, math.Min(normalizedUserRecords*5, 30.0))
+		// Динамические веса (с ограничением)
+		w1 := math.Max(1.0, math.Min(normalizedUserCock*2.0, 10.0))
+		w2 := math.Max(1.0, math.Min(normalizedUserRecords*5.0, 10.0))
 
 		// Вычисляем IRK
-		userIrk = (normalizedUserCock + w1) / (1.0 + w2)
+		rawIrk := normalizedUserCock / (1.0 + w1) * (normalizedUserRecords / (1.0 + w2))
 
-		// Ограничиваем значение IRK в диапазоне [0.0, 1.0]
-		if userIrk > 1.0 {
-			userIrk = 1.0
-		} else if userIrk < 0.0 {
-			userIrk = 0.0
-		}
+		// Ограничиваем IRK в пределах [0.0, 1.0]
+		userIrk = math.Max(0.0, math.Min(1.0, rawIrk))
 	}
 
 	// Calculate yesterday's change
