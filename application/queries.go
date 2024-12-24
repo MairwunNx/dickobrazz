@@ -245,7 +245,11 @@ func (app *Application) InlineQueryCockRaceImgStat(log *Logger, query *tgbotapi.
 	//}
 	//
 	//log.I("Successfully created graph image")
-	return tgbotapi.NewInlineQueryResultPhotoWithThumb(uuid.NewString(), "https://files.lynguard.com/raw/public/work-avatar.jpg", "https://files.lynguard.com/raw/public/work-avatar.jpg")
+	photo := tgbotapi.NewInlineQueryResultPhotoWithThumb(uuid.NewString(), "https://files.lynguard.com/raw/public/work-avatar.jpg", "https://files.lynguard.com/raw/public/work-avatar.jpg")
+	photo.Caption = "Тест photo.Caption"
+	photo.Description = "Тест photo.Description"
+	photo.Title = "Тест photo.Title"
+	return photo
 }
 func (app *Application) UploadPhotoToTelegram(log *Logger, filePath string) string {
 	photo := tgbotapi.NewPhoto(362695653, tgbotapi.FilePath(filePath)) // Используем FilePath

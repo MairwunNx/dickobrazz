@@ -1,5 +1,5 @@
 zip -r dickobot.zip .
-scp "dickobot.zip" ximanager@xi:~/
+rsync -a -P "dickobot.zip" ximanager@xi:~/
 ssh ximanager@xi
 unzip dickobot.zip -d dickobot
 cd dickobot/
