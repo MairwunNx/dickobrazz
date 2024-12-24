@@ -27,7 +27,7 @@ func (app *Application) HandleInlineQuery(log *Logger, query *tgbotapi.InlineQue
 			app.InlineQueryCockRace(log, query),
 			app.InlineQueryCockRuler(log, query),
 			//app.InlineQueryCockRaceImgStat(log, query),
-			//app.InlineQueryCockDynamic(log, query),
+			app.InlineQueryCockDynamic(log, query),
 		}
 	}
 
