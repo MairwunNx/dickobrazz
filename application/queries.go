@@ -156,11 +156,66 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 
 	log.I("Successfully calculated global average cock size", "TotalAvgSize", globalResult.TotalAvgSize)
 
+	// Global total pipeline
+	totalPipeline := mongo.Pipeline{
+		{{Key: "$group", Value: bson.D{
+			{Key: "_id", Value: nil},
+			{Key: "totalCock", Value: bson.D{{Key: "$sum", Value: "$size"}}},
+		}}},
+	}
+
+	totalCursor, err := collection.Aggregate(app.ctx, totalPipeline)
+	if err != nil {
+		log.E("Failed to aggregate global total cock size", InnerError, err)
+		return tgbotapi.InlineQueryResultArticle{}
+	}
+
+	var totalResult struct {
+		TotalCock int `bson:"totalCock"`
+	}
+	if totalCursor.Next(app.ctx) {
+		if err := totalCursor.Decode(&totalResult); err != nil {
+			log.E("Failed to decode global total data", InnerError, err)
+			return tgbotapi.InlineQueryResultArticle{}
+		}
+	} else {
+		log.E("No global total data found")
+		return tgbotapi.InlineQueryResultArticle{}
+	}
+
+	log.I("Successfully calculated global total cock size", "TotalCock", totalResult.TotalCock)
+
 	// Calculate metrics
 	var totalCock, totalAvgCock, totalMedianCock int
 	var userTotalCock, userAvgCock, userMaxCock, userYesterdayChangeCock int
 	var userIrk, userYesterdayChangePercent, userDailyGrowth float64
 	var userMaxCockDate time.Time
+
+	globalCockPipeline := mongo.Pipeline{
+		{{Key: "$group", Value: bson.D{
+			{Key: "_id", Value: nil},
+			{Key: "sizes", Value: bson.D{{Key: "$push", Value: "$size"}}},
+		}}},
+	}
+
+	var globalCocksResult struct {
+		Sizes []int `bson:"sizes"`
+	}
+
+	globalCockCursor, err := collection.Aggregate(app.ctx, globalCockPipeline)
+	if err != nil {
+		log.E("Failed to aggregate global cock sizes for median", InnerError, err)
+		return tgbotapi.InlineQueryResultArticle{}
+	}
+
+	if globalCockCursor.Next(app.ctx) {
+		if err := globalCockCursor.Decode(&globalCocksResult); err != nil {
+			log.E("Failed to decode global cock sizes for median", InnerError, err)
+			return tgbotapi.InlineQueryResultArticle{}
+		}
+	}
+
+	totalMedianCock = median(globalCocksResult.Sizes)
 
 	var allCocks []int
 	for _, result := range userResults {
@@ -177,8 +232,7 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 	}
 
 	// Calculate overall metrics
-	totalCock = sum(allCocks)
-	totalMedianCock = median(allCocks)
+	totalCock = totalResult.TotalCock
 
 	if len(userResults) > 0 {
 		userAvgCock = int(float64(userTotalCock) / float64(len(userResults)))
@@ -189,30 +243,19 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 	}
 
 	// Calculate IRK
-	if totalCock > 0 && len(userResults) > 0 {
-		// Суммируем размеры коков юзера
-		sumUserCocks := 0
-		for _, result := range userResults {
-			sumUserCocks += result.TotalSize
-		}
+	if totalCock > 0 && userTotalCock > 0 {
+		// Dynamic w1 and w2
+		w1 := float64(userTotalCock) * k1
+		w2 := float64(totalCock) * k2
 
-		// Находим средний размер кока
-		avgCockSize := float64(sumUserCocks) / float64(len(userResults))
+		// Calculate IRK
+		userIrk = (float64(userTotalCock) + w1) / (float64(totalCock) + w2)
 
-		// Динамические значения w1 и w2
-		w1 := avgCockSize * k1
-		w2 := float64(len(userResults)) * k2
-
-		// Вычисляем IRK
-		rawIrk := (float64(sumUserCocks) + w1) / (float64(len(userResults)) + w2)
-
-		// Ограничиваем значение IRK в диапазоне [0.0, 1.0]
-		if rawIrk > 1.0 {
+		// Clamp IRK to [0.0, 1.0]
+		if userIrk > 1.0 {
 			userIrk = 1.0
-		} else if rawIrk < 0.0 {
+		} else if userIrk < 0.0 {
 			userIrk = 0.0
-		} else {
-			userIrk = rawIrk
 		}
 	}
 

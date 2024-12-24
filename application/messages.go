@@ -118,7 +118,7 @@ func NewMsgCockDynamicsTemplate(
 		userYesterdayChangePercentSymbol = "+"
 	} else {
 		userYesterdayChangePercentEmoji = "🟥"
-		userYesterdayChangePercentSymbol = "-"
+		userYesterdayChangePercentSymbol = ""
 	}
 
 	var userDailyGrowthEmoji string
@@ -128,7 +128,7 @@ func NewMsgCockDynamicsTemplate(
 		userDailyGrowthSymbol = "+"
 	} else {
 		userDailyGrowthEmoji = "🟥"
-		userDailyGrowthSymbol = "-"
+		userDailyGrowthSymbol = ""
 	}
 
 	return fmt.Sprintf(
@@ -146,10 +146,10 @@ func NewMsgCockDynamicsTemplate(
 		EscapeMarkdownV2(FormatDickSize(userTotalCock)),
 		EscapeMarkdownV2(FormatDickSize(userAvgCock)), EmojiFromSize(userAvgCock),
 		EscapeMarkdownV2(FormatDickIkr(userIrk)),
-		EscapeMarkdownV2(FormatDickSize(userMaxCock)), EmojiFromSize(userMaxCock), EscapeMarkdownV2(userMaxCockDate.Format("02.01.06")),
+		EscapeMarkdownV2(FormatDickSize(userMaxCock)), EmojiFromSize(userMaxCock), userMaxCockDate.Format("02.01.06"),
 
 		/* Кок-активы */
-		userYesterdayChangePercentEmoji, fmt.Sprintf("%s%s", EscapeMarkdownV2(userYesterdayChangePercentSymbol), EscapeMarkdownV2(FormatDickPercent(userYesterdayChangePercent))), EscapeMarkdownV2(FormatDickSize(userYesterdayChangeCock)),
-		userDailyGrowthEmoji, fmt.Sprintf("%s%s", EscapeMarkdownV2(userDailyGrowthSymbol), EscapeMarkdownV2(FormatDickPercent(userDailyGrowth))),
+		userYesterdayChangePercentEmoji, fmt.Sprintf("%s%s", userYesterdayChangePercentSymbol, FormatDickPercent(userYesterdayChangePercent)), EscapeMarkdownV2(FormatDickSize(userYesterdayChangeCock)),
+		userDailyGrowthEmoji, fmt.Sprintf("%s%s", userDailyGrowthSymbol, FormatDickPercent(userDailyGrowth)),
 	)
 }
