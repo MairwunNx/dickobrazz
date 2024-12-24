@@ -83,6 +83,8 @@ _Гонка коков – это соревнование, в котором к
 
 %[14]s Вчерашняя динамика: *%[15]s%%* (*%[16]s см*) %[17]s
 %[18]s Средний дневной прирост: *%[19]s см/день* %[20]s
+
+⚠️ _Могут быть недоработки, динамика коков тестируется._
 `
 )
 
@@ -140,20 +142,20 @@ func NewMsgCockDynamicsTemplate(
 
 		/* Общая динамика коков */
 
-		FormatDickSize(totalCock),
-		FormatDickSize(totalUsers),
-		FormatDickSize(totalAvgCock), EmojiFromSize(totalAvgCock),
-		FormatDickSize(totalMedianCock), EmojiFromSize(totalMedianCock),
+		EscapeMarkdownV2(FormatDickSize(totalCock)),
+		EscapeMarkdownV2(FormatDickSize(totalUsers)),
+		EscapeMarkdownV2(FormatDickSize(totalAvgCock)), EmojiFromSize(totalAvgCock),
+		EscapeMarkdownV2(FormatDickSize(totalMedianCock)), EmojiFromSize(totalMedianCock),
 
 		/* Персональная динамика кока */
 
-		FormatDickSize(userTotalCock),
-		FormatDickSize(userAvgCock), EmojiFromSize(userAvgCock),
-		FormatDickIkr(userIrk),
-		FormatDickSize(userMaxCock), userMaxCockDate.Format("02.01.06"), EmojiFromSize(userMaxCock),
+		EscapeMarkdownV2(FormatDickSize(userTotalCock)),
+		EscapeMarkdownV2(FormatDickSize(userAvgCock)), EmojiFromSize(userAvgCock),
+		EscapeMarkdownV2(FormatDickIkr(userIrk)),
+		EscapeMarkdownV2(FormatDickSize(userMaxCock)), EscapeMarkdownV2(userMaxCockDate.Format("02.01.06")), EmojiFromSize(userMaxCock),
 
 		/* Кок-активы */
-		userYesterdayChangePercentEmoji, fmt.Sprintf("%s%s", userYesterdayChangePercentSymbol, FormatDickPercent(userYesterdayChangePercent)), FormatDickSize(userYesterdayChangeCock), userYesterdayChangePercentEmojiEnd,
-		userDailyGrowthEmoji, fmt.Sprintf("%s%s", userDailyGrowthSymbol, FormatDickPercent(userDailyGrowth)), userDailyGrowthEmojiEnd,
+		userYesterdayChangePercentEmoji, fmt.Sprintf("%s%s", EscapeMarkdownV2(userYesterdayChangePercentSymbol), EscapeMarkdownV2(FormatDickPercent(userYesterdayChangePercent))), EscapeMarkdownV2(FormatDickSize(userYesterdayChangeCock)), userYesterdayChangePercentEmojiEnd,
+		userDailyGrowthEmoji, fmt.Sprintf("%s%s", EscapeMarkdownV2(userDailyGrowthSymbol), EscapeMarkdownV2(FormatDickPercent(userDailyGrowth))), userDailyGrowthEmojiEnd,
 	)
 }
