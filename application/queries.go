@@ -359,6 +359,57 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 		userDailyGrowth = dailyGrowthSum / float64(len(userResults)-1)
 	}
 
+	// Pipeline для нахождения дня с самым большим коком
+	maxCockDayPipeline := mongo.Pipeline{
+		{{Key: "$group", Value: bson.D{
+			{Key: "_id", Value: bson.D{
+				{Key: "year", Value: bson.D{{Key: "$year", Value: "$requested_at"}}},
+				{Key: "month", Value: bson.D{{Key: "$month", Value: "$requested_at"}}},
+				{Key: "day", Value: bson.D{{Key: "$dayOfMonth", Value: "$requested_at"}}},
+			}},
+			{Key: "totalSize", Value: bson.D{{Key: "$sum", Value: "$size"}}},
+		}}},
+		{{Key: "$sort", Value: bson.D{{Key: "totalSize", Value: -1}}}},
+		{{Key: "$limit", Value: 1}},
+	}
+
+	maxCockDayPipelineCursor, err := collection.Aggregate(app.ctx, maxCockDayPipeline)
+	if err != nil {
+		log.E("Failed to aggregate max cock day", InnerError, err)
+		return tgbotapi.InlineQueryResultArticle{}
+	}
+
+	var maxCockDayResult struct {
+		ID struct {
+			Year  int `bson:"year"`
+			Month int `bson:"month"`
+			Day   int `bson:"day"`
+		} `bson:"_id"`
+		TotalSize int `bson:"totalSize"`
+	}
+
+	if maxCockDayPipelineCursor.Next(app.ctx) {
+		if err := maxCockDayPipelineCursor.Decode(&maxCockDayResult); err != nil {
+			log.E("Failed to decode max cock day data", InnerError, err)
+			return tgbotapi.InlineQueryResultArticle{}
+		}
+	} else {
+		log.E("No max cock day data found")
+		return tgbotapi.InlineQueryResultArticle{}
+	}
+
+	maxCockDate := time.Date(maxCockDayResult.ID.Year, time.Month(maxCockDayResult.ID.Month), maxCockDayResult.ID.Day, 0, 0, 0, 0, time.Local)
+	maxCockSize := maxCockDayResult.TotalSize
+
+	log.I("Successfully calculated max cock day", "Date", maxCockDate, "TotalSize", maxCockSize)
+
+	var dominancePercent float64
+	if totalResult.TotalCock > 0 {
+		dominancePercent = (float64(userTotalCock) / float64(totalResult.TotalCock)) * 100
+	}
+
+	log.I("Successfully calculated user dominance percentage", "Dominance", dominancePercent)
+
 	// Generate result text
 	text := NewMsgCockDynamicsTemplate(
 		// Общая динамика коков
@@ -369,6 +420,8 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 		userYesterdayChangePercent, userYesterdayChangeCock,
 		userDailyGrowth,
 		bigCocksPercent, smallCocksPercent,
+		maxCockDate, maxCockSize,
+		dominancePercent,
 	)
 
 	return tgbotapi.NewInlineQueryResultArticleMarkdown(query.ID, "Динамика кока", text)
