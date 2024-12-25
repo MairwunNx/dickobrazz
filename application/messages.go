@@ -72,6 +72,8 @@ _Гонка коков – это соревнование, в котором к
 Средний кок в системе: *%[3]s см* %[4]s
 Медиана кока в системе: *%[5]s см* %[6]s
 
+Соотношение коков (*Большие*/*Маленькие*): *%[19]s%%*/*%[20]s%%*
+
 📊 *Персональная динамика кока*
 
 Общий посчитанный кок: *%[7]s см* 🤯
@@ -110,6 +112,9 @@ func NewMsgCockDynamicsTemplate(
 	userYesterdayChangeCock int,
 
 	userDailyGrowth float64,
+
+	totalBigCockRatio float64,
+	totalSmallCockRatio float64,
 ) string {
 	var userYesterdayChangePercentEmoji string
 	var userYesterdayChangePercentSymbol string
@@ -151,5 +156,9 @@ func NewMsgCockDynamicsTemplate(
 		/* Кок-активы */
 		userYesterdayChangePercentEmoji, fmt.Sprintf("%s%s", userYesterdayChangePercentSymbol, FormatDickPercent(userYesterdayChangePercent)), FormatDickSize(userYesterdayChangeCock),
 		userDailyGrowthEmoji, fmt.Sprintf("%s%s", userDailyGrowthSymbol, FormatDickPercent(userDailyGrowth)),
+
+		/* Соотношение коков */
+
+		FormatDickPercent(totalBigCockRatio), FormatDickPercent(totalSmallCockRatio),
 	)
 }

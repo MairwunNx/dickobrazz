@@ -84,10 +84,7 @@ func (app *Application) InlineQueryCockRace(log *Logger, query *tgbotapi.InlineQ
 	return InitializeInlineQuery("Гонка коков", strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(text, ".", "\\."), "-", "\\-"), "!", "\\!"))
 }
 
-const (
-	k1 = 0.1 // Коэффициент влияния крупного размера
-	k2 = 0.5 // Коэффициент влияния количества записей
-)
+const bigCockThreshold = 19
 
 func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.InlineQuery) tgbotapi.InlineQueryResultArticle {
 	collection := app.db.Database("dickbot_db").Collection("cocks")
@@ -215,6 +212,55 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 
 	log.I("Successfully calculated unique users", "Count", uniqueUsersResult.Count)
 
+	distributionPipeline := mongo.Pipeline{
+		{{Key: "$facet", Value: bson.D{
+			{Key: "bigCocks", Value: bson.A{
+				bson.D{{Key: "$match", Value: bson.D{{Key: "size", Value: bson.D{{Key: "$gte", Value: bigCockThreshold}}}}}},
+				bson.D{{Key: "$count", Value: "count"}},
+			}},
+			{Key: "smallCocks", Value: bson.A{
+				bson.D{{Key: "$match", Value: bson.D{{Key: "size", Value: bson.D{{Key: "$lt", Value: bigCockThreshold}}}}}},
+				bson.D{{Key: "$count", Value: "count"}},
+			}},
+		}}},
+	}
+
+	distributionCursor, err := collection.Aggregate(app.ctx, distributionPipeline)
+	if err != nil {
+		log.E("Failed to calculate cock size distribution", InnerError, err)
+		return tgbotapi.InlineQueryResultArticle{}
+	}
+
+	var distributionResults []struct {
+		BigCocks   []struct{ Count int } `bson:"bigCocks"`
+		SmallCocks []struct{ Count int } `bson:"smallCocks"`
+	}
+	if err := distributionCursor.All(app.ctx, &distributionResults); err != nil {
+		log.E("Failed to decode cock size distribution data", InnerError, err)
+		return tgbotapi.InlineQueryResultArticle{}
+	}
+
+	log.I("Successfully calculated cock size distribution", "Results", distributionResults)
+
+	// Подсчитываем "Большие" и "Маленькие" коки
+	var bigCocks, smallCocks int
+	if len(distributionResults) > 0 {
+		if len(distributionResults[0].BigCocks) > 0 {
+			bigCocks = distributionResults[0].BigCocks[0].Count
+		}
+		if len(distributionResults[0].SmallCocks) > 0 {
+			smallCocks = distributionResults[0].SmallCocks[0].Count
+		}
+	}
+
+	// Рассчитываем проценты
+	var bigCocksPercent, smallCocksPercent float64
+	totalCocks := bigCocks + smallCocks
+	if totalCocks > 0 {
+		bigCocksPercent = float64(bigCocks) / float64(totalCocks) * 100
+		smallCocksPercent = float64(smallCocks) / float64(totalCocks) * 100
+	}
+
 	// Calculate metrics
 	var totalCock, totalAvgCock, totalMedianCock int
 	var userTotalCock, userAvgCock, userMaxCock, userYesterdayChangeCock int
@@ -322,6 +368,7 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 		// Кок-активы
 		userYesterdayChangePercent, userYesterdayChangeCock,
 		userDailyGrowth,
+		bigCocksPercent, smallCocksPercent,
 	)
 
 	return tgbotapi.NewInlineQueryResultArticleMarkdown(query.ID, "Динамика кока", text)
