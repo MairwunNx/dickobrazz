@@ -454,15 +454,14 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 				bson.D{{Key: "$count", Value: "count"}},
 			}},
 			{Key: "cockDistribution", Value: bson.A{
-				bson.D{{Key: "$facet", Value: bson.D{
-					{Key: "bigCocks", Value: bson.A{
-						bson.D{{Key: "$match", Value: bson.D{{Key: "size", Value: bson.D{{Key: "$gte", Value: bigCockThreshold}}}}}},
-						bson.D{{Key: "$count", Value: "count"}},
-					}},
-					{Key: "smallCocks", Value: bson.A{
-						bson.D{{Key: "$match", Value: bson.D{{Key: "size", Value: bson.D{{Key: "$lt", Value: bigCockThreshold}}}}}},
-						bson.D{{Key: "$count", Value: "count"}},
-					}},
+				bson.D{{Key: "$group", Value: bson.D{
+					{Key: "_id", Value: nil},
+					{Key: "bigCocks", Value: bson.D{{Key: "$sum", Value: bson.D{{Key: "$cond", Value: bson.A{
+						bson.D{{Key: "$gte", Value: bson.A{"$size", bigCockThreshold}}}, 1, 0,
+					}}}}}},
+					{Key: "smallCocks", Value: bson.D{{Key: "$sum", Value: bson.D{{Key: "$cond", Value: bson.A{
+						bson.D{{Key: "$lt", Value: bson.A{"$size", bigCockThreshold}}}, 1, 0,
+					}}}}}},
 				}}},
 			}},
 			{Key: "maxCockDay", Value: bson.A{
@@ -503,8 +502,8 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 			Count int `bson:"count"`
 		} `bson:"uniqueUsers"`
 		CockDistribution []struct {
-			BigCocks   []struct{ Count int } `bson:"bigCocks"`
-			SmallCocks []struct{ Count int } `bson:"smallCocks"`
+			BigCocks   int `bson:"bigCocks"`
+			SmallCocks int `bson:"smallCocks"`
 		} `bson:"cockDistribution"`
 		MaxCockDay []struct {
 			ID struct {
@@ -589,8 +588,8 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 	}
 
 	// Calculate distribution percentages
-	bigCocks := cockDistribution.BigCocks[0].Count
-	smallCocks := cockDistribution.SmallCocks[0].Count
+	bigCocks := cockDistribution.BigCocks
+	smallCocks := cockDistribution.SmallCocks
 	totalCocks := bigCocks + smallCocks
 	if totalCocks > 0 {
 		bigCocksPercent = float64(bigCocks) / float64(totalCocks) * 100
