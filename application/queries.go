@@ -87,7 +87,7 @@ func (app *Application) InlineQueryCockRace(log *Logger, query *tgbotapi.InlineQ
 const bigCockThreshold = 19
 
 func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.InlineQuery) tgbotapi.InlineQueryResultArticle {
-	collection := app.db.Database("dickbot_db").Collection("cocks")
+	/*collection := app.db.Database("dickbot_db").Collection("cocks")
 
 	userPipeline := mongo.Pipeline{
 		{{Key: "$match", Value: bson.D{{Key: "user_id", Value: query.From.ID}}}},
@@ -414,6 +414,202 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 	text := NewMsgCockDynamicsTemplate(
 		// Общая динамика коков
 		totalCock, uniqueUsersResult.Count, totalAvgCock, totalMedianCock,
+		// Персональная динамика кока
+		userTotalCock, userAvgCock, userIrk, userMaxCock, userMaxCockDate,
+		// Кок-активы
+		userYesterdayChangePercent, userYesterdayChangeCock,
+		userDailyGrowth,
+		bigCocksPercent, smallCocksPercent,
+		maxCockDate, maxCockSize,
+		dominancePercent,
+	)
+
+	return tgbotapi.NewInlineQueryResultArticleMarkdown(query.ID, "Динамика кока", text)*/
+
+	collection := app.db.Database("dickbot_db").Collection("cocks")
+
+	pipeline := mongo.Pipeline{
+		{{Key: "$facet", Value: bson.D{
+			{Key: "userStats", Value: bson.A{
+				bson.D{{Key: "$match", Value: bson.D{{Key: "user_id", Value: query.From.ID}}}},
+				bson.D{{Key: "$group", Value: bson.D{
+					{Key: "_id", Value: "$requested_at"},
+					{Key: "totalSize", Value: bson.D{{Key: "$sum", Value: "$size"}}},
+					{Key: "sizes", Value: bson.D{{Key: "$push", Value: "$size"}}},
+					{Key: "avgSize", Value: bson.D{{Key: "$avg", Value: "$size"}}},
+					{Key: "count", Value: bson.D{{Key: "$sum", Value: 1}}},
+				}}},
+				bson.D{{Key: "$sort", Value: bson.D{{Key: "_id", Value: 1}}}},
+			}},
+			{Key: "globalStats", Value: bson.A{
+				bson.D{{Key: "$group", Value: bson.D{
+					{Key: "_id", Value: nil},
+					{Key: "totalCock", Value: bson.D{{Key: "$sum", Value: "$size"}}},
+					{Key: "avgSize", Value: bson.D{{Key: "$avg", Value: "$size"}}},
+					{Key: "sizes", Value: bson.D{{Key: "$push", Value: "$size"}}},
+				}}},
+			}},
+			{Key: "uniqueUsers", Value: bson.A{
+				bson.D{{Key: "$group", Value: bson.D{{Key: "_id", Value: "$user_id"}}}},
+				bson.D{{Key: "$count", Value: "count"}},
+			}},
+			{Key: "cockDistribution", Value: bson.A{
+				bson.D{{Key: "$facet", Value: bson.D{
+					{Key: "bigCocks", Value: bson.A{
+						bson.D{{Key: "$match", Value: bson.D{{Key: "size", Value: bson.D{{Key: "$gte", Value: bigCockThreshold}}}}}},
+						bson.D{{Key: "$count", Value: "count"}},
+					}},
+					{Key: "smallCocks", Value: bson.A{
+						bson.D{{Key: "$match", Value: bson.D{{Key: "size", Value: bson.D{{Key: "$lt", Value: bigCockThreshold}}}}}},
+						bson.D{{Key: "$count", Value: "count"}},
+					}},
+				}}},
+			}},
+			{Key: "maxCockDay", Value: bson.A{
+				bson.D{{Key: "$group", Value: bson.D{
+					{Key: "_id", Value: bson.D{
+						{Key: "year", Value: bson.D{{Key: "$year", Value: "$requested_at"}}},
+						{Key: "month", Value: bson.D{{Key: "$month", Value: "$requested_at"}}},
+						{Key: "day", Value: bson.D{{Key: "$dayOfMonth", Value: "$requested_at"}}},
+					}},
+					{Key: "totalSize", Value: bson.D{{Key: "$sum", Value: "$size"}}},
+				}}},
+				bson.D{{Key: "$sort", Value: bson.D{{Key: "totalSize", Value: -1}}}},
+				bson.D{{Key: "$limit", Value: 1}},
+			}},
+		}}},
+	}
+
+	cursor, err := collection.Aggregate(app.ctx, pipeline)
+	if err != nil {
+		log.E("Failed to aggregate data with facet pipeline", InnerError, err)
+		return tgbotapi.InlineQueryResultArticle{}
+	}
+
+	var facetResults struct {
+		UserStats []struct {
+			Date      time.Time `bson:"_id"`
+			TotalSize int       `bson:"totalSize"`
+			Sizes     []int     `bson:"sizes"`
+			AvgSize   float64   `bson:"avgSize"`
+			Count     int       `bson:"count"`
+		} `bson:"userStats"`
+		GlobalStats []struct {
+			TotalCock int     `bson:"totalCock"`
+			AvgSize   float64 `bson:"avgSize"`
+			Sizes     []int   `bson:"sizes"`
+		} `bson:"globalStats"`
+		UniqueUsers []struct {
+			Count int `bson:"count"`
+		} `bson:"uniqueUsers"`
+		CockDistribution []struct {
+			BigCocks   []struct{ Count int } `bson:"bigCocks"`
+			SmallCocks []struct{ Count int } `bson:"smallCocks"`
+		} `bson:"cockDistribution"`
+		MaxCockDay []struct {
+			ID struct {
+				Year  int `bson:"year"`
+				Month int `bson:"month"`
+				Day   int `bson:"day"`
+			} `bson:"_id"`
+			TotalSize int `bson:"totalSize"`
+		} `bson:"maxCockDay"`
+	}
+
+	if err := cursor.All(app.ctx, &facetResults); err != nil {
+		log.E("Failed to decode facet pipeline results", InnerError, err)
+		return tgbotapi.InlineQueryResultArticle{}
+	}
+
+	// Extract data from facet results
+	userResults := facetResults.UserStats
+	globalStats := facetResults.GlobalStats[0]
+	uniqueUsers := facetResults.UniqueUsers[0].Count
+	cockDistribution := facetResults.CockDistribution[0]
+	maxCockDay := facetResults.MaxCockDay[0]
+
+	// Metrics initialization
+	var userTotalCock, userAvgCock, userMaxCock, userYesterdayChangeCock int
+	var userIrk, userYesterdayChangePercent, userDailyGrowth, bigCocksPercent, smallCocksPercent, dominancePercent float64
+	var userMaxCockDate time.Time
+	var totalCock, totalAvgCock, totalMedianCock int
+	var maxCockDate time.Time
+	var maxCockSize int
+
+	// Process user stats
+	for _, result := range userResults {
+		userTotalCock += result.TotalSize
+
+		// Track max cock
+		for _, size := range result.Sizes {
+			if size > userMaxCock {
+				userMaxCock = size
+				userMaxCockDate = result.Date
+			}
+		}
+	}
+
+	// Calculate global metrics
+	totalCock = globalStats.TotalCock
+	totalAvgCock = int(globalStats.AvgSize)
+	totalMedianCock = median(globalStats.Sizes)
+
+	// Calculate IRK
+	if totalCock > 0 && userTotalCock > 0 {
+		normalizedUserCock := float64(userTotalCock) / float64(totalAvgCock)
+		normalizedUserRecords := float64(len(userResults)) / float64(uniqueUsers)
+
+		w1 := math.Max(1.0, math.Min(normalizedUserCock*2.0, 10.0))
+		w2 := math.Max(1.0, math.Min(normalizedUserRecords*5.0, 10.0))
+
+		rawIrk := normalizedUserCock / (1.0 + w1) * (normalizedUserRecords / (1.0 + w2))
+		userIrk = math.Max(0.0, math.Min(1.0, rawIrk))
+	}
+
+	// Calculate yesterday's change
+	if len(userResults) > 1 {
+		userYesterdayChangeCock = userResults[len(userResults)-1].TotalSize - userResults[len(userResults)-2].TotalSize
+		if userResults[len(userResults)-2].TotalSize > 0 {
+			userYesterdayChangePercent = float64(userYesterdayChangeCock) / float64(userResults[len(userResults)-2].TotalSize) * 100
+		} else {
+			userYesterdayChangePercent = 100
+		}
+	} else {
+		userYesterdayChangePercent = 100
+		userYesterdayChangeCock = 0
+	}
+
+	// Calculate daily growth
+	var dailyGrowthSum float64
+	for i := 1; i < len(userResults); i++ {
+		dailyGrowthSum += float64(userResults[i].TotalSize - userResults[i-1].TotalSize)
+	}
+	if len(userResults) > 1 {
+		userDailyGrowth = dailyGrowthSum / float64(len(userResults)-1)
+	}
+
+	// Calculate distribution percentages
+	bigCocks := cockDistribution.BigCocks[0].Count
+	smallCocks := cockDistribution.SmallCocks[0].Count
+	totalCocks := bigCocks + smallCocks
+	if totalCocks > 0 {
+		bigCocksPercent = float64(bigCocks) / float64(totalCocks) * 100
+		smallCocksPercent = float64(smallCocks) / float64(totalCocks) * 100
+	}
+
+	// Extract max cock day data
+	maxCockDate = time.Date(maxCockDay.ID.Year, time.Month(maxCockDay.ID.Month), maxCockDay.ID.Day, 0, 0, 0, 0, time.Local)
+	maxCockSize = maxCockDay.TotalSize
+
+	// Calculate dominance percentage
+	if totalCock > 0 {
+		dominancePercent = (float64(userTotalCock) / float64(totalCock)) * 100
+	}
+
+	// Generate result text
+	text := NewMsgCockDynamicsTemplate(
+		// Общая динамика коков
+		totalCock, uniqueUsers, totalAvgCock, totalMedianCock,
 		// Персональная динамика кока
 		userTotalCock, userAvgCock, userIrk, userMaxCock, userMaxCockDate,
 		// Кок-активы
