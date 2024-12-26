@@ -69,7 +69,7 @@ _Гонка коков – это соревнование, в котором к
 Общий посчитанный кок: *%[1]s см* 🤭
 Всего уникальных коков в системе: *%[2]s* 🫡
 
-День самого большого кока: *%[21]s*, нарастили аж *%[22]sсм*
+День самого большого кока: *%[21]s*, нарастили аж *%[22]sсм* 🍾
 
 Средний кок в системе: *%[3]s см* %[4]s
 Медиана кока в системе: *%[5]s см* %[6]s
@@ -168,7 +168,7 @@ func NewMsgCockDynamicsTemplate(
 		EscapeMarkdownV2(FormatDickSize(userMaxCock)), EmojiFromSize(userMaxCock), userMaxCockDate.Format("02.01.06"),
 
 		/* Кок-активы */
-		userYesterdayChangePercentEmoji, fmt.Sprintf("%s%s", userYesterdayChangePercentSymbol, FormatDickPercent(userYesterdayChangePercent)), FormatDickSize(userYesterdayChangeCock),
+		userYesterdayChangePercentEmoji, fmt.Sprintf("%s%s", userYesterdayChangePercentSymbol, FormatDickPercent(userYesterdayChangePercent)), fmt.Sprintf("%s%s", userYesterdayChangePercentSymbol, FormatDickSize(userYesterdayChangeCock)),
 		userDailyGrowthEmoji, fmt.Sprintf("%s%s", userDailyGrowthSymbol, FormatDickPercent(userDailyGrowth)),
 
 		/* Соотношение коков */
