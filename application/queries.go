@@ -543,7 +543,7 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 
 	// Process user stats
 	for i, stat := range user {
-		println(fmt.Sprintf("User[%d]", i), stat)
+		println(fmt.Sprintf("User[%v] %v", i, stat))
 		totalUserCock += stat.Total
 
 		// Track max cock
