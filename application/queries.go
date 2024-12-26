@@ -557,14 +557,31 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 
 	// Calculate IRK
 	if totalCock > 0 && userTotalCock > 0 {
-		normalizedUserCock := float64(userTotalCock) / float64(totalAvgCock)
-		normalizedUserRecords := float64(len(userResults)) / float64(uniqueUsers)
+		// Восстанавливаем данные allCocks из globalStats.Sizes
+		allCocksCount := len(globalStats.Sizes)
 
-		w1 := math.Max(1.0, math.Min(normalizedUserCock*2.0, 10.0))
-		w2 := math.Max(1.0, math.Min(normalizedUserRecords*5.0, 10.0))
+		if allCocksCount > 0 {
+			// Нормализуем пользовательский общий кок относительно среднего общего размера
+			normalizedUserCock := float64(userTotalCock) / float64(totalAvgCock)
 
-		rawIrk := normalizedUserCock / (1.0 + w1) * (normalizedUserRecords / (1.0 + w2))
-		userIrk = math.Max(0.0, math.Min(1.0, rawIrk))
+			// Нормализуем количество записей пользователя
+			normalizedUserRecords := float64(len(userResults)) / float64(allCocksCount)
+
+			// Динамические веса (с ограничением)
+			w1 := math.Max(1.0, math.Min(normalizedUserCock*2.0, 10.0))
+			w2 := math.Max(1.0, math.Min(normalizedUserRecords*5.0, 10.0))
+
+			// Вычисляем IRK
+			rawIrk := normalizedUserCock / (1.0 + w1) * (normalizedUserRecords / (1.0 + w2))
+
+			// Ограничиваем IRK в пределах [0.0, 1.0]
+			userIrk = math.Max(0.0, math.Min(1.0, rawIrk))
+		}
+	}
+
+	// Calculate user's average cock size
+	if len(userResults) > 0 {
+		userAvgCock = int(float64(userTotalCock) / float64(len(userResults)))
 	}
 
 	// Calculate yesterday's change
