@@ -485,7 +485,7 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 		return tgbotapi.InlineQueryResultArticle{}
 	}
 
-	var facetResults struct {
+	var facetResults []struct {
 		UserStats []struct {
 			Date      time.Time `bson:"_id"`
 			TotalSize int       `bson:"totalSize"`
@@ -520,12 +520,14 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 		return tgbotapi.InlineQueryResultArticle{}
 	}
 
+	s := facetResults[0]
+
 	// Extract data from facet results
-	userResults := facetResults.UserStats
-	globalStats := facetResults.GlobalStats[0]
-	uniqueUsers := facetResults.UniqueUsers[0].Count
-	cockDistribution := facetResults.CockDistribution[0]
-	maxCockDay := facetResults.MaxCockDay[0]
+	userResults := s.UserStats
+	globalStats := s.GlobalStats[0]
+	uniqueUsers := s.UniqueUsers[0].Count
+	cockDistribution := s.CockDistribution[0]
+	maxCockDay := s.MaxCockDay[0]
 
 	// Metrics initialization
 	var userTotalCock, userAvgCock, userMaxCock, userYesterdayChangeCock int
