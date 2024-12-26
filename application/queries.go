@@ -449,10 +449,22 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 					{Key: "Average", Value: bson.D{{Key: "$avg", Value: "$size"}}},
 					{Key: "Sizes", Value: bson.D{{Key: "$push", Value: "$size"}}},
 				}}},
+				bson.D{{Key: "$limit", Value: 1}},
+				bson.D{{Key: "$project", Value: bson.D{
+					{Key: "_id", Value: 0},
+					{Key: "Total", Value: 1},
+					{Key: "Average", Value: 1},
+					{Key: "Sizes", Value: 1},
+				}}},
 			}},
 			{Key: "Users", Value: bson.A{
 				bson.D{{Key: "$group", Value: bson.D{{Key: "_id", Value: "$user_id"}}}},
 				bson.D{{Key: "$count", Value: "Count"}},
+				bson.D{{Key: "$limit", Value: 1}},
+				bson.D{{Key: "$project", Value: bson.D{
+					{Key: "_id", Value: 0},
+					{Key: "Count", Value: 1},
+				}}},
 			}},
 			{Key: "Distribution", Value: bson.A{
 				bson.D{{Key: "$group", Value: bson.D{
@@ -463,6 +475,12 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 					{Key: "Small", Value: bson.D{{Key: "$sum", Value: bson.D{{Key: "$cond", Value: bson.A{
 						bson.D{{Key: "$lt", Value: bson.A{"$size", bigCockThreshold}}}, 1, 0,
 					}}}}}},
+				}}},
+				bson.D{{Key: "$limit", Value: 1}},
+				bson.D{{Key: "$project", Value: bson.D{
+					{Key: "_id", Value: 0},
+					{Key: "Big", Value: 1},
+					{Key: "Small", Value: 1},
 				}}},
 			}},
 			{Key: "MaxDay", Value: bson.A{
@@ -476,6 +494,13 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 				}}},
 				bson.D{{Key: "$sort", Value: bson.D{{Key: "Total", Value: -1}}}},
 				bson.D{{Key: "$limit", Value: 1}},
+				bson.D{{Key: "$project", Value: bson.D{
+					{Key: "_id", Value: 0},
+					{Key: "Year", Value: "$_id.Year"},
+					{Key: "Month", Value: "$_id.Month"},
+					{Key: "Day", Value: "$_id.Day"},
+					{Key: "Total", Value: 1},
+				}}},
 			}},
 		}}}}
 
@@ -493,19 +518,19 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 			Average float64   `bson:"Average"`
 			Count   int       `bson:"Count"`
 		} `bson:"User"`
-		Global []struct {
+		Global struct {
 			Total   int     `bson:"Total"`
 			Average float64 `bson:"Average"`
 			Sizes   []int   `bson:"Sizes"`
 		} `bson:"Global"`
-		Users []struct {
+		Users struct {
 			Count int `bson:"Count"`
 		} `bson:"Users"`
-		Distribution []struct {
+		Distribution struct {
 			Big   int `bson:"Big"`
 			Small int `bson:"Small"`
 		} `bson:"Distribution"`
-		MaxDay []struct {
+		MaxDay struct {
 			ID struct {
 				Year  int `bson:"Year"`
 				Month int `bson:"Month"`
@@ -528,10 +553,10 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 	// Updated with renaming for clarity and consistency
 
 	user := result.User
-	global := result.Global[0]
-	usersCount := result.Users[0].Count
-	distribution := result.Distribution[0]
-	maxDay := result.MaxDay[0]
+	global := result.Global
+	usersCount := result.Users.Count
+	distribution := result.Distribution
+	maxDay := result.MaxDay
 
 	// Metrics initialization
 	var totalUserCock, avgUserCock, maxUserCock, yesterdayCockChange int
