@@ -90,8 +90,8 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 		return app.db.Database("dickbot_db").Collection("cocks")
 	})
 
-	pipeline := TraceTimeExecutionForResult(log, TraceKindCreatePipeline, func() *mongo.Pipeline {
-		return &mongo.Pipeline{
+	pipeline := TraceTimeExecutionForResult(log, TraceKindCreatePipeline, func() mongo.Pipeline {
+		return mongo.Pipeline{
 			{{Key: "$facet", Value: bson.D{
 				{Key: "User", Value: bson.A{
 					bson.D{{Key: "$match", Value: bson.D{{Key: "user_id", Value: query.From.ID}}}},
