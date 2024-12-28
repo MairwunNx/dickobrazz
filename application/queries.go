@@ -108,6 +108,10 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 					bson.D{{Key: "$group", Value: bson.D{
 						{Key: "_id", Value: nil},
 						{Key: "Total", Value: bson.D{{Key: "$sum", Value: "$size"}}},
+						{Key: "Median", Value: bson.D{{Key: "$median", Value: bson.D{
+							{Key: "input", Value: "$size"},
+							{Key: "method", Value: "approximate"},
+						}}}},
 						{Key: "Average", Value: bson.D{{Key: "$avg", Value: "$size"}}},
 						{Key: "Sizes", Value: bson.D{{Key: "$push", Value: "$size"}}},
 					}}},
@@ -180,6 +184,7 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 		Global []struct {
 			Total   int     `bson:"Total"`
 			Average float64 `bson:"Average"`
+			Median  float64 `bson:"Median"`
 			Sizes   []int   `bson:"Sizes"`
 		} `bson:"Global"`
 		Users []struct {
@@ -240,7 +245,7 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 	// Calculate global metrics
 	totalCock = global.Total
 	avgCock = int(global.Average)
-	medianCock = median(global.Sizes)
+	medianCock = global.Median
 
 	// Gather all user cocks
 	var userCocks []int
@@ -314,27 +319,6 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 	)
 
 	return tgbotapi.NewInlineQueryResultArticleMarkdown(query.ID, "Динамика кока", text)
-}
-
-func sum(data []int) int {
-	total := 0
-	for _, v := range data {
-		total += v
-	}
-	return total
-}
-
-func median(data []int) int {
-	n := len(data)
-	if n == 0 {
-		return 0
-	}
-
-	sort.Ints(data)
-	if n%2 == 0 {
-		return (data[n/2-1] + data[n/2]) / 2
-	}
-	return data[n/2]
 }
 
 func (app *Application) InlineQueryCockRaceImgStat(log *Logger, query *tgbotapi.InlineQuery) tgbotapi.InlineQueryResultPhoto {
