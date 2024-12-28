@@ -113,7 +113,6 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 							{Key: "method", Value: "approximate"},
 						}}}},
 						{Key: "Average", Value: bson.D{{Key: "$avg", Value: "$size"}}},
-						{Key: "Sizes", Value: bson.D{{Key: "$push", Value: "$size"}}},
 					}}},
 					bson.D{{Key: "$limit", Value: 1}},
 				}},
@@ -185,7 +184,6 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 			Total   int     `bson:"Total"`
 			Average float64 `bson:"Average"`
 			Median  float64 `bson:"Median"`
-			Sizes   []int   `bson:"Sizes"`
 		} `bson:"Global"`
 		Users []struct {
 			Count int `bson:"Count"`
