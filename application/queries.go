@@ -146,6 +146,7 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 				}},
 				{Key: "MaxDay", Value: bson.A{
 					bson.D{{Key: "$group", Value: bson.D{
+						{Key: "_id", Value: nil},
 						{Key: "RequestedAt", Value: "$requested_at"},
 						{Key: "Total", Value: bson.D{{Key: "$sum", Value: "$size"}}},
 					}}},
