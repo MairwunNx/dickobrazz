@@ -245,7 +245,7 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 	// Calculate global metrics
 	totalCock = global.Total
 	avgCock = int(global.Average)
-	medianCock = global.Median
+	medianCock = int(global.Median)
 
 	// Gather all user cocks
 	var userCocks []int
