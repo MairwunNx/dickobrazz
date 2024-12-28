@@ -190,7 +190,7 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 			SmallPercent float64 `bson:"SmallPercent"`
 		} `bson:"Distribution"`
 		MaxDay []struct {
-			RequestedAt time.Time `bson:"requested_at"`
+			RequestedAt time.Time `bson:"RequestedAt"`
 			Total       int       `bson:"Total"`
 		} `bson:"MaxDay"`
 	}
