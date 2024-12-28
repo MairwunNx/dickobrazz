@@ -6,17 +6,19 @@ import (
 )
 
 const (
-	SysVersion = "sys_version"
-	SysBuildRv = "sys_buildrv"
-	SysBuildAt = "sys_buildat"
-	SysRuntime = "sys_runtime"
-	InnerError = "inner_error"
-	UserId     = "user_id"
-	UserName   = "user_name"
-	QueryId    = "query_type"
-	ChatType   = "chat_type"
-	ChatId     = "chat_id"
-	RndSource  = "rnd_source"
+	ExecutionTime = "exe_time"
+	ExecutionKing = "exe_kind"
+	SysVersion    = "sys_version"
+	SysBuildRv    = "sys_buildrv"
+	SysBuildAt    = "sys_buildat"
+	SysRuntime    = "sys_runtime"
+	InnerError    = "inner_error"
+	UserId        = "user_id"
+	UserName      = "user_name"
+	QueryId       = "query_type"
+	ChatType      = "chat_type"
+	ChatId        = "chat_id"
+	RndSource     = "rnd_source"
 )
 
 type Logger struct {
