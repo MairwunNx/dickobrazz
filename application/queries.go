@@ -150,9 +150,9 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 				{Key: "record", Value: bson.A{
 					bson.D{{Key: "$group", Value: bson.D{
 						{Key: "_id", Value: bson.D{
-							{Key: "year", Value: bson.D{{Key: "$year", Value: "$requested_at"}}},
-							{Key: "month", Value: bson.D{{Key: "$month", Value: "$requested_at"}}},
-							{Key: "day", Value: bson.D{{Key: "$dayOfMonth", Value: "$requested_at"}}},
+							{Key: "Year", Value: bson.D{{Key: "$year", Value: "$requested_at"}}},
+							{Key: "Month", Value: bson.D{{Key: "$month", Value: "$requested_at"}}},
+							{Key: "Day", Value: bson.D{{Key: "$dayOfMonth", Value: "$requested_at"}}},
 						}},
 						{Key: "requested_at", Value: bson.D{{Key: "$first", Value: "$requested_at"}}},
 						{Key: "total", Value: bson.D{{Key: "$sum", Value: "$size"}}},
