@@ -104,7 +104,7 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 					}}},
 					bson.D{{Key: "$sort", Value: bson.D{{Key: "_id", Value: 1}}}},
 				}},
-				{Key: "Global", Value: bson.A{
+				{Key: "Total", Value: bson.A{
 					bson.D{{Key: "$group", Value: bson.D{
 						{Key: "_id", Value: nil},
 						{Key: "Total", Value: bson.D{{Key: "$sum", Value: "$size"}}},
@@ -116,7 +116,7 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 					}}},
 					bson.D{{Key: "$limit", Value: 1}},
 				}},
-				{Key: "Users", Value: bson.A{
+				{Key: "Uniques", Value: bson.A{
 					bson.D{{Key: "$group", Value: bson.D{{Key: "_id", Value: "$user_id"}}}},
 					bson.D{{Key: "$count", Value: "Count"}},
 				}},
@@ -147,7 +147,7 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 						}}}},
 					}}},
 				}},
-				{Key: "MaxDay", Value: bson.A{
+				{Key: "Record", Value: bson.A{
 					bson.D{{Key: "$group", Value: bson.D{
 						{Key: "_id", Value: bson.D{
 							{Key: "Year", Value: bson.D{{Key: "$year", Value: "$requested_at"}}},
@@ -172,7 +172,7 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 		return tgbotapi.InlineQueryResultArticle{}
 	}
 
-	var FacetResult []struct {
+	var result struct {
 		User []struct {
 			Date    time.Time `bson:"_id"`
 			Total   int       `bson:"Total"`
@@ -180,26 +180,29 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 			Average float64   `bson:"Average"`
 			Count   int       `bson:"Count"`
 		} `bson:"User"`
-		Global []struct {
+		Total []struct {
 			Total   int     `bson:"Total"`
 			Average float64 `bson:"Average"`
 			Median  float64 `bson:"Median"`
-		} `bson:"Global"`
-		Users []struct {
+		} `bson:"Total"`
+		Uniques []struct {
 			Count int `bson:"Count"`
-		} `bson:"Users"`
+		} `bson:"Uniques"`
 		Distribution []struct {
 			BigPercent   float64 `bson:"BigPercent"`
 			SmallPercent float64 `bson:"SmallPercent"`
 		} `bson:"Distribution"`
-		MaxDay []struct {
+		Record []struct {
 			RequestedAt time.Time `bson:"RequestedAt"`
 			Total       int       `bson:"Total"`
-		} `bson:"MaxDay"`
+		} `bson:"Record"`
 	}
 
 	if err := TraceTimeExecutionForResult(log, TraceKindInflatePipeline, func() error {
-		return cursor.All(app.ctx, &FacetResult)
+		if cursor.Next(app.ctx) {
+			return cursor.Decode(&result)
+		}
+		return fmt.Errorf("no results found in aggregation")
 	}); err != nil {
 		log.E("Failed to decode aggregation results", InnerError, err)
 		return tgbotapi.InlineQueryResultArticle{}
@@ -207,16 +210,11 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 
 	log.I("Aggregation completed successfully")
 
-	result := FacetResult[0]
-
-	// Extract data from facet results
-	// Updated with renaming for clarity and consistency
-
 	user := result.User
-	global := result.Global[0]
-	usersCount := result.Users[0].Count
+	global := result.Total[0]
+	usersCount := result.Uniques[0].Count
 	distribution := result.Distribution[0]
-	maxDay := result.MaxDay[0]
+	maxDay := result.Record[0]
 
 	// Metrics initialization
 	var totalUserCock, avgUserCock, maxUserCock, yesterdayCockChange int
