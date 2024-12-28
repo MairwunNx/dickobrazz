@@ -146,7 +146,12 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 				}},
 				{Key: "MaxDay", Value: bson.A{
 					bson.D{{Key: "$group", Value: bson.D{
-						{Key: "_id", Value: "$requested_at"},
+						{Key: "_id", Value: bson.D{
+							{Key: "Year", Value: bson.D{{Key: "$year", Value: "$requested_at"}}},
+							{Key: "Month", Value: bson.D{{Key: "$month", Value: "$requested_at"}}},
+							{Key: "Day", Value: bson.D{{Key: "$dayOfMonth", Value: "$requested_at"}}},
+						}},
+						{Key: "RequestedAt", Value: bson.D{{Key: "$first", Value: "$requested_at"}}},
 						{Key: "Total", Value: bson.D{{Key: "$sum", Value: "$size"}}},
 					}}},
 					bson.D{{Key: "$sort", Value: bson.D{{Key: "Total", Value: -1}}}},
@@ -185,7 +190,7 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 			SmallPercent float64 `bson:"SmallPercent"`
 		} `bson:"Distribution"`
 		MaxDay []struct {
-			RequestedAt time.Time `bson:"_id"`
+			RequestedAt time.Time `bson:"requested_at"`
 			Total       int       `bson:"Total"`
 		} `bson:"MaxDay"`
 	}
