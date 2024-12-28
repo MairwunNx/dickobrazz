@@ -93,69 +93,69 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 	pipeline := TraceTimeExecutionForResult(log, TraceKindCreatePipeline, func() mongo.Pipeline {
 		return mongo.Pipeline{
 			{{Key: "$facet", Value: bson.D{
-				{Key: "User", Value: bson.A{
+				{Key: "individual", Value: bson.A{
 					bson.D{{Key: "$match", Value: bson.D{{Key: "user_id", Value: query.From.ID}}}},
 					bson.D{{Key: "$group", Value: bson.D{
 						{Key: "_id", Value: "$requested_at"},
-						{Key: "Total", Value: bson.D{{Key: "$sum", Value: "$size"}}},
-						{Key: "Sizes", Value: bson.D{{Key: "$push", Value: "$size"}}},
-						{Key: "Average", Value: bson.D{{Key: "$avg", Value: "$size"}}},
-						{Key: "Count", Value: bson.D{{Key: "$sum", Value: 1}}},
+						{Key: "total", Value: bson.D{{Key: "$sum", Value: "$size"}}},
+						{Key: "sizes", Value: bson.D{{Key: "$push", Value: "$size"}}},
+						{Key: "average", Value: bson.D{{Key: "$avg", Value: "$size"}}},
+						{Key: "count", Value: bson.D{{Key: "$sum", Value: 1}}},
 					}}},
 					bson.D{{Key: "$sort", Value: bson.D{{Key: "_id", Value: 1}}}},
 				}},
-				{Key: "Total", Value: bson.A{
+				{Key: "total", Value: bson.A{
 					bson.D{{Key: "$group", Value: bson.D{
 						{Key: "_id", Value: nil},
-						{Key: "Total", Value: bson.D{{Key: "$sum", Value: "$size"}}},
-						{Key: "Median", Value: bson.D{{Key: "$median", Value: bson.D{
+						{Key: "size", Value: bson.D{{Key: "$sum", Value: "$size"}}},
+						{Key: "median", Value: bson.D{{Key: "$median", Value: bson.D{
 							{Key: "input", Value: "$size"},
 							{Key: "method", Value: "approximate"},
 						}}}},
-						{Key: "Average", Value: bson.D{{Key: "$avg", Value: "$size"}}},
+						{Key: "average", Value: bson.D{{Key: "$avg", Value: "$size"}}},
 					}}},
 					bson.D{{Key: "$limit", Value: 1}},
 				}},
-				{Key: "Uniques", Value: bson.A{
+				{Key: "uniques", Value: bson.A{
 					bson.D{{Key: "$group", Value: bson.D{{Key: "_id", Value: "$user_id"}}}},
-					bson.D{{Key: "$count", Value: "Count"}},
+					bson.D{{Key: "$count", Value: "count"}},
 				}},
-				{Key: "Distribution", Value: bson.A{
+				{Key: "distribution", Value: bson.A{
 					bson.D{{Key: "$group", Value: bson.D{
 						{Key: "_id", Value: nil},
-						{Key: "BigCount", Value: bson.D{{Key: "$sum", Value: bson.D{{Key: "$cond", Value: bson.A{
+						{Key: "huge", Value: bson.D{{Key: "$sum", Value: bson.D{{Key: "$cond", Value: bson.A{
 							bson.D{{Key: "$gte", Value: bson.A{"$size", 19}}}, 1, 0,
 						}}}}}},
-						{Key: "SmallCount", Value: bson.D{{Key: "$sum", Value: bson.D{{Key: "$cond", Value: bson.A{
+						{Key: "little", Value: bson.D{{Key: "$sum", Value: bson.D{{Key: "$cond", Value: bson.A{
 							bson.D{{Key: "$lt", Value: bson.A{"$size", 19}}}, 1, 0,
 						}}}}}},
 					}}},
 					bson.D{{Key: "$addFields", Value: bson.D{
-						{Key: "TotalCount", Value: bson.D{{Key: "$add", Value: bson.A{"$BigCount", "$SmallCount"}}}},
+						{Key: "total", Value: bson.D{{Key: "$add", Value: bson.A{"$huge", "$little"}}}},
 					}}},
 					bson.D{{Key: "$project", Value: bson.D{
 						{Key: "_id", Value: nil},
-						{Key: "BigPercent", Value: bson.D{{Key: "$cond", Value: bson.A{
-							bson.D{{Key: "$eq", Value: bson.A{"$TotalCount", 0}}},
+						{Key: "huge", Value: bson.D{{Key: "$cond", Value: bson.A{
+							bson.D{{Key: "$eq", Value: bson.A{"$total", 0}}},
 							0,
-							bson.D{{Key: "$multiply", Value: bson.A{bson.D{{Key: "$divide", Value: bson.A{"$BigCount", "$TotalCount"}}}, 100}}},
+							bson.D{{Key: "$multiply", Value: bson.A{bson.D{{Key: "$divide", Value: bson.A{"$huge", "$total"}}}, 100}}},
 						}}}},
-						{Key: "SmallPercent", Value: bson.D{{Key: "$cond", Value: bson.A{
-							bson.D{{Key: "$eq", Value: bson.A{"$TotalCount", 0}}},
+						{Key: "little", Value: bson.D{{Key: "$cond", Value: bson.A{
+							bson.D{{Key: "$eq", Value: bson.A{"$total", 0}}},
 							0,
-							bson.D{{Key: "$multiply", Value: bson.A{bson.D{{Key: "$divide", Value: bson.A{"$SmallCount", "$TotalCount"}}}, 100}}},
+							bson.D{{Key: "$multiply", Value: bson.A{bson.D{{Key: "$divide", Value: bson.A{"$little", "$total"}}}, 100}}},
 						}}}},
 					}}},
 				}},
-				{Key: "Record", Value: bson.A{
+				{Key: "record", Value: bson.A{
 					bson.D{{Key: "$group", Value: bson.D{
 						{Key: "_id", Value: bson.D{
-							{Key: "Year", Value: bson.D{{Key: "$year", Value: "$requested_at"}}},
-							{Key: "Month", Value: bson.D{{Key: "$month", Value: "$requested_at"}}},
-							{Key: "Day", Value: bson.D{{Key: "$dayOfMonth", Value: "$requested_at"}}},
+							{Key: "year", Value: bson.D{{Key: "$year", Value: "$requested_at"}}},
+							{Key: "month", Value: bson.D{{Key: "$month", Value: "$requested_at"}}},
+							{Key: "day", Value: bson.D{{Key: "$dayOfMonth", Value: "$requested_at"}}},
 						}},
-						{Key: "RequestedAt", Value: bson.D{{Key: "$first", Value: "$requested_at"}}},
-						{Key: "Total", Value: bson.D{{Key: "$sum", Value: "$size"}}},
+						{Key: "requested_at", Value: bson.D{{Key: "$first", Value: "$requested_at"}}},
+						{Key: "total", Value: bson.D{{Key: "$sum", Value: "$size"}}},
 					}}},
 					bson.D{{Key: "$sort", Value: bson.D{{Key: "Total", Value: -1}}}},
 					bson.D{{Key: "$limit", Value: 1}},
@@ -173,29 +173,29 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 	}
 
 	var result struct {
-		User []struct {
+		Individual []struct {
 			Date    time.Time `bson:"_id"`
-			Total   int       `bson:"Total"`
-			Sizes   []int     `bson:"Sizes"`
-			Average float64   `bson:"Average"`
-			Count   int       `bson:"Count"`
-		} `bson:"User"`
+			Total   int       `bson:"total"`
+			Sizes   []int     `bson:"sizes"`
+			Average float64   `bson:"average"`
+			Count   int       `bson:"count"`
+		} `bson:"individual"`
 		Total []struct {
-			Total   int     `bson:"Total"`
-			Average float64 `bson:"Average"`
-			Median  float64 `bson:"Median"`
-		} `bson:"Total"`
+			Size    int     `bson:"size"`
+			Average float64 `bson:"average"`
+			Median  float64 `bson:"median"`
+		} `bson:"total"`
 		Uniques []struct {
-			Count int `bson:"Count"`
-		} `bson:"Uniques"`
+			Count int `bson:"count"`
+		} `bson:"uniques"`
 		Distribution []struct {
-			BigPercent   float64 `bson:"BigPercent"`
-			SmallPercent float64 `bson:"SmallPercent"`
-		} `bson:"Distribution"`
+			HugePercent   float64 `bson:"huge"`
+			LittlePercent float64 `bson:"little"`
+		} `bson:"distribution"`
 		Record []struct {
-			RequestedAt time.Time `bson:"RequestedAt"`
-			Total       int       `bson:"Total"`
-		} `bson:"Record"`
+			RequestedAt time.Time `bson:"requested_at"`
+			Total       int       `bson:"total"`
+		} `bson:"record"`
 	}
 
 	if err := TraceTimeExecutionForResult(log, TraceKindInflatePipeline, func() error {
@@ -210,7 +210,7 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 
 	log.I("Aggregation completed successfully")
 
-	user := result.User
+	user := result.Individual
 	global := result.Total[0]
 	usersCount := result.Uniques[0].Count
 	distribution := result.Distribution[0]
@@ -239,7 +239,7 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 	}
 
 	// Calculate global metrics
-	totalCock = global.Total
+	totalCock = global.Size
 	avgCock = int(global.Average)
 	medianCock = int(global.Median)
 
@@ -288,8 +288,8 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 		dailyGrowth = growthSum / float64(len(user)-1)
 	}
 
-	bigCockPercent = distribution.BigPercent
-	smallCockPercent = distribution.SmallPercent
+	bigCockPercent = distribution.HugePercent
+	smallCockPercent = distribution.LittlePercent
 
 	// Extract max cock day data
 	maxCockDate = maxDay.RequestedAt
