@@ -112,9 +112,13 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 							{Key: "input", Value: "$size"},
 							{Key: "method", Value: "approximate"},
 						}}}},
-						{Key: "average", Value: bson.D{{
-							Key: "$round", Value: bson.A{bson.D{{Key: "$avg", Value: "$size"}}, 0}},
-						}},
+						{Key: "average", Value: bson.D{{Key: "$avg", Value: "$size"}}},
+					}}},
+					bson.D{{Key: "$project", Value: bson.D{
+						{Key: "_id", Value: nil},
+						{Key: "size", Value: 1},
+						{Key: "median", Value: 1},
+						{Key: "average", Value: bson.D{{Key: "$round", Value: bson.A{"$average", 0}}}},
 					}}},
 					bson.D{{Key: "$limit", Value: 1}},
 				}},
