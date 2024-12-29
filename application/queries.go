@@ -160,6 +160,12 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 					bson.D{{Key: "$sort", Value: bson.D{{Key: "total", Value: -1}}}},
 					bson.D{{Key: "$limit", Value: 1}},
 				}},
+				{Key: "$set", Value: bson.D{
+					{Key: "overall", Value: bson.D{{Key: "$arrayElemAt", Value: bson.A{"$overall", 0}}}},
+					{Key: "record", Value: bson.D{{Key: "$arrayElemAt", Value: bson.A{"$record", 0}}}},
+					{Key: "distribution", Value: bson.D{{Key: "$arrayElemAt", Value: bson.A{"$distribution", 0}}}},
+					{Key: "uniques", Value: bson.D{{Key: "$arrayElemAt", Value: bson.A{"$uniques", 0}}}},
+				}},
 			}}}}
 	})
 
@@ -181,22 +187,22 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 			Count   int       `bson:"count"`
 		} `bson:"individual"`
 
-		Overall []struct {
+		Overall struct {
 			Size    int     `bson:"size"`
 			Average float64 `bson:"average"`
 			Median  float64 `bson:"median"`
 		} `bson:"overall"`
 
-		Uniques []struct {
+		Uniques struct {
 			Count int `bson:"count"`
 		} `bson:"uniques"`
 
-		Distribution []struct {
+		Distribution struct {
 			HugePercent   float64 `bson:"huge"`
 			LittlePercent float64 `bson:"little"`
 		} `bson:"distribution"`
 
-		Record []struct {
+		Record struct {
 			RequestedAt time.Time `bson:"requested_at"`
 			Total       int       `bson:"total"`
 		} `bson:"record"`
@@ -215,10 +221,10 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 	log.I("Aggregation completed successfully")
 
 	user := result.Individual
-	overall := result.Overall[0]
-	usersCount := result.Uniques[0].Count
-	distribution := result.Distribution[0]
-	maxDay := result.Record[0]
+	overall := result.Overall
+	usersCount := result.Uniques.Count
+	distribution := result.Distribution
+	maxDay := result.Record
 
 	// Metrics initialization
 	var totalUserCock, avgUserCock, maxUserCock, yesterdayCockChange int
