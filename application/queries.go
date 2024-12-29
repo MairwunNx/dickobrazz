@@ -104,7 +104,7 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 					}}},
 					bson.D{{Key: "$sort", Value: bson.D{{Key: "_id", Value: 1}}}},
 				}},
-				{Key: "total", Value: bson.A{
+				{Key: "overall", Value: bson.A{
 					bson.D{{Key: "$group", Value: bson.D{
 						{Key: "_id", Value: nil},
 						{Key: "size", Value: bson.D{{Key: "$sum", Value: "$size"}}},
@@ -180,22 +180,25 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 			Average float64   `bson:"average"`
 			Count   int       `bson:"count"`
 		} `bson:"individual"`
-		Total []struct {
+		Overall []struct {
 			Size    int     `bson:"size"`
 			Average float64 `bson:"average"`
 			Median  float64 `bson:"median"`
-		} `bson:"total"`
-		Uniques []struct {
-			Count int `bson:"count"`
-		} `bson:"uniques"`
-		Distribution []struct {
-			HugePercent   float64 `bson:"huge"`
-			LittlePercent float64 `bson:"little"`
-		} `bson:"distribution"`
-		Record []struct {
-			RequestedAt time.Time `bson:"requested_at"`
-			Total       int       `bson:"total"`
-		} `bson:"record"`
+
+			Uniques []struct {
+				Count int `bson:"count"`
+			} `bson:"uniques"`
+
+			Distribution []struct {
+				HugePercent   float64 `bson:"huge"`
+				LittlePercent float64 `bson:"little"`
+			} `bson:"distribution"`
+
+			Record []struct {
+				RequestedAt time.Time `bson:"requested_at"`
+				Total       int       `bson:"total"`
+			} `bson:"record"`
+		} `bson:"overall"`
 	}
 
 	if err := TraceTimeExecutionForResult(log, TraceKindInflatePipeline, func() error {
@@ -211,10 +214,10 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 	log.I("Aggregation completed successfully")
 
 	user := result.Individual
-	global := result.Total[0]
-	usersCount := result.Uniques[0].Count
-	distribution := result.Distribution[0]
-	maxDay := result.Record[0]
+	overall := result.Overall[0]
+	usersCount := overall.Uniques[0].Count
+	distribution := overall.Distribution[0]
+	maxDay := overall.Record[0]
 
 	// Metrics initialization
 	var totalUserCock, avgUserCock, maxUserCock, yesterdayCockChange int
@@ -239,9 +242,9 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 	}
 
 	// Calculate global metrics
-	totalCock = global.Size
-	avgCock = int(global.Average)
-	medianCock = int(global.Median)
+	totalCock = overall.Size
+	avgCock = int(math.Round(overall.Average))
+	medianCock = int(overall.Median)
 
 	// Gather all user cocks
 	var userCocks []int
