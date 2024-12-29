@@ -161,10 +161,10 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 					bson.D{{Key: "$limit", Value: 1}},
 				}},
 				{Key: "$set", Value: bson.D{
-					{Key: "overall", Value: bson.D{{Key: "$arrayElemAt", Value: bson.A{"$overall", 0}}}},
-					{Key: "record", Value: bson.D{{Key: "$arrayElemAt", Value: bson.A{"$record", 0}}}},
-					{Key: "distribution", Value: bson.D{{Key: "$arrayElemAt", Value: bson.A{"$distribution", 0}}}},
-					{Key: "uniques", Value: bson.D{{Key: "$arrayElemAt", Value: bson.A{"$uniques", 0}}}},
+					{Key: "overall", Value: bson.D{{Key: "$first", Value: "$overall"}}},
+					{Key: "record", Value: bson.D{{Key: "$first", Value: "$record"}}},
+					{Key: "distribution", Value: bson.D{{Key: "$first", Value: "$distribution"}}},
+					{Key: "uniques", Value: bson.D{{Key: "$first", Value: "$uniques"}}},
 				}},
 			}}}}
 	})
