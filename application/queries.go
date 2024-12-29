@@ -180,25 +180,26 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 			Average float64   `bson:"average"`
 			Count   int       `bson:"count"`
 		} `bson:"individual"`
+
 		Overall []struct {
 			Size    int     `bson:"size"`
 			Average float64 `bson:"average"`
 			Median  float64 `bson:"median"`
-
-			Uniques []struct {
-				Count int `bson:"count"`
-			} `bson:"uniques"`
-
-			Distribution []struct {
-				HugePercent   float64 `bson:"huge"`
-				LittlePercent float64 `bson:"little"`
-			} `bson:"distribution"`
-
-			Record []struct {
-				RequestedAt time.Time `bson:"requested_at"`
-				Total       int       `bson:"total"`
-			} `bson:"record"`
 		} `bson:"overall"`
+
+		Uniques []struct {
+			Count int `bson:"count"`
+		} `bson:"uniques"`
+
+		Distribution []struct {
+			HugePercent   float64 `bson:"huge"`
+			LittlePercent float64 `bson:"little"`
+		} `bson:"distribution"`
+
+		Record []struct {
+			RequestedAt time.Time `bson:"requested_at"`
+			Total       int       `bson:"total"`
+		} `bson:"record"`
 	}
 
 	if err := TraceTimeExecutionForResult(log, TraceKindInflatePipeline, func() error {
@@ -215,9 +216,9 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 
 	user := result.Individual
 	overall := result.Overall[0]
-	usersCount := overall.Uniques[0].Count
-	distribution := overall.Distribution[0]
-	maxDay := overall.Record[0]
+	usersCount := result.Uniques[0].Count
+	distribution := result.Distribution[0]
+	maxDay := result.Record[0]
 
 	// Metrics initialization
 	var totalUserCock, avgUserCock, maxUserCock, yesterdayCockChange int
