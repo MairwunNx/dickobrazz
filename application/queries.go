@@ -224,15 +224,13 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 	overall := result.Overall[0]
 	usersCount := result.Uniques[0].Count
 	distribution := result.Distribution[0]
-	maxDay := result.Record[0]
+	record := result.Record[0]
 
 	// Metrics initialization
 	var totalUserCock, avgUserCock, maxUserCock, yesterdayCockChange int
-	var irk, yesterdayChangePercent, dailyGrowth, bigCockPercent, smallCockPercent, dominancePercent float64
+	var irk, yesterdayChangePercent, dailyGrowth, dominancePercent float64
 	var maxUserCockDate time.Time
 	var totalCock, avgCock, medianCock int
-	var maxCockDate time.Time
-	var maxCockSize int
 
 	// Process user stats
 	for i, stat := range user {
@@ -298,13 +296,6 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 		dailyGrowth = growthSum / float64(len(user)-1)
 	}
 
-	bigCockPercent = distribution.HugePercent
-	smallCockPercent = distribution.LittlePercent
-
-	// Extract max cock day data
-	maxCockDate = maxDay.RequestedAt
-	maxCockSize = maxDay.Total
-
 	// Calculate dominance percentage
 	if totalCock > 0 {
 		dominancePercent = (float64(totalUserCock) / float64(totalCock)) * 100
@@ -319,8 +310,8 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 		// Кок-активы
 		yesterdayChangePercent, yesterdayCockChange,
 		dailyGrowth,
-		bigCockPercent, smallCockPercent,
-		maxCockDate, maxCockSize,
+		distribution.HugePercent, distribution.LittlePercent,
+		record.RequestedAt, record.Total,
 		dominancePercent,
 	)
 
