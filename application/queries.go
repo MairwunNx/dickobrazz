@@ -112,7 +112,9 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 							{Key: "input", Value: "$size"},
 							{Key: "method", Value: "approximate"},
 						}}}},
-						{Key: "average", Value: bson.D{{Key: "$avg", Value: "$size"}}},
+						{Key: "average", Value: bson.D{{
+							Key: "$round", Value: bson.A{bson.D{{Key: "$avg", Value: "$size"}}, 0}},
+						}},
 					}}},
 					bson.D{{Key: "$limit", Value: 1}},
 				}},
@@ -182,9 +184,9 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 		} `bson:"individual"`
 
 		Overall []struct {
-			Size    int     `bson:"size"`
-			Average float64 `bson:"average"`
-			Median  float64 `bson:"median"`
+			Size    int `bson:"size"`
+			Average int `bson:"average"`
+			Median  int `bson:"median"`
 		} `bson:"overall"`
 
 		Uniques []struct {
@@ -244,8 +246,8 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 
 	// Calculate global metrics
 	totalCock = overall.Size
-	avgCock = int(math.Round(overall.Average))
-	medianCock = int(overall.Median)
+	avgCock = overall.Average
+	medianCock = overall.Median
 
 	// Gather all user cocks
 	var userCocks []int
