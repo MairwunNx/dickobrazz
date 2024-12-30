@@ -111,25 +111,27 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 					}}},
 				}},
 				{Key: "individual_dominance", Value: bson.A{
-					bson.D{{Key: "$match", Value: bson.D{{Key: "user_id", Value: query.From.ID}}}},
 					bson.D{{Key: "$group", Value: bson.D{
 						{Key: "_id", Value: nil},
-						{Key: "user_total_size", Value: bson.D{{Key: "$sum", Value: "$size"}}},
-					}}},
-					bson.D{{Key: "$group", Value: bson.D{
-						{Key: "_id", Value: nil},
-						{Key: "global_total_size", Value: bson.D{{Key: "$sum", Value: "$size"}}},
-						{Key: "user_total_size", Value: bson.D{{Key: "$first", Value: "$user_total_size"}}},
+						{Key: "total_cock", Value: bson.D{{Key: "$sum", Value: "$size"}}},
+						{Key: "total_user_cock", Value: bson.D{{Key: "$sum", Value: bson.D{{Key: "$cond", Value: bson.A{
+							bson.D{{Key: "$eq", Value: bson.A{"$user_id", query.From.ID}}},
+							"$size",
+							0,
+						}}}}}},
 					}}},
 					bson.D{{Key: "$project", Value: bson.D{
 						{Key: "_id", Value: nil},
-						{Key: "dominance", Value: bson.D{{Key: "$multiply", Value: bson.A{
-							bson.D{{Key: "$cond", Value: bson.A{
-								bson.D{{Key: "$eq", Value: bson.A{"$global_total_size", 0}}},
-								0,
-								bson.D{{Key: "$divide", Value: bson.A{"$user_total_size", "$global_total_size"}}},
+						{Key: "dominance", Value: bson.D{{Key: "$round", Value: bson.A{
+							bson.D{{Key: "$multiply", Value: bson.A{
+								bson.D{{Key: "$cond", Value: bson.A{
+									bson.D{{Key: "$eq", Value: bson.A{"$total_cock", 0}}},
+									0,
+									bson.D{{Key: "$divide", Value: bson.A{"$total_user_cock", "$total_cock"}}},
+								}}},
+								100,
 							}}},
-							100,
+							1,
 						}}}},
 					}}},
 				}},
