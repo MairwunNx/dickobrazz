@@ -53,6 +53,8 @@ func (app *Application) InlineQueryCockSize(log *Logger, query *tgbotapi.InlineQ
 	//
 	//}
 
+	log.I("**** TEST", "NowTime", NowTime())
+
 	if cached := app.GetCockSizeFromCache(log, query.From.ID); cached != nil {
 		size = *cached
 	} else {
