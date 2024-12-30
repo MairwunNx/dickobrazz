@@ -135,6 +135,62 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 						}}}},
 					}}},
 				}},
+				{Key: "individual_daily_growth", Value: bson.A{
+					bson.D{{Key: "$match", Value: bson.D{{Key: "user_id", Value: query.From.ID}}}},
+					bson.D{{Key: "$sort", Value: bson.D{{Key: "requested_at", Value: -1}}}},
+					bson.D{{Key: "$setWindowFields", Value: bson.D{
+						{Key: "partitionBy", Value: "$user_id"},
+						{Key: "sortBy", Value: bson.D{{Key: "requested_at", Value: -1}}},
+						{Key: "output", Value: bson.D{
+							{Key: "prev_size", Value: bson.D{{Key: "$shift", Value: bson.D{
+								{Key: "output", Value: "$size"},
+								{Key: "by", Value: 1},
+							}}}},
+						}},
+					}}},
+					bson.D{{Key: "$set", Value: bson.D{
+						{Key: "growth", Value: bson.D{{Key: "$round", Value: bson.A{
+							bson.D{{Key: "$subtract", Value: bson.A{"$size", "$prev_size"}}},
+							1,
+						}}}},
+					}}},
+					bson.D{{Key: "$group", Value: bson.D{
+						{Key: "_id", Value: "$user_id"},
+						{Key: "average_daily_growth", Value: bson.D{{Key: "$avg", Value: "$growth"}}},
+					}}},
+					bson.D{{Key: "$project", Value: bson.D{
+						{Key: "_id", Value: nil},
+						{Key: "average", Value: bson.D{{Key: "$round", Value: bson.A{"$average_daily_growth", 1}}}},
+					}}},
+				}},
+				{Key: "individual_daily_dynamics", Value: bson.A{
+					bson.D{{Key: "$match", Value: bson.D{{Key: "user_id", Value: query.From.ID}}}},
+					bson.D{{Key: "$project", Value: bson.D{
+						{Key: "requested_at", Value: 1},
+						{Key: "size", Value: 1},
+					}}},
+					bson.D{{Key: "$sort", Value: bson.D{{Key: "requested_at", Value: -1}}}},
+					bson.D{{Key: "$limit", Value: 2}},
+					bson.D{{Key: "$group", Value: bson.D{
+						{Key: "_id", Value: nil},
+						{Key: "curr_cock", Value: bson.D{{Key: "$first", Value: "$size"}}},
+						{Key: "prev_cock", Value: bson.D{{Key: "$last", Value: "$size"}}},
+					}}},
+					bson.D{{Key: "$project", Value: bson.D{
+						{Key: "_id", Value: 0},
+						{Key: "yesterday_cock_change", Value: bson.D{{Key: "$subtract", Value: bson.A{"$curr_cock", "$prev_cock"}}}},
+						{Key: "yesterday_cock_change_percent", Value: bson.D{{Key: "$round", Value: bson.A{
+							bson.D{{Key: "$multiply", Value: bson.A{
+								bson.D{{Key: "$divide", Value: bson.A{
+									bson.D{{Key: "$subtract", Value: bson.A{"$curr_cock", "$prev_cock"}}},
+									"$prev_cock",
+								}}},
+								100,
+							}}},
+							1,
+						}}}},
+					}}},
+				}},
 				{Key: "individual_cock", Value: bson.A{
 					bson.D{{Key: "$match", Value: bson.D{{Key: "user_id", Value: query.From.ID}}}},
 					bson.D{{Key: "$group", Value: bson.D{
@@ -253,6 +309,15 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 			Dominance float64 `bson:"dominance"`
 		} `bson:"individual_dominance"`
 
+		IndividualDailyGrowth []struct {
+			Average float64 `bson:"average"`
+		} `bson:"individual_daily_growth"`
+
+		IndividualDailyDynamics []struct {
+			YesterdayCockChange        int     `bson:"yesterday_cock_change"`
+			YesterdayCockChangePercent float64 `bson:"yesterday_cock_change_percent"`
+		} `bson:"individual_daily_dynamics"`
+
 		Overall []struct {
 			Size    int `bson:"size"`
 			Average int `bson:"average"`
@@ -290,14 +355,15 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 	individualCock := result.IndividualCock[0]
 	individualRecord := result.IndividualRecord[0]
 	individualDominance := result.IndividualDominance[0]
+	individualDailyGrowth := result.IndividualDailyGrowth[0]
+	individualDailyDynamics := result.IndividualDailyDynamics[0]
 
 	overall := result.Overall[0]
 	overallCockers := result.Uniques[0].Count
 	overallDistribution := result.Distribution[0]
 	overallRecord := result.Record[0]
 
-	var yesterdayCockChange int
-	var irk, yesterdayChangePercent, dailyGrowth float64
+	var irk float64
 
 	// Gather all individual cocks
 	var userCocks []int
@@ -317,28 +383,6 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 		irk = math.Max(0.0, math.Min(1.0, rawIrk))
 	}
 
-	// Calculate yesterday's change
-	if len(individual) > 1 {
-		yesterdayCockChange = individual[len(individual)-1].Total - individual[len(individual)-2].Total
-		if individual[len(individual)-2].Total > 0 {
-			yesterdayChangePercent = float64(yesterdayCockChange) / float64(individual[len(individual)-2].Total) * 100
-		} else {
-			yesterdayChangePercent = 100
-		}
-	} else {
-		yesterdayChangePercent = 100
-		yesterdayCockChange = 0
-	}
-
-	// Calculate daily growth
-	var growthSum float64
-	for i := 1; i < len(individual); i++ {
-		growthSum += float64(individual[i].Total - individual[i-1].Total)
-	}
-	if len(individual) > 1 {
-		dailyGrowth = growthSum / float64(len(individual)-1)
-	}
-
 	text := NewMsgCockDynamicsTemplate(
 		/* Общая динамика коков */
 		overall.Size,
@@ -354,9 +398,9 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 		individualRecord.RequestedAt,
 
 		/* Кок-активы */
-		yesterdayChangePercent,
-		yesterdayCockChange,
-		dailyGrowth,
+		individualDailyDynamics.YesterdayCockChangePercent,
+		individualDailyDynamics.YesterdayCockChange,
+		individualDailyGrowth.Average,
 
 		/* Соотношение коков */
 		overallDistribution.HugePercent,
