@@ -294,10 +294,11 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 	record := result.Record[0]
 	individualRecord := result.IndividualRecord[0]
 	individualCock := result.IndividualCock[0]
+	individualDominance := result.IndividualDominance[0]
 
 	// Metrics initialization
 	var totalUserCock, yesterdayCockChange int
-	var irk, yesterdayChangePercent, dailyGrowth, dominancePercent float64
+	var irk, yesterdayChangePercent, dailyGrowth float64
 	var totalCock, avgCock, medianCock int
 
 	// Calculate global metrics
@@ -349,11 +350,6 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 		dailyGrowth = growthSum / float64(len(individual)-1)
 	}
 
-	// Calculate dominance percentage
-	if totalCock > 0 {
-		dominancePercent = (float64(totalUserCock) / float64(totalCock)) * 100
-	}
-
 	text := NewMsgCockDynamicsTemplate(
 		/* Общая динамика коков */
 		totalCock,
@@ -382,7 +378,7 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 		record.Total,
 
 		/* % доминирование */
-		dominancePercent,
+		individualDominance.Dominance,
 	)
 
 	return tgbotapi.NewInlineQueryResultArticleMarkdown(query.ID, "Динамика кока", text)
