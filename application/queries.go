@@ -287,24 +287,17 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 	log.I("Aggregation completed successfully", "AggregationResult", result)
 
 	individual := result.Individual
-	overall := result.Overall[0]
-
-	overallCockers := result.Uniques[0].Count
-	distribution := result.Distribution[0]
-	record := result.Record[0]
-	individualRecord := result.IndividualRecord[0]
 	individualCock := result.IndividualCock[0]
+	individualRecord := result.IndividualRecord[0]
 	individualDominance := result.IndividualDominance[0]
 
-	// Metrics initialization
-	var totalUserCock, yesterdayCockChange int
-	var irk, yesterdayChangePercent, dailyGrowth float64
-	var totalCock, avgCock, medianCock int
+	overall := result.Overall[0]
+	overallCockers := result.Uniques[0].Count
+	overallDistribution := result.Distribution[0]
+	overallRecord := result.Record[0]
 
-	// Calculate global metrics
-	totalCock = overall.Size
-	avgCock = overall.Average
-	medianCock = overall.Median
+	var yesterdayCockChange int
+	var irk, yesterdayChangePercent, dailyGrowth float64
 
 	// Gather all individual cocks
 	var userCocks []int
@@ -312,13 +305,9 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 		userCocks = append(userCocks, stat.Sizes...)
 	}
 
-	// todo: remove
-
-	totalUserCock = individualCock.Total
-
 	// Calculate IRK
-	if totalCock > 0 && totalUserCock > 0 && len(userCocks) > 0 {
-		normalizedCock := float64(totalUserCock) / float64(avgCock)
+	if overall.Size > 0 && individualCock.Total > 0 && len(userCocks) > 0 {
+		normalizedCock := float64(individualCock.Total) / float64(overall.Average)
 		normalizedRecords := float64(len(individual)) / float64(len(userCocks))
 
 		w1 := math.Max(1.0, math.Min(normalizedCock*2.0, 10.0))
@@ -352,17 +341,17 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 
 	text := NewMsgCockDynamicsTemplate(
 		/* Общая динамика коков */
-		totalCock,
+		overall.Size,
 		overallCockers,
-		avgCock,
-		medianCock,
+		overall.Average,
+		overall.Median,
 
 		/* Персональная динамика кока */
-		totalUserCock,
+		individualCock.Total,
 		individualCock.Average,
 		irk,
 		individualRecord.Total,
-		individualRecord.RequestedAt.Local(),
+		individualRecord.RequestedAt,
 
 		/* Кок-активы */
 		yesterdayChangePercent,
@@ -370,12 +359,12 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 		dailyGrowth,
 
 		/* Соотношение коков */
-		distribution.HugePercent,
-		distribution.LittlePercent,
+		overallDistribution.HugePercent,
+		overallDistribution.LittlePercent,
 
 		/* Самый большой кок */
-		record.RequestedAt.Local(),
-		record.Total,
+		overallRecord.RequestedAt,
+		overallRecord.Total,
 
 		/* % доминирование */
 		individualDominance.Dominance,

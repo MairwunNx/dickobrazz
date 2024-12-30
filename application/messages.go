@@ -164,7 +164,7 @@ func NewMsgCockDynamicsTemplate(
 		EscapeMarkdownV2(FormatDickSize(userTotalCock)),
 		EscapeMarkdownV2(FormatDickSize(userAvgCock)), EmojiFromSize(userAvgCock),
 		EscapeMarkdownV2(FormatDickIkr(userIrk)),
-		EscapeMarkdownV2(FormatDickSize(userMaxCock)), EmojiFromSize(userMaxCock), userMaxCockDate.Format("02.01.06"),
+		EscapeMarkdownV2(FormatDickSize(userMaxCock)), EmojiFromSize(userMaxCock), userMaxCockDate.Local().Format("02.01.06"),
 
 		/* Кок-активы */
 		userYesterdayChangePercentEmoji, fmt.Sprintf("%s%s", userYesterdayChangePercentSymbol, FormatDickPercent(userYesterdayChangePercent)), fmt.Sprintf("%s%s", userYesterdayChangePercentSymbol, FormatDickSize(userYesterdayChangeCock)),
@@ -175,7 +175,7 @@ func NewMsgCockDynamicsTemplate(
 		FormatDickPercent(totalBigCockRatio), FormatDickPercent(totalSmallCockRatio),
 
 		/* Самый большой кок */
-		totalMaxCockDate.Format("02.01.06"), FormatDickSize(totalMaxCock),
+		totalMaxCockDate.Local().Format("02.01.06"), FormatDickSize(totalMaxCock),
 
 		/* % Доминирования */
 		FormatDickPercent(userDominancePercent),
