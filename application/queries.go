@@ -257,9 +257,12 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 
 	log.I("Aggregation completed successfully")
 
-	user := result.Individual
+	log.D("***** IndividualRecord", "IndividualRecord", result.IndividualRecord)
+
+	individual := result.Individual
 	overall := result.Overall[0]
-	usersCount := result.Uniques[0].Count
+
+	overallCockers := result.Uniques[0].Count
 	distribution := result.Distribution[0]
 	record := result.Record[0]
 	individualRecord := result.IndividualRecord[0]
@@ -275,9 +278,9 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 	avgCock = overall.Average
 	medianCock = overall.Median
 
-	// Gather all user cocks
+	// Gather all individual cocks
 	var userCocks []int
-	for _, stat := range user {
+	for _, stat := range individual {
 		userCocks = append(userCocks, stat.Sizes...)
 	}
 
@@ -289,7 +292,7 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 	// Calculate IRK
 	if totalCock > 0 && totalUserCock > 0 && len(userCocks) > 0 {
 		normalizedCock := float64(totalUserCock) / float64(avgCock)
-		normalizedRecords := float64(len(user)) / float64(len(userCocks))
+		normalizedRecords := float64(len(individual)) / float64(len(userCocks))
 
 		w1 := math.Max(1.0, math.Min(normalizedCock*2.0, 10.0))
 		w2 := math.Max(1.0, math.Min(normalizedRecords*5.0, 10.0))
@@ -299,10 +302,10 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 	}
 
 	// Calculate yesterday's change
-	if len(user) > 1 {
-		yesterdayCockChange = user[len(user)-1].Total - user[len(user)-2].Total
-		if user[len(user)-2].Total > 0 {
-			yesterdayChangePercent = float64(yesterdayCockChange) / float64(user[len(user)-2].Total) * 100
+	if len(individual) > 1 {
+		yesterdayCockChange = individual[len(individual)-1].Total - individual[len(individual)-2].Total
+		if individual[len(individual)-2].Total > 0 {
+			yesterdayChangePercent = float64(yesterdayCockChange) / float64(individual[len(individual)-2].Total) * 100
 		} else {
 			yesterdayChangePercent = 100
 		}
@@ -313,11 +316,11 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 
 	// Calculate daily growth
 	var growthSum float64
-	for i := 1; i < len(user); i++ {
-		growthSum += float64(user[i].Total - user[i-1].Total)
+	for i := 1; i < len(individual); i++ {
+		growthSum += float64(individual[i].Total - individual[i-1].Total)
 	}
-	if len(user) > 1 {
-		dailyGrowth = growthSum / float64(len(user)-1)
+	if len(individual) > 1 {
+		dailyGrowth = growthSum / float64(len(individual)-1)
 	}
 
 	// Calculate dominance percentage
@@ -328,7 +331,7 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 	// Generate result text
 	text := NewMsgCockDynamicsTemplate(
 		// Общая динамика коков
-		totalCock, usersCount, avgCock, medianCock,
+		totalCock, overallCockers, avgCock, medianCock,
 		// Персональная динамика кока
 		totalUserCock, individualCock.Average, irk, individualRecord.Total, individualRecord.RequestedAt,
 		// Кок-активы
