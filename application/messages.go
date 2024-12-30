@@ -113,7 +113,6 @@ func NewMsgCockDynamicsTemplate(
 
 	userYesterdayChangePercent float64,
 	userYesterdayChangeCock int,
-
 	userDailyGrowth float64,
 
 	/* Соотношение коков */

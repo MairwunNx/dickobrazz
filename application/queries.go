@@ -110,6 +110,29 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 						{Key: "average", Value: bson.D{{Key: "$round", Value: bson.A{"$average", 0}}}},
 					}}},
 				}},
+				{Key: "individual_dominance", Value: bson.A{
+					bson.D{{Key: "$match", Value: bson.D{{Key: "user_id", Value: query.From.ID}}}},
+					bson.D{{Key: "$group", Value: bson.D{
+						{Key: "_id", Value: nil},
+						{Key: "user_total_size", Value: bson.D{{Key: "$sum", Value: "$size"}}},
+					}}},
+					bson.D{{Key: "$group", Value: bson.D{
+						{Key: "_id", Value: nil},
+						{Key: "global_total_size", Value: bson.D{{Key: "$sum", Value: "$size"}}},
+						{Key: "user_total_size", Value: bson.D{{Key: "$first", Value: "$user_total_size"}}},
+					}}},
+					bson.D{{Key: "$project", Value: bson.D{
+						{Key: "_id", Value: nil},
+						{Key: "dominance", Value: bson.D{{Key: "$multiply", Value: bson.A{
+							bson.D{{Key: "$cond", Value: bson.A{
+								bson.D{{Key: "$eq", Value: bson.A{"$global_total_size", 0}}},
+								0,
+								bson.D{{Key: "$divide", Value: bson.A{"$user_total_size", "$global_total_size"}}},
+							}}},
+							100,
+						}}}},
+					}}},
+				}},
 				{Key: "individual_cock", Value: bson.A{
 					bson.D{{Key: "$match", Value: bson.D{{Key: "user_id", Value: query.From.ID}}}},
 					bson.D{{Key: "$group", Value: bson.D{
@@ -224,6 +247,10 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 			Total       int       `bson:"total"`
 		} `bson:"individual_record"`
 
+		IndividualDominance []struct {
+			Dominance float64 `bson:"dominance"`
+		} `bson:"individual_dominance"`
+
 		Overall []struct {
 			Size    int `bson:"size"`
 			Average int `bson:"average"`
@@ -325,17 +352,34 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 		dominancePercent = (float64(totalUserCock) / float64(totalCock)) * 100
 	}
 
-	// Generate result text
 	text := NewMsgCockDynamicsTemplate(
-		// Общая динамика коков
-		totalCock, overallCockers, avgCock, medianCock,
-		// Персональная динамика кока
-		totalUserCock, individualCock.Average, irk, individualRecord.Total, individualRecord.RequestedAt.Local(),
-		// Кок-активы
-		yesterdayChangePercent, yesterdayCockChange,
+		/* Общая динамика коков */
+		totalCock,
+		overallCockers,
+		avgCock,
+		medianCock,
+
+		/* Персональная динамика кока */
+		totalUserCock,
+		individualCock.Average,
+		irk,
+		individualRecord.Total,
+		individualRecord.RequestedAt.Local(),
+
+		/* Кок-активы */
+		yesterdayChangePercent,
+		yesterdayCockChange,
 		dailyGrowth,
-		distribution.HugePercent, distribution.LittlePercent,
-		record.RequestedAt.Local(), record.Total,
+
+		/* Соотношение коков */
+		distribution.HugePercent,
+		distribution.LittlePercent,
+
+		/* Самый большой кок */
+		record.RequestedAt.Local(),
+		record.Total,
+
+		/* % доминирование */
 		dominancePercent,
 	)
 
