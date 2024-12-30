@@ -101,7 +101,6 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 						{Key: "_id", Value: "$requested_at"},
 						{Key: "total", Value: bson.D{{Key: "$sum", Value: "$size"}}},
 						{Key: "sizes", Value: bson.D{{Key: "$push", Value: "$size"}}},
-						{Key: "average", Value: bson.D{{Key: "$avg", Value: "$size"}}},
 					}}},
 					bson.D{{Key: "$sort", Value: bson.D{{Key: "_id", Value: 1}}}},
 					bson.D{{Key: "$project", Value: bson.D{
@@ -119,7 +118,7 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 						{Key: "avg_val", Value: bson.D{{Key: "$avg", Value: "$size"}}},
 					}}},
 					bson.D{{Key: "$project", Value: bson.D{
-						{Key: "_id", Value: 0},
+						{Key: "_id", Value: nil},
 						{Key: "total", Value: 1},
 						{Key: "average", Value: bson.D{{Key: "$round", Value: bson.A{"$avg_val", 0}}}},
 					}}},
@@ -210,10 +209,9 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 
 	var result struct {
 		Individual []struct {
-			Date    time.Time `bson:"_id"`
-			Total   int       `bson:"total"`
-			Sizes   []int     `bson:"sizes"`
-			Average int       `bson:"average"`
+			Date  time.Time `bson:"_id"`
+			Total int       `bson:"total"`
+			Sizes []int     `bson:"sizes"`
 		} `bson:"individual"`
 
 		IndividualCock []struct {
@@ -257,7 +255,7 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 		return tgbotapi.InlineQueryResultArticle{}
 	}
 
-	log.I("Aggregation completed successfully")
+	log.I("Aggregation completed successfully", "AggregationResult", result)
 
 	individual := result.Individual
 	overall := result.Overall[0]
