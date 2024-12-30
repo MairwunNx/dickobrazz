@@ -257,7 +257,7 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 
 	log.I("Aggregation completed successfully")
 
-	log.D("***** IndividualRecord", "IndividualRecord", result.IndividualRecord)
+	log.I("***** IndividualRecord", "IndividualRecord", result.IndividualRecord)
 
 	individual := result.Individual
 	overall := result.Overall[0]
@@ -287,7 +287,6 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 	// todo: remove
 
 	totalUserCock = individualCock.Total
-	log.D("*******", "TOTAL_USER_COCK", totalUserCock)
 
 	// Calculate IRK
 	if totalCock > 0 && totalUserCock > 0 && len(userCocks) > 0 {
