@@ -259,7 +259,7 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 
 	log.I("Aggregation completed successfully")
 
-	log.I("***** IndividualRecord", "IndividualRecord", result.IndividualRecord)
+	log.I("***** IndividualRecord", "IndividualRecord", result.IndividualRecord[0].RequestedAt.Local())
 
 	individual := result.Individual
 	overall := result.Overall[0]
@@ -334,12 +334,12 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 		// Общая динамика коков
 		totalCock, overallCockers, avgCock, medianCock,
 		// Персональная динамика кока
-		totalUserCock, individualCock.Average, irk, individualRecord.Total, individualRecord.RequestedAt,
+		totalUserCock, individualCock.Average, irk, individualRecord.Total, individualRecord.RequestedAt.Local(),
 		// Кок-активы
 		yesterdayChangePercent, yesterdayCockChange,
 		dailyGrowth,
 		distribution.HugePercent, distribution.LittlePercent,
-		record.RequestedAt, record.Total,
+		record.RequestedAt.Local(), record.Total,
 		dominancePercent,
 	)
 
