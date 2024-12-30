@@ -259,7 +259,9 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 
 	log.I("Aggregation completed successfully")
 
-	log.I("***** IndividualRecord", "IndividualRecord", result.IndividualRecord[0].RequestedAt.Local())
+	log.I("***** IndividualRecord 1 ", "IndividualRecord", result.IndividualRecord[0].RequestedAt.Local())
+	log.I("***** IndividualRecord 2 ", "IndividualRecord", result.IndividualRecord[0].RequestedAt)
+	log.I("***** IndividualRecord 3", "IndividualRecord", result.IndividualRecord[0].RequestedAt.In(NowLocation()))
 
 	individual := result.Individual
 	overall := result.Overall[0]
