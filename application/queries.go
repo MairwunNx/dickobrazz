@@ -103,6 +103,13 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 						{Key: "count", Value: bson.D{{Key: "$sum", Value: 1}}},
 					}}},
 					bson.D{{Key: "$sort", Value: bson.D{{Key: "_id", Value: 1}}}},
+					bson.D{{Key: "$project", Value: bson.D{
+						{Key: "_id", Value: 1},
+						{Key: "total", Value: 1},
+						{Key: "sizes", Value: 1},
+						{Key: "count", Value: 1},
+						{Key: "average", Value: bson.D{{Key: "$round", Value: bson.A{"$average", 0}}}},
+					}}},
 				}},
 				{Key: "overall", Value: bson.A{
 					bson.D{{Key: "$group", Value: bson.D{
@@ -166,6 +173,16 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 					bson.D{{Key: "$sort", Value: bson.D{{Key: "total", Value: -1}}}},
 					bson.D{{Key: "$limit", Value: 1}},
 				}},
+				{Key: "individual_record", Value: bson.A{
+					bson.D{{Key: "$match", Value: bson.D{{Key: "user_id", Value: query.From.ID}}}},
+					bson.D{{Key: "$group", Value: bson.D{
+						{Key: "_id", Value: "$requested_at"},
+						{Key: "requested_at", Value: bson.D{{Key: "$first", Value: "$requested_at"}}},
+						{Key: "total", Value: bson.D{{Key: "$first", Value: "$size"}}},
+					}}},
+					bson.D{{Key: "$sort", Value: bson.D{{Key: "total", Value: -1}}}},
+					bson.D{{Key: "$limit", Value: 1}},
+				}},
 			}}}}
 	})
 
@@ -183,9 +200,14 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 			Date    time.Time `bson:"_id"`
 			Total   int       `bson:"total"`
 			Sizes   []int     `bson:"sizes"`
-			Average float64   `bson:"average"`
+			Average int       `bson:"average"`
 			Count   int       `bson:"count"`
 		} `bson:"individual"`
+
+		IndividualRecord []struct {
+			RequestedAt time.Time `bson:"requested_at"`
+			Total       int       `bson:"total"`
+		} `bson:"individual_record"`
 
 		Overall []struct {
 			Size    int `bson:"size"`
@@ -225,26 +247,12 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 	usersCount := result.Uniques[0].Count
 	distribution := result.Distribution[0]
 	record := result.Record[0]
+	individualRecord := result.IndividualRecord[0]
 
 	// Metrics initialization
-	var totalUserCock, avgUserCock, maxUserCock, yesterdayCockChange int
+	var totalUserCock, yesterdayCockChange int
 	var irk, yesterdayChangePercent, dailyGrowth, dominancePercent float64
-	var maxUserCockDate time.Time
 	var totalCock, avgCock, medianCock int
-
-	// Process user stats
-	for i, stat := range user {
-		println(fmt.Sprintf("User[%v] %v", i, stat))
-		totalUserCock += stat.Total
-
-		// Track max cock
-		for _, size := range stat.Sizes {
-			if size > maxUserCock {
-				maxUserCock = size
-				maxUserCockDate = stat.Date
-			}
-		}
-	}
 
 	// Calculate global metrics
 	totalCock = overall.Size
@@ -257,6 +265,11 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 		userCocks = append(userCocks, stat.Sizes...)
 	}
 
+	// todo: remove
+
+	totalUserCock = user[0].Total
+	log.D("*******", "TOTAL_USER_COCK", totalUserCock)
+
 	// Calculate IRK
 	if totalCock > 0 && totalUserCock > 0 && len(userCocks) > 0 {
 		normalizedCock := float64(totalUserCock) / float64(avgCock)
@@ -267,11 +280,6 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 
 		rawIrk := normalizedCock / (1.0 + w1) * (normalizedRecords / (1.0 + w2))
 		irk = math.Max(0.0, math.Min(1.0, rawIrk))
-	}
-
-	// Calculate user's average cock size
-	if len(user) > 0 {
-		avgUserCock = int(float64(totalUserCock) / float64(len(user)))
 	}
 
 	// Calculate yesterday's change
@@ -306,7 +314,7 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 		// Общая динамика коков
 		totalCock, usersCount, avgCock, medianCock,
 		// Персональная динамика кока
-		totalUserCock, avgUserCock, irk, maxUserCock, maxUserCockDate,
+		totalUserCock, user[0].Average, irk, individualRecord.Total, individualRecord.RequestedAt,
 		// Кок-активы
 		yesterdayChangePercent, yesterdayCockChange,
 		dailyGrowth,
