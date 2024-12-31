@@ -6,7 +6,6 @@ import (
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
-	"math"
 	"sort"
 	"strings"
 	"time"
@@ -95,19 +94,71 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 	pipeline := TraceTimeExecutionForResult(log, TraceKindCreatePipeline, func() mongo.Pipeline {
 		return mongo.Pipeline{
 			{{Key: "$facet", Value: bson.D{
-				{Key: "individual", Value: bson.A{
+				{Key: "individual_irk", Value: bson.A{
 					bson.D{{Key: "$match", Value: bson.D{{Key: "user_id", Value: query.From.ID}}}},
 					bson.D{{Key: "$group", Value: bson.D{
-						{Key: "_id", Value: "$requested_at"},
-						{Key: "total", Value: bson.D{{Key: "$sum", Value: "$size"}}},
-						{Key: "sizes", Value: bson.D{{Key: "$push", Value: "$size"}}},
+						{Key: "_id", Value: "$user_id"},
+						{Key: "total_size", Value: bson.D{{Key: "$sum", Value: "$size"}}},
+						{Key: "count_user_cocks", Value: bson.D{{Key: "$sum", Value: 1}}},
+						{Key: "user_cocks", Value: bson.D{{Key: "$push", Value: "$size"}}},
 					}}},
-					bson.D{{Key: "$sort", Value: bson.D{{Key: "_id", Value: 1}}}},
+					bson.D{{Key: "$group", Value: bson.D{
+						{Key: "_id", Value: nil},
+						{Key: "overall_total_size", Value: bson.D{{Key: "$sum", Value: "$size"}}},
+						{Key: "overall_count", Value: bson.D{{Key: "$sum", Value: 1}}},
+						{Key: "user_total_size", Value: bson.D{{Key: "$first", Value: "$total_size"}}},
+						{Key: "user_count", Value: bson.D{{Key: "$first", Value: "$count_user_cocks"}}},
+						{Key: "user_cocks", Value: bson.D{{Key: "$first", Value: "$user_cocks"}}},
+					}}},
 					bson.D{{Key: "$project", Value: bson.D{
-						{Key: "_id", Value: 1},
-						{Key: "total", Value: 1},
-						{Key: "sizes", Value: 1},
-						{Key: "average", Value: bson.D{{Key: "$round", Value: bson.A{"$average", 0}}}},
+						{Key: "_id", Value: nil},
+						{Key: "normalized_cock", Value: bson.D{{Key: "$divide", Value: bson.A{
+							"$user_total_size",
+							bson.D{{Key: "$divide", Value: bson.A{"$overall_total_size", "$overall_count"}}},
+						}}}},
+						{Key: "normalized_records", Value: bson.D{{Key: "$divide", Value: bson.A{
+							"$user_count",
+							bson.D{{Key: "$size", Value: "$user_cocks"}},
+						}}}},
+					}}},
+					bson.D{{Key: "$project", Value: bson.D{
+						{Key: "normalized_cock", Value: 1},
+						{Key: "normalized_records", Value: 1},
+						{Key: "w1", Value: bson.D{{Key: "$max", Value: bson.A{
+							1.0,
+							bson.D{{Key: "$min", Value: bson.A{
+								bson.D{{Key: "$multiply", Value: bson.A{"$normalized_cock", 2.0}}},
+								10.0,
+							}}},
+						}}}},
+						{Key: "w2", Value: bson.D{{Key: "$max", Value: bson.A{
+							1.0,
+							bson.D{{Key: "$min", Value: bson.A{
+								bson.D{{Key: "$multiply", Value: bson.A{"$normalized_records", 5.0}}},
+								10.0,
+							}}},
+						}}}},
+					}}},
+					bson.D{{Key: "$project", Value: bson.D{
+						{Key: "irk", Value: bson.D{{Key: "$max", Value: bson.A{
+							0.0,
+							bson.D{{Key: "$min", Value: bson.A{
+								1.0,
+								bson.D{{Key: "$multiply", Value: bson.A{
+									bson.D{{Key: "$divide", Value: bson.A{
+										"$normalized_cock",
+										bson.D{{Key: "$add", Value: bson.A{1.0, "$w1"}}},
+									}}},
+									bson.D{{Key: "$divide", Value: bson.A{
+										"$normalized_records",
+										bson.D{{Key: "$add", Value: bson.A{1.0, "$w2"}}},
+									}}},
+								}}},
+							}}},
+						}}}},
+					}}},
+					bson.D{{Key: "$project", Value: bson.D{
+						{Key: "irk", Value: bson.D{{Key: "$round", Value: bson.A{"$irk", 3}}}},
 					}}},
 				}},
 				{Key: "individual_dominance", Value: bson.A{
@@ -289,16 +340,14 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 	}
 
 	var result struct {
-		Individual []struct {
-			Date  time.Time `bson:"_id"`
-			Total int       `bson:"total"`
-			Sizes []int     `bson:"sizes"`
-		} `bson:"individual"`
-
 		IndividualCock []struct {
 			Total   int `bson:"total"`
 			Average int `bson:"average"`
 		} `bson:"individual_cock"`
+
+		IndividualIrk []struct {
+			Irk float64 `bson:"irk"`
+		}
 
 		IndividualRecord []struct {
 			RequestedAt time.Time `bson:"requested_at"`
@@ -351,9 +400,9 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 
 	log.I("Aggregation completed successfully", "AggregationResult", result)
 
-	individual := result.Individual
 	individualCock := result.IndividualCock[0]
 	individualRecord := result.IndividualRecord[0]
+	individualIrk := result.IndividualIrk[0]
 	individualDominance := result.IndividualDominance[0]
 	individualDailyGrowth := result.IndividualDailyGrowth[0]
 	individualDailyDynamics := result.IndividualDailyDynamics[0]
@@ -362,26 +411,6 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 	overallCockers := result.Uniques[0].Count
 	overallDistribution := result.Distribution[0]
 	overallRecord := result.Record[0]
-
-	var irk float64
-
-	// Gather all individual cocks
-	var userCocks []int
-	for _, stat := range individual {
-		userCocks = append(userCocks, stat.Sizes...)
-	}
-
-	// Calculate IRK
-	if overall.Size > 0 && individualCock.Total > 0 && len(userCocks) > 0 {
-		normalizedCock := float64(individualCock.Total) / float64(overall.Average)
-		normalizedRecords := float64(len(individual)) / float64(len(userCocks))
-
-		w1 := math.Max(1.0, math.Min(normalizedCock*2.0, 10.0))
-		w2 := math.Max(1.0, math.Min(normalizedRecords*5.0, 10.0))
-
-		rawIrk := normalizedCock / (1.0 + w1) * (normalizedRecords / (1.0 + w2))
-		irk = math.Max(0.0, math.Min(1.0, rawIrk))
-	}
 
 	text := NewMsgCockDynamicsTemplate(
 		/* Общая динамика коков */
@@ -393,7 +422,7 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 		/* Персональная динамика кока */
 		individualCock.Total,
 		individualCock.Average,
-		irk,
+		individualIrk.Irk,
 		individualRecord.Total,
 		individualRecord.RequestedAt,
 
