@@ -97,68 +97,23 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 				{Key: "individual_irk", Value: bson.A{
 					bson.D{{Key: "$match", Value: bson.D{{Key: "user_id", Value: query.From.ID}}}},
 					bson.D{{Key: "$group", Value: bson.D{
-						{Key: "_id", Value: "$user_id"},
-						{Key: "total_size", Value: bson.D{{Key: "$sum", Value: "$size"}}},
-						{Key: "count_user_cocks", Value: bson.D{{Key: "$sum", Value: 1}}},
-						{Key: "user_cocks", Value: bson.D{{Key: "$push", Value: "$size"}}},
+						{Key: "_id", Value: nil},
+						{Key: "user_total_size", Value: bson.D{{Key: "$sum", Value: "$size"}}},
 					}}},
 					bson.D{{Key: "$group", Value: bson.D{
 						{Key: "_id", Value: nil},
-						{Key: "overall_total_size", Value: bson.D{{Key: "$sum", Value: "$size"}}},
-						{Key: "overall_count", Value: bson.D{{Key: "$sum", Value: 1}}},
-						{Key: "user_total_size", Value: bson.D{{Key: "$first", Value: "$total_size"}}},
-						{Key: "user_count", Value: bson.D{{Key: "$first", Value: "$count_user_cocks"}}},
-						{Key: "user_cocks", Value: bson.D{{Key: "$first", Value: "$user_cocks"}}},
+						{Key: "global_total_size", Value: bson.D{{Key: "$sum", Value: "$size"}}},
+						{Key: "user_total_size", Value: bson.D{{Key: "$first", Value: "$user_total_size"}}},
 					}}},
 					bson.D{{Key: "$project", Value: bson.D{
 						{Key: "_id", Value: nil},
-						{Key: "normalized_cock", Value: bson.D{{Key: "$divide", Value: bson.A{
-							"$user_total_size",
-							bson.D{{Key: "$divide", Value: bson.A{"$overall_total_size", "$overall_count"}}},
-						}}}},
-						{Key: "normalized_records", Value: bson.D{{Key: "$divide", Value: bson.A{
-							"$user_count",
-							bson.D{{Key: "$size", Value: "$user_cocks"}},
-						}}}},
-					}}},
-					bson.D{{Key: "$project", Value: bson.D{
-						{Key: "normalized_cock", Value: 1},
-						{Key: "normalized_records", Value: 1},
-						{Key: "w1", Value: bson.D{{Key: "$max", Value: bson.A{
-							1.0,
-							bson.D{{Key: "$min", Value: bson.A{
-								bson.D{{Key: "$multiply", Value: bson.A{"$normalized_cock", 2.0}}},
-								10.0,
+						{Key: "irk", Value: bson.D{{Key: "$round", Value: bson.A{
+							bson.D{{Key: "$divide", Value: bson.A{
+								bson.D{{Key: "$log10", Value: bson.D{{Key: "$add", Value: bson.A{1, "$user_total_size"}}}}},
+								bson.D{{Key: "$log10", Value: bson.D{{Key: "$add", Value: bson.A{1, "$global_total_size"}}}}},
 							}}},
+							3,
 						}}}},
-						{Key: "w2", Value: bson.D{{Key: "$max", Value: bson.A{
-							1.0,
-							bson.D{{Key: "$min", Value: bson.A{
-								bson.D{{Key: "$multiply", Value: bson.A{"$normalized_records", 5.0}}},
-								10.0,
-							}}},
-						}}}},
-					}}},
-					bson.D{{Key: "$project", Value: bson.D{
-						{Key: "irk", Value: bson.D{{Key: "$max", Value: bson.A{
-							0.0,
-							bson.D{{Key: "$min", Value: bson.A{
-								1.0,
-								bson.D{{Key: "$multiply", Value: bson.A{
-									bson.D{{Key: "$divide", Value: bson.A{
-										"$normalized_cock",
-										bson.D{{Key: "$add", Value: bson.A{1.0, "$w1"}}},
-									}}},
-									bson.D{{Key: "$divide", Value: bson.A{
-										"$normalized_records",
-										bson.D{{Key: "$add", Value: bson.A{1.0, "$w2"}}},
-									}}},
-								}}},
-							}}},
-						}}}},
-					}}},
-					bson.D{{Key: "$project", Value: bson.D{
-						{Key: "irk", Value: bson.D{{Key: "$round", Value: bson.A{"$irk", 3}}}},
 					}}},
 				}},
 				{Key: "individual_dominance", Value: bson.A{
