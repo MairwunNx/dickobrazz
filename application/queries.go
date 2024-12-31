@@ -312,7 +312,7 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 
 		IndividualIrk []struct {
 			Irk float64 `bson:"irk"`
-		}
+		} `bson:"individual_irk"`
 
 		IndividualRecord []struct {
 			RequestedAt time.Time `bson:"requested_at"`
