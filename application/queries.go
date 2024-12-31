@@ -100,17 +100,27 @@ func (app *Application) InlineQueryCockDynamic(log *Logger, query *tgbotapi.Inli
 						{Key: "_id", Value: nil},
 						{Key: "user_total_size", Value: bson.D{{Key: "$sum", Value: "$size"}}},
 					}}},
-					bson.D{{Key: "$group", Value: bson.D{
-						{Key: "_id", Value: nil},
-						{Key: "global_total_size", Value: bson.D{{Key: "$sum", Value: "$size"}}},
-						{Key: "user_total_size", Value: bson.D{{Key: "$first", Value: "$user_total_size"}}},
+					bson.D{{Key: "$lookup", Value: bson.D{
+						{Key: "from", Value: "cocks"},
+						{Key: "pipeline", Value: bson.A{
+							bson.D{{Key: "$group", Value: bson.D{
+								{Key: "_id", Value: nil},
+								{Key: "global_total_size", Value: bson.D{{Key: "$sum", Value: "$size"}}},
+							}}},
+						}},
+						{Key: "as", Value: "global_data"},
 					}}},
+					bson.D{{Key: "$unwind", Value: "$global_data"}},
 					bson.D{{Key: "$project", Value: bson.D{
 						{Key: "_id", Value: nil},
 						{Key: "irk", Value: bson.D{{Key: "$round", Value: bson.A{
-							bson.D{{Key: "$divide", Value: bson.A{
-								bson.D{{Key: "$log10", Value: bson.D{{Key: "$add", Value: bson.A{1, "$user_total_size"}}}}},
-								bson.D{{Key: "$log10", Value: bson.D{{Key: "$add", Value: bson.A{1, "$global_total_size"}}}}},
+							bson.D{{Key: "$cond", Value: bson.A{
+								bson.D{{Key: "$lte", Value: bson.A{"$global_data.global_total_size", 0}}},
+								0,
+								bson.D{{Key: "$divide", Value: bson.A{
+									bson.D{{Key: "$log10", Value: bson.D{{Key: "$add", Value: bson.A{1, "$user_total_size"}}}}},
+									bson.D{{Key: "$log10", Value: bson.D{{Key: "$add", Value: bson.A{1, "$global_data.global_total_size"}}}}},
+								}}},
 							}}},
 							3,
 						}}}},
