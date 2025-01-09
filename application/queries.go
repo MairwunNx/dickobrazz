@@ -1,6 +1,7 @@
 package application
 
 import (
+	"dickobot/application/geo"
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/google/uuid"
@@ -47,12 +48,6 @@ func (app *Application) HandleInlineQuery(log *Logger, query *tgbotapi.InlineQue
 
 func (app *Application) InlineQueryCockSize(log *Logger, query *tgbotapi.InlineQuery) tgbotapi.InlineQueryResultArticle {
 	var size int
-	//
-	//if daily, isPresent := app.GetDaylyCock(log, query.From.ID); isPresent {
-	//
-	//}
-
-	log.I("**** TEST", "NowTime", NowTime())
 
 	if cached := app.GetCockSizeFromCache(log, query.From.ID); cached != nil {
 		size = *cached
@@ -73,6 +68,9 @@ func (app *Application) InlineQueryCockSize(log *Logger, query *tgbotapi.InlineQ
 
 	emoji := EmojiFromSize(size)
 	text := GenerateCockSizeText(size, emoji)
+	subtext := geo.GetRegionBySize(size)
+
+	text = text + "\n\n" + "_" + subtext + "_"
 
 	return InitializeInlineQuery(
 		"Размер кока",
