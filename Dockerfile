@@ -13,6 +13,7 @@ COPY .git ./
 COPY application/*.go ./application/
 COPY application/database/*.go ./application/database/
 COPY application/datetime/*.go ./application/datetime/
+COPY application/geo/*.go ./application/geo/
 COPY application/logging/*.go ./application/logging/
 COPY application/timings/*.go ./application/timings/
 ENV GOCACHE=/root/.cache/go-build
