@@ -8,6 +8,8 @@
 **/.idea
 **/.vscode
 **/bin
+data
+__MACOSX
 *.md
 license
 golangci-lint
