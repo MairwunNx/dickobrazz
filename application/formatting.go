@@ -1,6 +1,7 @@
 package application
 
 import (
+	"dickobot/application/logging"
 	"fmt"
 	"golang.org/x/text/language"
 	"golang.org/x/text/message"
@@ -11,7 +12,7 @@ func GenerateCockSizeText(size int, emoji string) string {
 	return fmt.Sprintf(MsgCockSize, size, emoji)
 }
 
-func (app *Application) GenerateCockRulerText(log *Logger, userID int64, cocks []UserCock) string {
+func (app *Application) GenerateCockRulerText(log *logging.Logger, userID int64, cocks []UserCock) string {
 	var winners []string
 	var others []string
 	isUserInScoreboard := false
@@ -57,7 +58,7 @@ func (app *Application) GenerateCockRulerText(log *Logger, userID int64, cocks [
 	}
 }
 
-func (app *Application) GenerateCockRaceScoreboard(log *Logger, userID int64, sizes []UserCockRace) string {
+func (app *Application) GenerateCockRaceScoreboard(log *logging.Logger, userID int64, sizes []UserCockRace) string {
 	var winners []string
 	var others []string
 	isUserInScoreboard := false

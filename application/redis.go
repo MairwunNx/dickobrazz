@@ -2,6 +2,8 @@ package application
 
 import (
 	"context"
+	"dickobot/application/datetime"
+	"dickobot/application/logging"
 	"fmt"
 	"github.com/go-redis/cache/v9"
 	"github.com/redis/go-redis/v9"
@@ -17,7 +19,7 @@ type UserCock struct {
 	Size     int    `json:"size,omitempty"`
 }
 
-func InitializeRedisConnection(log *Logger) (*redis.Client, *cache.Cache) {
+func InitializeRedisConnection(log *logging.Logger) (*redis.Client, *cache.Cache) {
 	port := os.Getenv("REDIS_PORT")
 	if port == "" {
 		log.F("REDIS_PORT does not have value, set it in .env file")
@@ -33,7 +35,7 @@ func InitializeRedisConnection(log *Logger) (*redis.Client, *cache.Cache) {
 	client := redis.NewClient(&redis.Options{Addr: address, Password: password, DB: 0})
 
 	if _, err := client.Ping(context.Background()).Result(); err != nil {
-		log.F("Failed to connect to Redis", InnerError, err)
+		log.F("Failed to connect to Redis", logging.InnerError, err)
 	}
 
 	redisCache := cache.New(&cache.Options{
@@ -45,7 +47,7 @@ func InitializeRedisConnection(log *Logger) (*redis.Client, *cache.Cache) {
 	return client, redisCache
 }
 
-func (app *Application) GetCockSizeFromCache(log *Logger, userID int64) *int {
+func (app *Application) GetCockSizeFromCache(log *logging.Logger, userID int64) *int {
 	key := GetCockCacheKey(userID)
 
 	var cock UserCock
@@ -57,13 +59,13 @@ func (app *Application) GetCockSizeFromCache(log *Logger, userID int64) *int {
 	return &cock.Size
 }
 
-func (app *Application) SaveCockToCache(log *Logger, userID int64, userName string, size int) {
-	now := NowTime()
-	midnight := time.Date(now.Year(), now.Month(), now.Day()+1, 0, 0, 0, 0, NowLocation())
+func (app *Application) SaveCockToCache(log *logging.Logger, userID int64, userName string, size int) {
+	now := datetime.NowTime()
+	midnight := time.Date(now.Year(), now.Month(), now.Day()+1, 0, 0, 0, 0, datetime.NowLocation())
 	ttl := time.Until(midnight)
 
 	if err := app.cache.Set(&cache.Item{Ctx: app.ctx, Key: GetCockCacheKey(userID), Value: &UserCock{UserId: userID, UserName: userName, Size: size}, TTL: ttl}); err != nil {
-		log.E("Failed to save cock Size to Redis", InnerError, err)
+		log.E("Failed to save cock Size to Redis", logging.InnerError, err)
 	} else {
 		log.I("Successfully saved cock to redis")
 	}
@@ -73,7 +75,7 @@ func GetCockCacheKey(userID int64) string {
 	return fmt.Sprintf("cock_size:%d", userID)
 }
 
-func (app *Application) GetCockSizesFromCache(log *Logger) []UserCock {
+func (app *Application) GetCockSizesFromCache(log *logging.Logger) []UserCock {
 	var cockSizes []UserCock
 
 	iter := app.redis.Scan(app.ctx, 0, "cock_size:*", 0).Iterator()
@@ -92,7 +94,7 @@ func (app *Application) GetCockSizesFromCache(log *Logger) []UserCock {
 	}
 
 	if err := iter.Err(); err != nil {
-		log.E("Failed to iterate over cock keys in Redis", InnerError, err)
+		log.E("Failed to iterate over cock keys in Redis", logging.InnerError, err)
 		panic(err)
 	}
 

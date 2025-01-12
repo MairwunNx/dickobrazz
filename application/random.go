@@ -1,6 +1,7 @@
 package application
 
 import (
+	"dickobot/application/logging"
 	"github.com/sgade/randomorg"
 	"math/rand/v2"
 	"os"
@@ -11,23 +12,23 @@ type Random struct {
 	chacha8   *rand.ChaCha8
 }
 
-func InitializeRandom(log *Logger) *Random {
+func InitializeRandom(log *logging.Logger) *Random {
 	rndorg, chacha8 := InitializeRandomOrg(log), InitializeChaCha8(log)
 	return &Random{randomOrg: rndorg, chacha8: chacha8}
 }
 
-func (rnd *Random) IntN(log *Logger, maxInclusive int) int {
+func (rnd *Random) IntN(log *logging.Logger, maxInclusive int) int {
 	if value, err := rnd.randomOrg.GenerateIntegers(1, 0, int64(maxInclusive+1)); err != nil {
-		log.E("Failed to generate random number", RndSource, "external/random.org", InnerError, err)
-		log.I("Successfully generated random number", RndSource, "native/chacha8", InnerError, err)
+		log.E("Failed to generate random number", logging.RndSource, "external/random.org", logging.InnerError, err)
+		log.I("Successfully generated random number", logging.RndSource, "native/chacha8", logging.InnerError, err)
 		return int(rnd.chacha8.Uint64() % uint64(maxInclusive+1))
 	} else {
-		log.I("Successfully generated random number", RndSource, "external/random.org")
+		log.I("Successfully generated random number", logging.RndSource, "external/random.org")
 		return int(value[0])
 	}
 }
 
-func InitializeRandomOrg(log *Logger) *randomorg.Random {
+func InitializeRandomOrg(log *logging.Logger) *randomorg.Random {
 	token, exist := os.LookupEnv("RANDOMORG_TOKEN")
 	if !exist || token == "" {
 		log.F("Random.org token must be set and non-empty")
@@ -38,7 +39,7 @@ func InitializeRandomOrg(log *Logger) *randomorg.Random {
 	return rnd
 }
 
-func InitializeChaCha8(log *Logger) *rand.ChaCha8 {
+func InitializeChaCha8(log *logging.Logger) *rand.ChaCha8 {
 	log.I("Successfully initialized chacha8 random")
 	return rand.NewChaCha8([32]byte{
 		0x3d, 0x1a, 0x94, 0xde, 0xdd, 0x01, 0xc3, 0xa6, 0xb8, 0x09, 0x42, 0x18, 0xba, 0x90, 0xc5, 0x71,

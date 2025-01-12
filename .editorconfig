@@ -17,9 +17,6 @@ ij_visual_guides =
 ij_wrap_on_typing = false
 
 [{*.go,*.go2}]
-indent_size = 2
-tab_width = 2
-ij_continuation_indent_size = 2
 ij_go_GROUP_CURRENT_PROJECT_IMPORTS = false
 ij_go_add_leading_space_to_comments = false
 ij_go_add_parentheses_for_single_import = false
@@ -48,7 +45,6 @@ ij_go_wrap_func_result_newline_after_lparen = true
 ij_go_wrap_func_result_newline_before_rparen = true
 
 [{*.yaml,*.yml}]
-indent_size = 2
 ij_yaml_align_values_properties = do_not_align
 ij_yaml_autoinsert_sequence_marker = true
 ij_yaml_block_mapping_on_new_line = false

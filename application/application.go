@@ -2,6 +2,7 @@ package application
 
 import (
 	"context"
+	"dickobot/application/logging"
 	"github.com/go-redis/cache/v9"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/redis/go-redis/v9"
@@ -11,15 +12,10 @@ import (
 	"syscall"
 )
 
-var Version string   // 1
-var GoVersion string // go1.23.4
-var BuildAt string   // 2024-06-29_15:48:20
-var BuildRv string   // 5b329d0
-
 type Application struct {
 	ctx    context.Context
 	cancel context.CancelFunc
-	log    *Logger
+	log    *logging.Logger
 	bot    *tgbotapi.BotAPI
 	rnd    *Random
 	db     *mongo.Client
@@ -29,7 +25,7 @@ type Application struct {
 
 func NewApplication() *Application {
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
-	log := NewLogger()
+	log := logging.NewLogger()
 
 	bot := InitializeTelegramBot(log)
 	rnd := InitializeRandom(log)
@@ -49,26 +45,26 @@ func (app *Application) Shutdown() {
 
 func (app *Application) Run() {
 	updates := tgbotapi.NewUpdate(0)
-	updates.Timeout = 120
+	updates.Timeout = 60
 
 	for update := range app.bot.GetUpdatesChan(updates) {
 		if msg := update.Message; msg != nil {
 			user := update.SentFrom()
 			app.log.With(
-				UserId, user.ID,
-				UserName, user.UserName,
-				ChatType, msg.Chat.Type,
-				ChatId, msg.Chat.ID,
+				logging.UserId, user.ID,
+				logging.UserName, user.UserName,
+				logging.ChatType, msg.Chat.Type,
+				logging.ChatId, msg.Chat.ID,
 			).I("Received message")
 		}
 
 		if query := update.InlineQuery; query != nil {
 			user := update.SentFrom()
 			log := app.log.With(
-				UserId, user.ID,
-				UserName, user.UserName,
-				QueryId, query.ID,
-				ChatType, query.ChatType,
+				logging.UserId, user.ID,
+				logging.UserName, user.UserName,
+				logging.QueryId, query.ID,
+				logging.ChatType, query.ChatType,
 			)
 
 			app.HandleInlineQuery(log, query)

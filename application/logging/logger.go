@@ -1,4 +1,4 @@
-package application
+package logging
 
 import (
 	"log/slog"
@@ -7,7 +7,6 @@ import (
 
 const (
 	ExecutionTime = "exe_time"
-	ExecutionKing = "exe_kind"
 	SysVersion    = "sys_version"
 	SysBuildRv    = "sys_buildrv"
 	SysBuildAt    = "sys_buildat"
@@ -15,7 +14,8 @@ const (
 	InnerError    = "inner_error"
 	UserId        = "user_id"
 	UserName      = "user_name"
-	QueryId       = "query_type"
+	QueryId       = "query_id"
+	QueryType     = "query_type"
 	ChatType      = "chat_type"
 	ChatId        = "chat_id"
 	RndSource     = "rnd_source"

@@ -2,6 +2,7 @@ package application
 
 import (
 	"context"
+	"dickobot/application/logging"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -23,7 +24,7 @@ type UserCockRace struct { // Для аггрегаций только
 	TotalSize int32  `bson:"total_size"`
 }
 
-func InitializeMongoConnection(ctx context.Context, log *Logger) *mongo.Client {
+func InitializeMongoConnection(ctx context.Context, log *logging.Logger) *mongo.Client {
 	uri := os.Getenv("MONGODB_URI")
 	if uri == "" {
 		log.F("MONGODB_URI does not have value, set it in .env file")
@@ -31,24 +32,24 @@ func InitializeMongoConnection(ctx context.Context, log *Logger) *mongo.Client {
 
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI(uri).SetAppName("Dickobrazz").SetTimeout(10*time.Second))
 	if err != nil {
-		log.F("Failed to connect to MongoDB", InnerError, err)
+		log.F("Failed to connect to MongoDB", logging.InnerError, err)
 	}
 
 	log.I("Successfully connected to MongoDB!")
 	return client
 }
 
-func (app *Application) SaveCockToMongo(log *Logger, cock *Cock) {
+func (app *Application) SaveCockToMongo(log *logging.Logger, cock *Cock) {
 	collection := app.db.Database("dickbot_db").Collection("cocks")
 
 	if _, err := collection.InsertOne(app.ctx, cock); err != nil {
-		log.E("Failed to save cock to MongoDB", InnerError, err)
+		log.E("Failed to save cock to MongoDB", logging.InnerError, err)
 	} else {
 		log.I("Successfully saved cock to MongoDB")
 	}
 }
 
-func (app *Application) AggregateCockSizes(log *Logger) []UserCockRace {
+func (app *Application) AggregateCockSizes(log *logging.Logger) []UserCockRace {
 	collection := app.db.Database("dickbot_db").Collection("cocks")
 
 	pipeline := mongo.Pipeline{
@@ -65,26 +66,26 @@ func (app *Application) AggregateCockSizes(log *Logger) []UserCockRace {
 
 	cursor, err := collection.Aggregate(app.ctx, pipeline)
 	if err != nil {
-		log.E("Failed to aggregate cock sizes", InnerError, err)
+		log.E("Failed to aggregate cock sizes", logging.InnerError, err)
 	}
 
 	defer func(cursor *mongo.Cursor, ctx context.Context) {
 		err := cursor.Close(ctx)
 		if err != nil { // Кааааак же похуй...
-			log.E("Failed to close mongo cursor", InnerError, err)
+			log.E("Failed to close mongo cursor", logging.InnerError, err)
 		}
 	}(cursor, app.ctx)
 
 	var results []UserCockRace
 	if err = cursor.All(app.ctx, &results); err != nil {
-		log.E("Failed to parse aggregation results", InnerError, err)
+		log.E("Failed to parse aggregation results", logging.InnerError, err)
 	}
 
 	log.I("Successfully aggregated cock sizes")
 	return results
 }
 
-func (app *Application) GetUserAggregatedCock(log *Logger, userID int64) *UserCockRace {
+func (app *Application) GetUserAggregatedCock(log *logging.Logger, userID int64) *UserCockRace {
 	collection := app.db.Database("dickbot_db").Collection("cocks")
 
 	pipeline := mongo.Pipeline{
@@ -98,21 +99,21 @@ func (app *Application) GetUserAggregatedCock(log *Logger, userID int64) *UserCo
 
 	cursor, err := collection.Aggregate(app.ctx, pipeline)
 	if err != nil {
-		log.E("Failed to aggregate user cock sizes", InnerError, err)
+		log.E("Failed to aggregate user cock sizes", logging.InnerError, err)
 		return nil
 	}
 
 	defer func(cursor *mongo.Cursor, ctx context.Context) {
 		err := cursor.Close(ctx)
 		if err != nil {
-			log.E("Failed to close mongo cursor", InnerError, err)
+			log.E("Failed to close mongo cursor", logging.InnerError, err)
 		}
 	}(cursor, app.ctx)
 
 	var result UserCockRace
 	if cursor.Next(app.ctx) {
 		if err := cursor.Decode(&result); err != nil {
-			log.E("Failed to decode aggregation result", InnerError, err)
+			log.E("Failed to decode aggregation result", logging.InnerError, err)
 			return nil
 		}
 		return &result

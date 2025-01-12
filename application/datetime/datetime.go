@@ -1,8 +1,6 @@
-package application
+package datetime
 
-import (
-	"time"
-)
+import "time"
 
 func NowLocation() *time.Location {
 	location, _ := time.LoadLocation("Europe/Moscow")
