@@ -110,7 +110,7 @@ var dynamic = []bson.D{
 				{Key: "yesterday_cock_change", Value: bson.D{{Key: "$subtract", Value: bson.A{"$curr_cock", "$prev_cock"}}}},
 				{Key: "yesterday_cock_change_percent", Value: bson.D{{Key: "$round", Value: bson.A{
 					bson.D{{Key: "$multiply", Value: bson.A{
-						bson.D{{Key: "$divide", Value: bson.A{
+						bson.D{{Key: "$divide", Value: bson.A{ // todo: division by zero
 							bson.D{{Key: "$subtract", Value: bson.A{"$curr_cock", "$prev_cock"}}},
 							"$prev_cock",
 						}}},
@@ -316,7 +316,7 @@ func PipelineDynamic(userId int64) mongo.Pipeline {
 						bson.D{{Key: "$multiply", Value: bson.A{
 							bson.D{{Key: "$divide", Value: bson.A{
 								bson.D{{Key: "$subtract", Value: bson.A{"$curr_cock", "$prev_cock"}}},
-								"$prev_cock",
+								bson.D{{Key: "$max", Value: bson.A{"$prev_cock", 1}}},
 							}}},
 							100,
 						}}},
