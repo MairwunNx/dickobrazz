@@ -15,22 +15,20 @@ import (
 )
 
 func (app *Application) HandleInlineQuery(log *logging.Logger, query *tgbotapi.InlineQuery) {
+	var traceQueryCreated = func(l *logging.Logger) { l.I("Inline query successfully created") }
+
 	queries := []any{
 		timings.ReportExecutionForResult(log.With(logging.QueryType, "CockSize"),
-			func() tgbotapi.InlineQueryResultArticle { return app.InlineQueryCockSize(log, query) },
-			func(l *logging.Logger) { l.I("Inline query successfully created") },
+			func() tgbotapi.InlineQueryResultArticle { return app.InlineQueryCockSize(log, query) }, traceQueryCreated,
 		),
 		timings.ReportExecutionForResult(log.With(logging.QueryType, "CockRace"),
-			func() tgbotapi.InlineQueryResultArticle { return app.InlineQueryCockRace(log, query) },
-			func(l *logging.Logger) { l.I("Inline query successfully created") },
+			func() tgbotapi.InlineQueryResultArticle { return app.InlineQueryCockRace(log, query) }, traceQueryCreated,
 		),
 		timings.ReportExecutionForResult(log.With(logging.QueryType, "CockRuler"),
-			func() tgbotapi.InlineQueryResultArticle { return app.InlineQueryCockRuler(log, query) },
-			func(l *logging.Logger) { l.I("Inline query successfully created") },
+			func() tgbotapi.InlineQueryResultArticle { return app.InlineQueryCockRuler(log, query) }, traceQueryCreated,
 		),
 		timings.ReportExecutionForResult(log.With(logging.QueryType, "CockDynamic"),
-			func() tgbotapi.InlineQueryResultArticle { return app.InlineQueryCockDynamic(log, query) },
-			func(l *logging.Logger) { l.I("Inline query successfully created") },
+			func() tgbotapi.InlineQueryResultArticle { return app.InlineQueryCockDynamic(log, query) }, traceQueryCreated,
 		),
 	}
 
