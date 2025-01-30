@@ -2,6 +2,7 @@ package application
 
 import (
 	"context"
+	"dickobot/application/database"
 	"dickobot/application/logging"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -52,19 +53,7 @@ func (app *Application) SaveCockToMongo(log *logging.Logger, cock *Cock) {
 func (app *Application) AggregateCockSizes(log *logging.Logger) []UserCockRace {
 	collection := app.db.Database("dickbot_db").Collection("cocks")
 
-	pipeline := mongo.Pipeline{
-		{
-			{Key: "$group", Value: bson.D{
-				{Key: "_id", Value: "$user_id"},
-				{Key: "total_size", Value: bson.D{{Key: "$sum", Value: "$size"}}},
-				{Key: "nickname", Value: bson.D{{Key: "$first", Value: "$nickname"}}},
-			}},
-		},
-		{{Key: "$sort", Value: bson.D{{Key: "total_size", Value: -1}}}},
-		{{Key: "$limit", Value: 13}},
-	}
-
-	cursor, err := collection.Aggregate(app.ctx, pipeline)
+	cursor, err := collection.Aggregate(app.ctx, database.PipelineTopUsersBySize())
 	if err != nil {
 		log.E("Failed to aggregate cock sizes", logging.InnerError, err)
 	}
@@ -88,16 +77,7 @@ func (app *Application) AggregateCockSizes(log *logging.Logger) []UserCockRace {
 func (app *Application) GetUserAggregatedCock(log *logging.Logger, userID int64) *UserCockRace {
 	collection := app.db.Database("dickbot_db").Collection("cocks")
 
-	pipeline := mongo.Pipeline{
-		{{Key: "$match", Value: bson.D{{Key: "user_id", Value: userID}}}},
-		{{Key: "$group", Value: bson.D{
-			{Key: "_id", Value: "$user_id"},
-			{Key: "total_size", Value: bson.D{{Key: "$sum", Value: "$size"}}},
-			{Key: "nickname", Value: bson.D{{Key: "$first", Value: "$nickname"}}},
-		}}},
-	}
-
-	cursor, err := collection.Aggregate(app.ctx, pipeline)
+	cursor, err := collection.Aggregate(app.ctx, database.PipelineUserTotalSize(userID))
 	if err != nil {
 		log.E("Failed to aggregate user cock sizes", logging.InnerError, err)
 		return nil
