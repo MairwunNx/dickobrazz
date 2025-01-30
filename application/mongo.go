@@ -101,9 +101,3 @@ func (app *Application) GetUserAggregatedCock(log *logging.Logger, userID int64)
 	log.I("No cocks found for user")
 	return nil
 }
-
-//pipeline := `[
-//	{"$match": { "user_name": "mairwunnx" }},
-//	{"$group": { "_id": "$brand", "count": { "$sum": 1 } }},
-//	{"$project": { "brand": "$_id", "_id": 0, "count": 1 }}
-//]`
