@@ -91,6 +91,11 @@ _Гонка коков – это соревнование, в котором к
 
 Процент доминирования: *%[23]s%%* 👑
 
+🏆 *Сезонные достижения*
+
+Побед в сезонах: *%[24]s* 🎖️
+Кок-респект: *%[25]s* 🚀
+
 📈 *Кок-активы*
 
 %[14]s Вчерашняя динамика: *%[15]s%%* (*%[16]s см*)
@@ -156,6 +161,11 @@ func NewMsgCockDynamicsTemplate(
 	/* % доминирование */
 
 	userDominancePercent float64,
+
+	/* Сезонные достижения */
+
+	userSeasonWins int,
+	userCockRespect int,
 ) string {
 	var userYesterdayChangePercentEmoji string
 	var userYesterdayChangePercentSymbol string
@@ -207,10 +217,13 @@ func NewMsgCockDynamicsTemplate(
 
 		/* % Доминирования */
 		FormatDickPercent(userDominancePercent),
+
+		/* Сезонные достижения */
+		FormatDickSize(userSeasonWins),
+		FormatDickSize(userCockRespect),
 	)
 }
 
-// GetMedalByPosition возвращает эмодзи медали по позиции (0, 1, 2)
 func GetMedalByPosition(position int) string {
 	switch position {
 	case 0:
