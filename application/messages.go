@@ -279,7 +279,9 @@ func NewMsgCockSeasonsFullText(seasons []CockSeason, totalSeasonsCount int, getS
 	
 	var seasonBlocks []string
 	
-	for _, season := range seasons {
+	// Проходим сезоны в обратном порядке (от нового к старому)
+	for i := len(seasons) - 1; i >= 0; i-- {
+		season := seasons[i]
 		startDate := EscapeMarkdownV2(season.StartDate.Format("02.01.2006"))
 		endDate := EscapeMarkdownV2(season.EndDate.Format("02.01.2006"))
 		
