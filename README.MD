@@ -126,7 +126,7 @@ docker build -t dickobrazz .
 
 ## Архитектура
 
-### Микросервисная структура
+### Структура
 ```
 dickbot (Go app) ←→ Redis (кэш)
        ↓
