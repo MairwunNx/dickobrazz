@@ -4,6 +4,7 @@ import (
 	"context"
 	"dickobot/application/database"
 	"dickobot/application/logging"
+	"math"
 	"os"
 	"time"
 
@@ -227,6 +228,120 @@ func (app *Application) GetAllSeasonsCount(log *logging.Logger) int {
 	}
 	
 	return count
+}
+
+func (app *Application) GetUserSeasonWins(log *logging.Logger, userID int64) int {
+	seasons := app.GetAllSeasonsForStats(log)
+	wins := 0
+	
+	for _, season := range seasons {
+		if !season.IsActive {
+			winners := app.GetSeasonWinners(log, season)
+			for _, winner := range winners {
+				if winner.UserID == userID && winner.Place <= 3 {
+					wins++
+					break
+				}
+			}
+		}
+	}
+	
+	return wins
+}
+
+func (app *Application) GetUserCockRespect(log *logging.Logger, userID int64) int {
+	seasons := app.GetAllSeasonsForStats(log)
+	totalRespect := 0
+	
+	for _, season := range seasons {
+		if !season.IsActive {
+			respect := app.GetUserSeasonRespect(log, userID, season)
+			totalRespect += respect
+		}
+	}
+	
+	return totalRespect
+}
+
+func (app *Application) GetUserSeasonRespect(log *logging.Logger, userID int64, season CockSeason) int {
+	collection := database.CollectionCocks(app.db)
+	
+	cursor, err := collection.Aggregate(app.ctx, database.PipelineAllUsersInSeason(season.StartDate, season.EndDate))
+	if err != nil {
+		log.E("Failed to get season ranking for respect calculation", logging.InnerError, err)
+		return 0
+	}
+	
+	defer func(cursor *mongo.Cursor, ctx context.Context) {
+		err := cursor.Close(ctx)
+		if err != nil {
+			log.E("Failed to close mongo cursor", logging.InnerError, err)
+		}
+	}(cursor, app.ctx)
+	
+	var results []UserCockRace
+	if err = cursor.All(app.ctx, &results); err != nil {
+		log.E("Failed to parse season ranking", logging.InnerError, err)
+		return 0
+	}
+	
+	for position, user := range results {
+		if user.UserID == userID {
+			place := position + 1
+			return CalculateCockRespect(place)
+		}
+	}
+	
+	return 0
+}
+
+func CalculateCockRespect(place int) int {
+	if place <= 0 {
+		return 0 // За то что не вошел в сезончик *trollface.jpg*
+	}
+
+	if place == 1 {
+		return 1488 // Почему бы и нет, *заслужено.gif*
+	}
+
+	// Базовая идея: чем дальше место — тем ниже респект, но не линейно
+	score := int(3000 / math.Pow(float64(place), 1.2))
+
+	if score < 1 {
+		return 1 // Минимум — 1 очко за выход в сезон
+	}
+
+	return score
+}
+
+func (app *Application) GetAllSeasonsForStats(log *logging.Logger) []CockSeason {
+	firstCockDate := app.GetFirstCockDate(log)
+	if firstCockDate == nil {
+		log.I("No cocks found in database")
+		return []CockSeason{}
+	}
+	
+	var seasons []CockSeason
+	currentDate := *firstCockDate
+	seasonNum := 1
+	now := time.Now()
+	
+	for currentDate.Before(now) {
+		endDate := currentDate.AddDate(0, 3, 0)
+		isActive := now.After(currentDate) && now.Before(endDate)
+		
+		seasons = append(seasons, CockSeason{
+			StartDate: currentDate,
+			EndDate:   endDate,
+			IsActive:  isActive,
+			SeasonNum: seasonNum,
+		})
+		
+		currentDate = endDate
+		seasonNum++
+	}
+	
+	return seasons
 }
 
 func (app *Application) GetCurrentSeason(log *logging.Logger) *CockSeason {
