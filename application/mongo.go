@@ -11,6 +11,8 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+const MaxSeasonsToShow = 14
+
 type Cock struct {
 	ID          string    `bson:"_id"`
 	Size        int32     `bson:"size"`
@@ -23,6 +25,20 @@ type UserCockRace struct { // Для аггрегаций только
 	UserID    int64  `bson:"_id"`
 	Nickname  string `bson:"nickname"`
 	TotalSize int32  `bson:"total_size"`
+}
+
+type CockSeason struct {
+	StartDate time.Time
+	EndDate   time.Time
+	IsActive  bool
+	SeasonNum int
+}
+
+type SeasonWinner struct {
+	UserID    int64  `bson:"_id"`
+	Nickname  string `bson:"nickname"`
+	TotalSize int32  `bson:"total_size"`
+	Place     int    // 1, 2, 3
 }
 
 func InitializeMongoConnection(ctx context.Context, log *logging.Logger) *mongo.Client {
@@ -74,6 +90,32 @@ func (app *Application) AggregateCockSizes(log *logging.Logger) []UserCockRace {
 	return results
 }
 
+func (app *Application) AggregateCockSizesForSeason(log *logging.Logger, season CockSeason) []UserCockRace {
+	collection := database.CollectionCocks(app.db)
+
+	cursor, err := collection.Aggregate(app.ctx, database.PipelineTopUsersInSeason(season.StartDate, season.EndDate))
+	if err != nil {
+		log.E("Failed to aggregate cock sizes for season", logging.InnerError, err)
+		return []UserCockRace{}
+	}
+
+	defer func(cursor *mongo.Cursor, ctx context.Context) {
+		err := cursor.Close(ctx)
+		if err != nil {
+			log.E("Failed to close mongo cursor", logging.InnerError, err)
+		}
+	}(cursor, app.ctx)
+
+	var results []UserCockRace
+	if err = cursor.All(app.ctx, &results); err != nil {
+		log.E("Failed to parse season aggregation results", logging.InnerError, err)
+		return []UserCockRace{}
+	}
+
+	log.I("Successfully aggregated cock sizes for season")
+	return results
+}
+
 func (app *Application) GetUserAggregatedCock(log *logging.Logger, userID int64) *UserCockRace {
 	collection := database.CollectionCocks(app.db)
 
@@ -101,4 +143,128 @@ func (app *Application) GetUserAggregatedCock(log *logging.Logger, userID int64)
 
 	log.I("No cocks found for user")
 	return nil
+}
+
+func (app *Application) GetFirstCockDate(log *logging.Logger) *time.Time {
+	collection := database.CollectionCocks(app.db)
+	
+	cursor, err := collection.Aggregate(app.ctx, database.PipelineFirstCockDate())
+	if err != nil {
+		log.E("Failed to get first cock date", logging.InnerError, err)
+		return nil
+	}
+	
+	defer func(cursor *mongo.Cursor, ctx context.Context) {
+		err := cursor.Close(ctx)
+		if err != nil {
+			log.E("Failed to close mongo cursor", logging.InnerError, err)
+		}
+	}(cursor, app.ctx)
+	
+	var result struct {
+		FirstDate time.Time `bson:"first_date"`
+	}
+	if cursor.Next(app.ctx) {
+		if err := cursor.Decode(&result); err != nil {
+			log.E("Failed to decode first cock date", logging.InnerError, err)
+			return nil
+		}
+		return &result.FirstDate
+	}
+	
+	return nil
+}
+
+func (app *Application) GetAllSeasons(log *logging.Logger) []CockSeason {
+	firstCockDate := app.GetFirstCockDate(log)
+	if firstCockDate == nil {
+		log.I("No cocks found in database")
+		return []CockSeason{}
+	}
+	
+	var seasons []CockSeason
+	currentDate := *firstCockDate
+	seasonNum := 1
+	now := time.Now()
+	
+	for currentDate.Before(now) {
+		// Каждый сезон длится 3 месяца
+		endDate := currentDate.AddDate(0, 3, 0)
+		isActive := now.After(currentDate) && now.Before(endDate)
+		
+		seasons = append(seasons, CockSeason{
+			StartDate: currentDate,
+			EndDate:   endDate,
+			IsActive:  isActive,
+			SeasonNum: seasonNum,
+		})
+		
+		currentDate = endDate
+		seasonNum++
+	}
+	
+	if len(seasons) > MaxSeasonsToShow {
+		seasons = seasons[len(seasons)-MaxSeasonsToShow:]
+	}
+	
+	return seasons
+}
+
+func (app *Application) GetAllSeasonsCount(log *logging.Logger) int {
+	firstCockDate := app.GetFirstCockDate(log)
+	if firstCockDate == nil {
+		return 0
+	}
+	
+	currentDate := *firstCockDate
+	count := 0
+	now := time.Now()
+	
+	for currentDate.Before(now) {
+		endDate := currentDate.AddDate(0, 3, 0)
+		count++
+		currentDate = endDate
+	}
+	
+	return count
+}
+
+func (app *Application) GetCurrentSeason(log *logging.Logger) *CockSeason {
+	seasons := app.GetAllSeasons(log)
+	for _, season := range seasons {
+		if season.IsActive {
+			return &season
+		}
+	}
+	return nil
+}
+
+func (app *Application) GetSeasonWinners(log *logging.Logger, season CockSeason) []SeasonWinner {
+	collection := database.CollectionCocks(app.db)
+	
+	cursor, err := collection.Aggregate(app.ctx, database.PipelineSeasonWinners(season.StartDate, season.EndDate))
+	if err != nil {
+		log.E("Failed to get season winners", logging.InnerError, err)
+		return []SeasonWinner{}
+	}
+	
+	defer func(cursor *mongo.Cursor, ctx context.Context) {
+		err := cursor.Close(ctx)
+		if err != nil {
+			log.E("Failed to close mongo cursor", logging.InnerError, err)
+		}
+	}(cursor, app.ctx)
+	
+	var results []SeasonWinner
+	if err = cursor.All(app.ctx, &results); err != nil {
+		log.E("Failed to parse season winners", logging.InnerError, err)
+		return []SeasonWinner{}
+	}
+	
+	// Добавляем места (1, 2, 3)
+	for i := range results {
+		results[i].Place = i + 1
+	}
+	
+	return results
 }
