@@ -7,6 +7,7 @@ import (
 	"dickobot/application/geo"
 	"dickobot/application/logging"
 	"dickobot/application/timings"
+	"fmt"
 	"sort"
 	"strings"
 
@@ -93,6 +94,7 @@ func (app *Application) InlineQueryCockRace(log *logging.Logger, query *tgbotapi
 	}
 	
 	text := app.GenerateCockRaceScoreboard(log, query.From.ID, cocks, seasonStartDate)
+	fmt.Println(text)
 	return InitializeInlineQuery("Гонка коков", text)
 }
 
@@ -198,6 +200,8 @@ func (app *Application) InlineQueryCockSeason(log *logging.Logger, query *tgbota
 	}
 	
 	text := NewMsgCockSeasonsFullText(seasons, totalSeasonsCount, getSeasonWinners)
+	
+	fmt.Println(text)
 	return InitializeInlineQuery("Сезоны коков", text)
 }
 
