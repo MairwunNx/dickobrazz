@@ -2,6 +2,7 @@ package application
 
 import (
 	"fmt"
+	"strings"
 	"time"
 )
 
@@ -221,4 +222,86 @@ func GetMedalByPosition(position int) string {
 	default:
 		return ""
 	}
+}
+
+func NewMsgCockSeasonTemplate(pretenders string, startDate, endDate string) string {
+	return fmt.Sprintf(
+		MsgCockSeasonTemplate,
+		pretenders,
+		startDate,
+		endDate,
+	)
+}
+
+func NewMsgCockSeasonWithWinnersTemplate(winners string, startDate, endDate string) string {
+	return fmt.Sprintf(
+		MsgCockSeasonWithWinnersTemplate,
+		winners,
+		startDate,
+		endDate,
+	)
+}
+
+func NewMsgCockSeasonWinnerTemplate(medal, nickname, totalSize string) string {
+	return fmt.Sprintf(
+		MsgCockSeasonWinnerTemplate,
+		medal,
+		EscapeMarkdownV2(nickname),
+		EscapeMarkdownV2(totalSize),
+	)
+}
+
+func NewMsgCockSeasonTemplateFooter() string {
+	return MsgCockSeasonTemplateFooter
+}
+
+func NewMsgCockSeasonNoSeasonsTemplate() string {
+	return MsgCockSeasonNoSeasonsTemplate
+}
+
+func NewMsgCockSeasonsFullText(seasons []CockSeason, totalSeasonsCount int, getSeasonWinners func(CockSeason) []SeasonWinner) string {
+	if len(seasons) == 0 {
+		return NewMsgCockSeasonNoSeasonsTemplate()
+	}
+	
+	var seasonBlocks []string
+	
+	for _, season := range seasons {
+		startDate := season.StartDate.Format("02.01.2006")
+		endDate := season.EndDate.Format("02.01.2006")
+		
+		winners := getSeasonWinners(season)
+		var winnerLines []string
+		
+		for _, winner := range winners {
+			medal := GetMedalByPosition(winner.Place - 1)
+			line := NewMsgCockSeasonWinnerTemplate(
+				medal,
+				winner.Nickname,
+				FormatDickSize(int(winner.TotalSize)),
+			)
+			winnerLines = append(winnerLines, line)
+		}
+		
+		winnersText := strings.Join(winnerLines, "\n")
+		
+		var seasonBlock string
+		if season.IsActive {
+			seasonBlock = NewMsgCockSeasonTemplate(winnersText, startDate, endDate)
+		} else {
+			seasonBlock = NewMsgCockSeasonWithWinnersTemplate(winnersText, startDate, endDate)
+		}
+		
+		seasonBlocks = append(seasonBlocks, seasonBlock)
+	}
+	
+	allSeasonsText := strings.Join(seasonBlocks, "\n\n")
+	footer := NewMsgCockSeasonTemplateFooter()
+	
+	if totalSeasonsCount > len(seasons) {
+		trimInfo := fmt.Sprintf("\n\n📋 _Показаны последние %d из %d сезонов_", len(seasons), totalSeasonsCount)
+		return allSeasonsText + "\n\n" + footer + trimInfo
+	}
+	
+	return allSeasonsText + "\n\n" + footer
 }
