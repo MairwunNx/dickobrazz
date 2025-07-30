@@ -3,13 +3,14 @@ package application
 import (
 	"context"
 	"dickobot/application/logging"
+	"os"
+	"os/signal"
+	"syscall"
+
 	"github.com/go-redis/cache/v9"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/redis/go-redis/v9"
 	"go.mongodb.org/mongo-driver/mongo"
-	"os"
-	"os/signal"
-	"syscall"
 )
 
 type Application struct {
