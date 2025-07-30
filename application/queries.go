@@ -144,6 +144,9 @@ func (app *Application) InlineQueryCockDynamic(log *logging.Logger, query *tgbot
 	overallDistribution := result.Distribution[0]
 	overallRecord := result.Record[0]
 
+	userSeasonWins := app.GetUserSeasonWins(log, query.From.ID)
+	userCockRespect := app.GetUserCockRespect(log, query.From.ID)
+
 	text := NewMsgCockDynamicsTemplate(
 		/* Общая динамика коков */
 		overall.Size,
@@ -173,6 +176,10 @@ func (app *Application) InlineQueryCockDynamic(log *logging.Logger, query *tgbot
 
 		/* % доминирование */
 		individualDominance.Dominance,
+
+		/* Сезонные достижения */
+		userSeasonWins,
+		userCockRespect,
 	)
 
 	return tgbotapi.NewInlineQueryResultArticleMarkdown(query.ID, "Динамика кока", text)
