@@ -1,2 +1,0 @@
-./.zip-project.sh && "/Applications/SSH Config Editor.app/Contents/Resources/connect.sh" "rsync -a -P "dickobot.zip" ximanager@xi:~/" "A7923380-C56B-4C44-AD72-024895199549"
-unzip dickobot.zip -d dickobot/ && cd ./dickobot && sudo docker compose build dickbot && sudo docker compose down dickbot && sudo docker compose up -d dickbot
