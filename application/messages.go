@@ -280,8 +280,8 @@ func NewMsgCockSeasonsFullText(seasons []CockSeason, totalSeasonsCount int, getS
 	var seasonBlocks []string
 	
 	for _, season := range seasons {
-		startDate := season.StartDate.Format("02.01.2006")
-		endDate := season.EndDate.Format("02.01.2006")
+		startDate := EscapeMarkdownV2(season.StartDate.Format("02.01.2006"))
+		endDate := EscapeMarkdownV2(season.EndDate.Format("02.01.2006"))
 		
 		winners := getSeasonWinners(season)
 		var winnerLines []string
