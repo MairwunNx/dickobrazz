@@ -79,7 +79,15 @@ func (app *Application) InlineQueryCockSize(log *logging.Logger, query *tgbotapi
 }
 
 func (app *Application) InlineQueryCockRace(log *logging.Logger, query *tgbotapi.InlineQuery) tgbotapi.InlineQueryResultArticle {
-	cocks := app.AggregateCockSizes(log)
+	currentSeason := app.GetCurrentSeason(log)
+	
+	var cocks []UserCockRace
+	if currentSeason != nil {
+		cocks = app.AggregateCockSizesForSeason(log, *currentSeason)
+	} else {
+		cocks = app.AggregateCockSizes(log)
+	}
+	
 	text := app.GenerateCockRaceScoreboard(log, query.From.ID, cocks)
 	return InitializeInlineQuery("Гонка коков", strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(text, ".", "\\."), "-", "\\-"), "!", "\\!"))
 }
@@ -171,10 +179,17 @@ func (app *Application) InlineQueryCockDynamic(log *logging.Logger, query *tgbot
 }
 
 func (app *Application) InlineQueryCockSeason(log *logging.Logger, query *tgbotapi.InlineQuery) tgbotapi.InlineQueryResultArticle {
-	// Получаем список всех сезонов
-	// Форматируем все сезоны в один текст с общим футером
-	// Экранируем спецсимволы для Markdown V2
-	return InitializeInlineQuery("Сезоны коков", strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(text, ".", "\\."), "-", "\\-"), "!", "\\!"))
+	seasons := app.GetAllSeasons(log)
+	totalSeasonsCount := app.GetAllSeasonsCount(log)
+	
+	getSeasonWinners := func(season CockSeason) []SeasonWinner {
+		return app.GetSeasonWinners(log, season)
+	}
+	
+	text := NewMsgCockSeasonsFullText(seasons, totalSeasonsCount, getSeasonWinners)
+	text = strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(text, ".", "\\."), "-", "\\-"), "!", "\\!")
+	
+	return InitializeInlineQuery("Сезоны коков", text)
 }
 
 func (app *Application) InlineQueryCockRuler(log *logging.Logger, query *tgbotapi.InlineQuery) tgbotapi.InlineQueryResultArticle {
