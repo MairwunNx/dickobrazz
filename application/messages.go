@@ -101,14 +101,14 @@ _Гонка коков – это соревнование, в котором к
 %[14]s Вчерашняя динамика: *%[15]s%%* (*%[16]s см*)
 %[17]s Средний дневной прирост: *%[18]s см/день*`
 
-	MsgCockSeasonTemplate = `🏆 *Сезон коков* (Текущий)
+	MsgCockSeasonTemplate = `🏆 *Сезон коков* \(Текущий\)
 
 🔮 Претенденты сезона:
 %[1]s
 
 ⏱️ Период: *%[2]s - %[3]s*`
 
-	MsgCockSeasonWithWinnersTemplate = `🏆 *Сезон коков* (Завершён)
+	MsgCockSeasonWithWinnersTemplate = `🏆 *Сезон коков* \(Завершён\)
 
 🎖 Победители сезона:
 %[1]s
@@ -123,7 +123,7 @@ _Гонка коков – это соревнование, в котором к
 
 	MsgCockSeasonWinnerTemplate = "%[1]s *@%[2]s* с коком *%[3]sсм*"
 	
-	MsgCockSeasonNoSeasonsTemplate = "*Сезоны коков*\n\nВ данный момент нет активных сезонов\\. Следите за обновлениями\\!"
+	MsgCockSeasonNoSeasonsTemplate = "*Сезоны коков*\n\nВ данный момент нет активных сезонов. Следите за обновлениями!"
 )
 
 func NewMsgCockDynamicsTemplate(
@@ -265,11 +265,11 @@ func NewMsgCockSeasonWinnerTemplate(medal, nickname, totalSize string) string {
 }
 
 func NewMsgCockSeasonTemplateFooter() string {
-	return MsgCockSeasonTemplateFooter
+	return EscapeMarkdownV2(MsgCockSeasonTemplateFooter)
 }
 
 func NewMsgCockSeasonNoSeasonsTemplate() string {
-	return MsgCockSeasonNoSeasonsTemplate
+	return EscapeMarkdownV2(MsgCockSeasonNoSeasonsTemplate)
 }
 
 func NewMsgCockSeasonsFullText(seasons []CockSeason, totalSeasonsCount int, getSeasonWinners func(CockSeason) []SeasonWinner) string {
