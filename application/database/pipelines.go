@@ -1,6 +1,8 @@
 package database
 
 import (
+	"time"
+
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -230,5 +232,52 @@ func PipelineUserTotalSize(userID int64) mongo.Pipeline {
 			{Key: "total_size", Value: bson.D{{Key: "$sum", Value: "$size"}}},
 			{Key: "nickname", Value: bson.D{{Key: "$first", Value: "$nickname"}}},
 		}}},
+	}
+}
+
+func PipelineFirstCockDate() mongo.Pipeline {
+	return mongo.Pipeline{
+		{{Key: "$sort", Value: bson.D{{Key: "requested_at", Value: 1}}}},
+		{{Key: "$limit", Value: 1}},
+		{{Key: "$project", Value: bson.D{
+			{Key: "_id", Value: 0},
+			{Key: "first_date", Value: "$requested_at"},
+		}}},
+	}
+}
+
+func PipelineSeasonWinners(startDate, endDate time.Time) mongo.Pipeline {
+	return mongo.Pipeline{
+		{{Key: "$match", Value: bson.D{
+			{Key: "requested_at", Value: bson.D{
+				{Key: "$gte", Value: startDate},
+				{Key: "$lt", Value: endDate},
+			}},
+		}}},
+		{{Key: "$group", Value: bson.D{
+			{Key: "_id", Value: "$user_id"},
+			{Key: "total_size", Value: bson.D{{Key: "$sum", Value: "$size"}}},
+			{Key: "nickname", Value: bson.D{{Key: "$first", Value: "$nickname"}}},
+		}}},
+		{{Key: "$sort", Value: bson.D{{Key: "total_size", Value: -1}}}},
+		{{Key: "$limit", Value: 3}},
+	}
+}
+
+func PipelineTopUsersInSeason(startDate, endDate time.Time) mongo.Pipeline {
+	return mongo.Pipeline{
+		{{Key: "$match", Value: bson.D{
+			{Key: "requested_at", Value: bson.D{
+				{Key: "$gte", Value: startDate},
+				{Key: "$lt", Value: endDate},
+			}},
+		}}},
+		{{Key: "$group", Value: bson.D{
+			{Key: "_id", Value: "$user_id"},
+			{Key: "total_size", Value: bson.D{{Key: "$sum", Value: "$size"}}},
+			{Key: "nickname", Value: bson.D{{Key: "$first", Value: "$nickname"}}},
+		}}},
+		{{Key: "$sort", Value: bson.D{{Key: "total_size", Value: -1}}}},
+		{{Key: "$limit", Value: 13}},
 	}
 }
