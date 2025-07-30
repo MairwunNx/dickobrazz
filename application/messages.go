@@ -265,11 +265,11 @@ func NewMsgCockSeasonWinnerTemplate(medal, nickname, totalSize string) string {
 }
 
 func NewMsgCockSeasonTemplateFooter() string {
-	return EscapeMarkdownV2(MsgCockSeasonTemplateFooter)
+	return MsgCockSeasonTemplateFooter
 }
 
 func NewMsgCockSeasonNoSeasonsTemplate() string {
-	return EscapeMarkdownV2(MsgCockSeasonNoSeasonsTemplate)
+	return MsgCockSeasonNoSeasonsTemplate
 }
 
 func NewMsgCockSeasonsFullText(seasons []CockSeason, totalSeasonsCount int, getSeasonWinners func(CockSeason) []SeasonWinner) string {
@@ -311,10 +311,13 @@ func NewMsgCockSeasonsFullText(seasons []CockSeason, totalSeasonsCount int, getS
 	allSeasonsText := strings.Join(seasonBlocks, "\n\n")
 	footer := NewMsgCockSeasonTemplateFooter()
 	
+	var finalText string
 	if totalSeasonsCount > len(seasons) {
 		trimInfo := fmt.Sprintf("\n\n📋 _Показаны последние %d из %d сезонов_", len(seasons), totalSeasonsCount)
-		return allSeasonsText + "\n\n" + footer + trimInfo
+		finalText = allSeasonsText + "\n\n" + footer + EscapeMarkdownV2(trimInfo)
+	} else {
+		finalText = allSeasonsText + "\n\n" + footer
 	}
 	
-	return allSeasonsText + "\n\n" + footer
+	return finalText
 }
