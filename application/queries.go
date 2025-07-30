@@ -82,13 +82,17 @@ func (app *Application) InlineQueryCockRace(log *logging.Logger, query *tgbotapi
 	currentSeason := app.GetCurrentSeason(log)
 	
 	var cocks []UserCockRace
+	var seasonStartDate string
+	
 	if currentSeason != nil {
 		cocks = app.AggregateCockSizesForSeason(log, *currentSeason)
+		seasonStartDate = currentSeason.StartDate.Format("02.01.2006")
 	} else {
 		cocks = app.AggregateCockSizes(log)
+		seasonStartDate = "хуй знает когда" // Заглушка для случая если нет активного сезона (чего в целом быть не может, я в это верю.)
 	}
 	
-	text := app.GenerateCockRaceScoreboard(log, query.From.ID, cocks)
+	text := app.GenerateCockRaceScoreboard(log, query.From.ID, cocks, seasonStartDate)
 	return InitializeInlineQuery("Гонка коков", strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(text, ".", "\\."), "-", "\\-"), "!", "\\!"))
 }
 
