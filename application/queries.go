@@ -87,7 +87,7 @@ func (app *Application) InlineQueryCockRace(log *logging.Logger, query *tgbotapi
 	
 	if currentSeason != nil {
 		cocks = app.AggregateCockSizesForSeason(log, *currentSeason)
-		seasonStartDate = currentSeason.StartDate.Format("02.01.2006")
+		seasonStartDate = EscapeMarkdownV2(currentSeason.StartDate.Format("02.01.2006"))
 	} else {
 		cocks = app.AggregateCockSizes(log)
 		seasonStartDate = "хуй знает когда" // Заглушка для случая если нет активного сезона (чего в целом быть не может, я в это верю.)
