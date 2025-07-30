@@ -4,10 +4,11 @@ import (
 	"context"
 	"dickobot/application/database"
 	"dickobot/application/logging"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 	"os"
 	"time"
+
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type Cock struct {
@@ -40,7 +41,7 @@ func InitializeMongoConnection(ctx context.Context, log *logging.Logger) *mongo.
 }
 
 func (app *Application) SaveCockToMongo(log *logging.Logger, cock *Cock) {
-	collection := app.db.Database("dickbot_db").Collection("cocks")
+	collection := database.CollectionCocks(app.db)
 
 	if _, err := collection.InsertOne(app.ctx, cock); err != nil {
 		log.E("Failed to save cock to MongoDB", logging.InnerError, err)
@@ -50,7 +51,7 @@ func (app *Application) SaveCockToMongo(log *logging.Logger, cock *Cock) {
 }
 
 func (app *Application) AggregateCockSizes(log *logging.Logger) []UserCockRace {
-	collection := app.db.Database("dickbot_db").Collection("cocks")
+	collection := database.CollectionCocks(app.db)
 
 	cursor, err := collection.Aggregate(app.ctx, database.PipelineTopUsersBySize())
 	if err != nil {
@@ -74,7 +75,7 @@ func (app *Application) AggregateCockSizes(log *logging.Logger) []UserCockRace {
 }
 
 func (app *Application) GetUserAggregatedCock(log *logging.Logger, userID int64) *UserCockRace {
-	collection := app.db.Database("dickbot_db").Collection("cocks")
+	collection := database.CollectionCocks(app.db)
 
 	cursor, err := collection.Aggregate(app.ctx, database.PipelineUserTotalSize(userID))
 	if err != nil {
