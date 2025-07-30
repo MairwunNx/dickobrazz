@@ -7,11 +7,12 @@ import (
 	"dickobot/application/geo"
 	"dickobot/application/logging"
 	"dickobot/application/timings"
+	"sort"
+	"strings"
+
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/mongo"
-	"sort"
-	"strings"
 )
 
 func (app *Application) HandleInlineQuery(log *logging.Logger, query *tgbotapi.InlineQuery) {
@@ -29,6 +30,9 @@ func (app *Application) HandleInlineQuery(log *logging.Logger, query *tgbotapi.I
 		),
 		timings.ReportExecutionForResult(log.With(logging.QueryType, "CockDynamic"),
 			func() tgbotapi.InlineQueryResultArticle { return app.InlineQueryCockDynamic(log, query) }, traceQueryCreated,
+		),
+		timings.ReportExecutionForResult(log.With(logging.QueryType, "CockSeason"),
+			func() tgbotapi.InlineQueryResultArticle { return app.InlineQueryCockSeason(log, query) }, traceQueryCreated,
 		),
 	}
 
@@ -164,6 +168,13 @@ func (app *Application) InlineQueryCockDynamic(log *logging.Logger, query *tgbot
 	)
 
 	return tgbotapi.NewInlineQueryResultArticleMarkdown(query.ID, "Динамика кока", text)
+}
+
+func (app *Application) InlineQueryCockSeason(log *logging.Logger, query *tgbotapi.InlineQuery) tgbotapi.InlineQueryResultArticle {
+	// Получаем список всех сезонов
+	// Форматируем все сезоны в один текст с общим футером
+	// Экранируем спецсимволы для Markdown V2
+	return InitializeInlineQuery("Сезоны коков", strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(text, ".", "\\."), "-", "\\-"), "!", "\\!"))
 }
 
 func (app *Application) InlineQueryCockRuler(log *logging.Logger, query *tgbotapi.InlineQuery) tgbotapi.InlineQueryResultArticle {
