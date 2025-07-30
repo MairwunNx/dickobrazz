@@ -3,9 +3,10 @@ package application
 import (
 	"dickobot/application/logging"
 	"fmt"
+	"strings"
+
 	"golang.org/x/text/language"
 	"golang.org/x/text/message"
-	"strings"
 )
 
 func GenerateCockSizeText(size int, emoji string) string {
@@ -58,7 +59,7 @@ func (app *Application) GenerateCockRulerText(log *logging.Logger, userID int64,
 	}
 }
 
-func (app *Application) GenerateCockRaceScoreboard(log *logging.Logger, userID int64, sizes []UserCockRace) string {
+func (app *Application) GenerateCockRaceScoreboard(log *logging.Logger, userID int64, sizes []UserCockRace, seasonStart string) string {
 	var winners []string
 	var others []string
 	isUserInScoreboard := false
@@ -98,11 +99,13 @@ func (app *Application) GenerateCockRaceScoreboard(log *logging.Logger, userID i
 			MsgCockRaceScoreboardTemplate,
 			strings.Join(winners, "\n"),
 			strings.Join(others, "\n"),
+			seasonStart,
 		)
 	} else {
 		return fmt.Sprintf(
 			MsgCockRaceScoreboardWinnersTemplate,
 			strings.Join(winners, "\n"),
+			seasonStart,
 		)
 	}
 }
