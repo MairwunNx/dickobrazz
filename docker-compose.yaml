@@ -20,6 +20,12 @@ services:
       REDIS_PASSWORD: ${REDIS_PASSWORD}
       TELEGRAM_TOKEN: ${TELEGRAM_TOKEN}
       TZ: ${TZ}
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
     logging:
       driver: local
       options:
