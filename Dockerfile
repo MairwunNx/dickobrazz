@@ -1,7 +1,7 @@
 FROM alpine:3.21 AS certs
 RUN apk --no-cache add ca-certificates tzdata
 
-FROM golang:1.23.4-alpine AS builder
+FROM golang:1.25-alpine AS builder
 
 RUN apk --no-cache add git
 COPY go.mod go.sum ./
@@ -13,8 +13,15 @@ COPY .git ./
 COPY application/ ./application/
 
 RUN mkdir -p /app
-
-RUN go build -o /app/dickobot -a -installsuffix cgo -gcflags "all=-N -l" -tags timetzdata -ldflags="-s -w -X dickobot/application/logging.Version=$(cat .version) -X dickobot/application/logging.BuildAt=$(date +%Y-%m-%d_%H:%M:%S) -X dickobot/application/logging.GoVersion=$(go version | awk '{print $3}') -X dickobot/application/logging.BuildRv=$(git describe --always --long)"
+RUN go build -o /app/dickobot \
+    -a -installsuffix cgo \
+    -gcflags "all=-N -l" \
+    -tags timetzdata \
+    -ldflags="-s -w \
+        -X dickobot/application/logging.Version=$(cat .version) \
+        -X dickobot/application/logging.BuildAt=$(date +%Y-%m-%d_%H:%M:%S) \
+        -X dickobot/application/logging.GoVersion=$(go version | awk '{print $3}') \
+        -X dickobot/application/logging.BuildRv=$(git describe --always --long)"
 RUN chmod +x /app/dickobot
 
 FROM busybox:1.36-musl
