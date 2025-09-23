@@ -1,0 +1,35 @@
+{
+  "name": "dickobrazz-dev",
+  "dockerComposeFile": ["../docker-compose.dev.yml"],
+  "service": "dickobrazz",
+  "workspaceFolder": "/workspace",
+  "features": {
+    "ghcr.io/devcontainers/features/common-utils:2": {},
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers/features/docker-from-docker:1": {}
+  },
+  "forwardPorts": [
+    { "hostPort": 6379, "containerPort": 6379 },
+    { "hostPort": 27017, "containerPort": 27017 }
+  ],
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "golang.Go",
+        "ms-azuretools.vscode-docker",
+        "mongodb.mongodb-vscode",
+        "editorconfig.editorconfig",
+        "k--kato.intellij-idea-keybindings",
+        "redis.redis-for-vscode"
+      ],
+      "settings": {
+        "go.gopath": "/go",
+        "go.toolsManagement.autoUpdate": true,
+        "go.useLanguageServer": true
+      }
+    }
+  },
+  "postCreateCommand": "go mod download",
+  "runServices": ["dickobrazz-redis", "dickobrazz-mongo", "dickobrazz_bot"],
+  "shutdownAction": "stopCompose"
+}
