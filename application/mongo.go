@@ -2,8 +2,8 @@ package application
 
 import (
 	"context"
-	"dickobot/application/database"
-	"dickobot/application/logging"
+	"dickobrazz/application/database"
+	"dickobrazz/application/logging"
 	"math"
 	"os"
 	"time"

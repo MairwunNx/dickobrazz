@@ -1,9 +1,10 @@
 package application
 
 import (
-	"dickobot/application/logging"
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"dickobrazz/application/logging"
 	"os"
+
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
 func InitializeTelegramBot(log *logging.Logger) *tgbotapi.BotAPI {

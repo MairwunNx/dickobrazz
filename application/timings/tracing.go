@@ -1,7 +1,7 @@
 package timings
 
 import (
-	"dickobot/application/logging"
+	"dickobrazz/application/logging"
 	"time"
 )
 

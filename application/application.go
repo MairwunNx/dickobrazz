@@ -2,7 +2,7 @@ package application
 
 import (
 	"context"
-	"dickobot/application/logging"
+	"dickobrazz/application/logging"
 	"os"
 	"os/signal"
 	"syscall"

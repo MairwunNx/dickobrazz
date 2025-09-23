@@ -1,10 +1,11 @@
 package application
 
 import (
-	"dickobot/application/logging"
-	"github.com/sgade/randomorg"
+	"dickobrazz/application/logging"
 	"math/rand/v2"
 	"os"
+
+	"github.com/sgade/randomorg"
 )
 
 type Random struct {

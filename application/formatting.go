@@ -1,7 +1,7 @@
 package application
 
 import (
-	"dickobot/application/logging"
+	"dickobrazz/application/logging"
 	"fmt"
 	"strings"
 

@@ -2,11 +2,11 @@ package application
 
 import (
 	"context"
-	"dickobot/application/database"
-	"dickobot/application/datetime"
-	"dickobot/application/geo"
-	"dickobot/application/logging"
-	"dickobot/application/timings"
+	"dickobrazz/application/database"
+	"dickobrazz/application/datetime"
+	"dickobrazz/application/geo"
+	"dickobrazz/application/logging"
+	"dickobrazz/application/timings"
 	"sort"
 	"strings"
 

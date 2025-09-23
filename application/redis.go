@@ -2,15 +2,16 @@ package application
 
 import (
 	"context"
-	"dickobot/application/datetime"
-	"dickobot/application/logging"
+	"dickobrazz/application/datetime"
+	"dickobrazz/application/logging"
 	"fmt"
-	"github.com/go-redis/cache/v9"
-	"github.com/redis/go-redis/v9"
 	"os"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/go-redis/cache/v9"
+	"github.com/redis/go-redis/v9"
 )
 
 type UserCock struct {
@@ -20,17 +21,15 @@ type UserCock struct {
 }
 
 func InitializeRedisConnection(log *logging.Logger) (*redis.Client, *cache.Cache) {
-	port := os.Getenv("REDIS_PORT")
-	if port == "" {
-		log.F("REDIS_PORT does not have value, set it in .env file")
-	}
-
 	password := os.Getenv("REDIS_PASSWORD")
 	if password == "" {
 		log.F("REDIS_PASSWORD does not have value, set it in .env file")
 	}
 
-	address := "cache:" + port
+	address := os.Getenv("REDIS_ADDRESS")
+	if address == "" {
+		log.F("REDIS_ADDRESS does not have value, set it in .env file")
+	}
 
 	client := redis.NewClient(&redis.Options{Addr: address, Password: password, DB: 0})
 
