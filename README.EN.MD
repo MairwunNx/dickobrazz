@@ -60,17 +60,11 @@ Dickobrazz works through **inline queries** in Telegram. Simply type `@dickobraz
 3. Choose the option you're interested in from the list
 4. Send the result to chat or view privately
 
-## Compatibility
+## Deployment
 
-- **Telegram Bot API** — works in any chats
-- **Database**: MongoDB 5.0+
-- **Cache**: Redis 6.0+
-- **Runtime**: Go 1.23+
-- **Deployment**: Docker + Docker Compose
+### Dev Containers (recommended for development)
 
-## Installation
-
-### Quick Start with Docker Compose
+The simplest way to run for development — using Dev Containers in VS Code or similar IDEs:
 
 1. Clone the repository:
 ```bash
@@ -78,41 +72,89 @@ git clone https://github.com/mairwunnx/dickobrazz
 cd dickobrazz
 ```
 
-2. Configure environment variables:
+2. Configure only two required tokens (in `.env.dev` file):
 ```bash
-# Copy example configuration
-cp .env.draft .env
-
-# Edit the .env file, filling in necessary variables
+TELEGRAM_TOKEN="your_telegram_bot_token"
+RANDOMORG_TOKEN="your_random_org_api_key"
 ```
+
+3. Open the project in VS Code and select "Reopen in Container"
+
+Everything else (MongoDB, Redis, dependencies) will be configured automatically. Simple and fast!
+
+### Docker Compose (for production)
+
+1. Clone the repository:
+```bash
+git clone https://github.com/mairwunnx/dickobrazz
+cd dickobrazz
+```
+
+2. Configure two required tokens (in `.env` file):
+```bash
+TELEGRAM_TOKEN="your_telegram_bot_token"
+RANDOMORG_TOKEN="your_random_org_api_key"
+```
+
+> **Note**: If needed, configure other environment variables (passwords for Redis and MongoDB).
 
 3. Start services:
 ```bash
 docker compose up -d
 ```
 
-4. Check status:
+### Docker Compose with Ready Image
+
+If you want to use a ready image and manage MongoDB/Redis separately:
+
+1. Declare dickobrazz service in `docker-compose.yml`:
+
+```yaml
+services:
+  dickobrazz:
+    image: ghcr.io/mairwunnx/dickobrazz:latest
+    env_file: .env
+    environment:
+      REDIS_ADDRESS: ${REDIS_ADDRESS}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      MONGODB_URI: ${MONGODB_URI}
+      TELEGRAM_TOKEN: ${TELEGRAM_TOKEN}
+      RANDOMORG_TOKEN: ${RANDOMORG_TOKEN}
+```
+
+> **Note**: You'll need to pass all environment variables from `.env` file or any other convenient way.
+
+2. Declare MongoDB and Redis services in `docker-compose.yml`. 
+> Important: **MongoDB** version should be `8.2+`, and **Redis** should be `8.2+`.
+
+3. Start services:
 ```bash
-docker compose logs dickbot
+docker compose up -d
 ```
 
 ### Build from Source
 
+#### Manual and Direct Build
+
 Requirements:
-- Go 1.23+
-- Docker for containerization
+- Go 1.25+
 
 ```bash
-# Build binary
-go build -o dickbot program.go
+go build -o dickobrazz program.go
+```
 
-# Or build Docker image
+#### Docker Build
+
+Requirements:
+- Docker
+
+```bash
 docker build -t dickobrazz .
 ```
 
 ## Tech Stack
 
-- **Go 1.23** — main development language
+- **Go 1.25** — main development language
 - **Telegram Bot API (tgbotapi/v5)** — Telegram integration
 - **MongoDB + Mongo Driver** — main database with aggregations
 - **Redis + go-redis/cache** — caching with TinyLFU
@@ -120,54 +162,6 @@ docker build -t dickobrazz .
 - **ChaCha8** — cryptographically strong PRNG for fallback
 - **Docker + Docker Compose** — containerization and orchestration
 - **Structured Logging (slog)** — JSON logging with context
-
-## Architecture
-
-### Structure
-```
-dickbot (Go app) ←→ Redis (cache)
-       ↓
-   MongoDB (data)
-```
-
-### Key Components
-
-- **application.go** — main update processing loop
-- **queries.go** — inline query handlers
-- **mongo.go** — MongoDB logic and aggregations
-- **redis.go** — size caching
-- **random.go** — double randomization system
-- **database/pipelines.go** — complex aggregation queries
-- **messages.go** — message templates with formatting
-
-### Inline Queries System
-
-Each query type is handled separately:
-- `CockSize` — main size with caching
-- `CockRace` — season ranking through aggregation
-- `CockRuler` — daily top from Redis
-- `CockDynamic` — complex statistics through MongoDB pipelines
-- `CockSeason` — season history and winners
-
-## Implementation Features
-
-### Randomness System
-- **Random.org** — HTTP API for quantum randomness
-- **ChaCha8** — backup PRNG with fixed seed for determinism during testing
-
-### Caching
-- **Daily Caching** — user size is saved until midnight Moscow time
-- **TinyLFU** — eviction algorithm considering frequency and recency of access
-
-### Season System
-- **Automatic Seasons** — every 3 months from the date of first cock
-- **Respect System** — points for season placements using formula `3000 / place^1.2`
-- **Top-3 Winners** — visual rewards for users
-
-### Performance
-- **Operation Tracing** — execution time of each operation is logged
-- **Aggregation Pipelines** — complex analytics calculated at database level
-- **Batching** — multiple operations combined into pipelines
 
 ## AI Participation
 
