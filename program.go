@@ -1,7 +1,7 @@
 package main
 
 import (
-	"dickobot/application"
+	"dickobrazz/application"
 )
 
 func main() {
