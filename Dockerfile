@@ -33,4 +33,6 @@ COPY --from=builder /app/dickobrazz /usr/local/bin/dickobrazz
 RUN adduser -D -s /bin/sh dickobrazz
 USER dickobrazz
 
+EXPOSE 80
+
 CMD ["/usr/local/bin/dickobrazz"]
