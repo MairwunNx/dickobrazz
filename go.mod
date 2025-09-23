@@ -1,4 +1,4 @@
-module dickobot
+module dickobrazz
 
 go 1.25
 
