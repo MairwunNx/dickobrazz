@@ -9,44 +9,69 @@ services:
       dockerfile: Dockerfile
     command: ["/usr/local/bin/dickobrazz"]
     container_name: dickobrazz_bot
+    cpus: '0.25'
     depends_on: [ dickobrazz-redis, dickobrazz-mongo ]
     env_file: [ .env ]
     environment:
-      TZ: ${TZ}
+      DD_DB_HOST: dickobrazz-mongo
+      MONGODB_URI: ${MONGODB_URI}
+      RANDOMORG_TOKEN: ${RANDOMORG_TOKEN}
       REDIS_ADDRESS: ${REDIS_ADDRESS}
       REDIS_PASSWORD: ${REDIS_PASSWORD}
-      MONGODB_URI: ${MONGODB_URI}
       TELEGRAM_TOKEN: ${TELEGRAM_TOKEN}
-      RANDOMORG_TOKEN: ${RANDOMORG_TOKEN}
-      DD_DB_HOST: dickobrazz-mongo
+      TZ: ${TZ}
+    logging:
+      driver: local
+      options:
+        max-file: '3'
+        max-size: 10m
+    mem_limit: 256m
+    mem_reservation: 64m
     networks: [ base ]
     restart: unless-stopped
   dickobrazz-mongo:
+    command: ["--wiredTigerCacheSizeGB", "0.25"]
     container_name: dickobrazz-mongo
+    cpus: '0.5'
     env_file: [ .env ]
     environment:
-      TZ: ${TZ}
       MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      TZ: ${TZ}
     image: mongo:8.2
+    logging:
+      driver: local
+      options:
+        max-file: '3'
+        max-size: 10m
+    mem_limit: 512m
+    mem_reservation: 256m
     networks: [ base ]
     ports: [ "27017:27017" ]
     restart: unless-stopped
     volumes:
       - dickobrazz-mongo-data:/data/db
   dickobrazz-redis:
-    environment:
-      TZ: ${TZ}
-      REDIS_PASSWORD: ${REDIS_PASSWORD}
     command: >
       redis-server --port 6379
       --loglevel warning
       --save 20 1
       --requirepass ${REDIS_PASSWORD}
     container_name: dickobrazz-redis
+    cpus: '0.5'
     env_file: [ .env ]
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      TZ: ${TZ}
     image: redis:8.2-alpine
+    logging:
+      driver: local
+      options:
+        max-file: '3'
+        max-size: 10m
+    mem_limit: 256m
+    mem_reservation: 128m
     networks: [ base ]
     ports: [ "6379:6379" ]
     restart: unless-stopped
