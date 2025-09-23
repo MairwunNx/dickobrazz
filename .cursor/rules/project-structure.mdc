@@ -1,0 +1,97 @@
+---
+alwaysApply: true
+---
+
+# Dickobrazz - Project Structure 🌶️
+
+## Root Structure
+
+### Main Files
+- **Entry Point**: [program.go](mdc:program.go) – Simple initialization and launch of the application  
+- **Configuration**: [go.mod](mdc:go.mod), [go.sum](mdc:go.sum) – Go module dependencies  
+- **Docker**: [Dockerfile](mdc:Dockerfile), [docker-compose.yaml](mdc:docker-compose.yaml) – Containerization and deployment  
+- **Documentation**: [README.MD](mdc:README.MD), [README.EN.MD](mdc:README.EN.MD) – Project documentation  
+
+### Application Layer (`application/`)
+
+#### Core Application (`application/`)
+- **Purpose**: Main application logic and initialization  
+- **Key Files**:  
+  - [application.go](mdc:application/application.go) – Application struct and main lifecycle management  
+  - [queries.go](mdc:application/queries.go) – Inline query handlers for Telegram bot  
+  - [messages.go](mdc:application/messages.go) – Message templates and formatting  
+
+#### Database Integration (`application/database/`)
+- **Purpose**: MongoDB collections and document structures  
+- **Key Files**:  
+  - [collections.go](mdc:application/database/collections.go) – MongoDB collection accessors  
+  - [documents.go](mdc:application/database/documents.go) – Document structures and validation  
+  - [pipelines.go](mdc:application/database/pipelines.go) – MongoDB aggregation pipelines  
+
+#### External Services
+- **Purpose**: Integration with external APIs and services  
+- **Key Files**:  
+  - [telegram.go](mdc:application/telegram.go) – Telegram Bot API initialization  
+  - [mongo.go](mdc:application/mongo.go) – MongoDB connection and data operations  
+  - [redis.go](mdc:application/redis.go) – Redis connection and caching operations  
+  - [random.go](mdc:application/random.go) – Random number generation (Random.org + ChaCha8 fallback)  
+
+#### Utilities and Helpers
+- **Purpose**: Common utilities and helper functions  
+- **Key Files**:  
+  - [formatting.go](mdc:application/formatting.go) – Text and data formatting utilities  
+  - [emoji.go](mdc:application/emoji.go) – Seasonal emoji selection logic  
+
+#### Specialized Modules
+
+##### datetime/ (`application/datetime/`)
+- **Purpose**: Date and time utilities  
+- **Functions**: Timezone handling, date calculations, seasonal logic  
+
+##### geo/ (`application/geo/`)
+- **Purpose**: Geographic data and region mapping  
+- **Functions**: Russian region mapping for size comparisons  
+
+##### logging/ (`application/logging/`)
+- **Purpose**: Structured logging with context  
+- **Key Files**:  
+  - [logger.go](mdc:application/logging/logger.go) – Main logger implementation  
+  - [builtins.go](mdc:application/logging/builtins.go) – Built-in log fields and constants  
+
+##### timings/ (`application/timings/`)
+- **Purpose**: Performance monitoring and tracing  
+- **Functions**: Execution time tracking, performance metrics  
+
+## Technology Stack
+
+### Core Technologies
+- **Go 1.25** – Modern Go with generics and latest features
+- **MongoDB 8.2+** – Document database with aggregation pipelines
+- **Redis 8.2+** – Caching layer with TinyLFU algorithm
+- **Telegram Bot API** – Inline query-based bot interface
+
+### External Dependencies
+- **Random.org API** – True random number generation
+- **ChaCha8 PRNG** – Cryptographically secure fallback randomization
+- **Docker & Docker Compose** – Containerization and orchestration
+
+## Architectural Principles
+
+### Design Patterns
+- **Simple Structure**: No dependency injection framework, direct initialization
+- **Monolithic Application**: Single binary with clear internal organization  
+- **Inline Query Focus**: Designed primarily for Telegram inline interactions
+- **Dual Randomization**: External true random + local cryptographic fallback
+
+### Data Flow
+1. **User Interaction**: Inline queries through Telegram
+2. **Processing**: Query routing and business logic execution
+3. **Data Access**: MongoDB for persistence, Redis for caching
+4. **Response**: Formatted inline query results with seasonal content
+
+### Key Features Architecture
+- **Daily Limits**: One measurement per user per day (Moscow timezone)
+- **Seasonal Content**: Dynamic emoji and content based on calendar seasons
+- **Leaderboards**: Real-time rankings with MongoDB aggregations
+- **Statistics**: Advanced analytics with percentiles and growth tracking
+- **Caching Strategy**: Redis with intelligent cache invalidation  
