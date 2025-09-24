@@ -217,6 +217,8 @@ func PipelineDynamic(userId int64) mongo.Pipeline {
 			}},
 			{Key: "individual_luck", Value: bson.A{
 				bson.D{{Key: "$match", Value: bson.D{{Key: "user_id", Value: userId}}}},
+				bson.D{{Key: "$sort", Value: bson.D{{Key: "requested_at", Value: -1}}}},
+				bson.D{{Key: "$limit", Value: 5}},
 				bson.D{{Key: "$group", Value: bson.D{
 					{Key: "_id", Value: nil},
 					{Key: "avg_size", Value: bson.D{{Key: "$avg", Value: "$size"}}},
@@ -231,6 +233,8 @@ func PipelineDynamic(userId int64) mongo.Pipeline {
 			}},
 			{Key: "individual_volatility", Value: bson.A{
 				bson.D{{Key: "$match", Value: bson.D{{Key: "user_id", Value: userId}}}},
+				bson.D{{Key: "$sort", Value: bson.D{{Key: "requested_at", Value: -1}}}},
+				bson.D{{Key: "$limit", Value: 5}},
 				bson.D{{Key: "$group", Value: bson.D{
 					{Key: "_id", Value: nil},
 					{Key: "sizes", Value: bson.D{{Key: "$push", Value: "$size"}}},
