@@ -150,6 +150,9 @@ func (app *Application) InlineQueryCockDynamic(log *logging.Logger, query *tgbot
 	
 	totalCocksCount := result.TotalCocksCount[0].TotalCount
 	userCocksCount := result.IndividualCocksCount[0].UserCount
+	
+	userLuckCoefficient := result.IndividualLuck[0].LuckCoefficient
+	userVolatility := result.IndividualVolatility[0].Volatility
 
 	userSeasonWins := app.GetUserSeasonWins(log, query.From.ID)
 	userCockRespect := app.GetUserCockRespect(log, query.From.ID)
@@ -191,6 +194,10 @@ func (app *Application) InlineQueryCockDynamic(log *logging.Logger, query *tgbot
 		/* Всего дёрнуто коков */
 		totalCocksCount,
 		userCocksCount,
+
+		/* Коэффициент везения и волатильность */
+		userLuckCoefficient,
+		userVolatility,
 	)
 
 	return tgbotapi.NewInlineQueryResultArticleMarkdown(query.ID, "Динамика кока", text)

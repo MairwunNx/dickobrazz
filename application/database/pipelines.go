@@ -215,6 +215,42 @@ func PipelineDynamic(userId int64) mongo.Pipeline {
 				bson.D{{Key: "$match", Value: bson.D{{Key: "user_id", Value: userId}}}},
 				bson.D{{Key: "$count", Value: "user_count"}},
 			}},
+			{Key: "individual_luck", Value: bson.A{
+				bson.D{{Key: "$match", Value: bson.D{{Key: "user_id", Value: userId}}}},
+				bson.D{{Key: "$group", Value: bson.D{
+					{Key: "_id", Value: nil},
+					{Key: "avg_size", Value: bson.D{{Key: "$avg", Value: "$size"}}},
+				}}},
+				bson.D{{Key: "$project", Value: bson.D{
+					{Key: "_id", Value: nil},
+					{Key: "luck_coefficient", Value: bson.D{{Key: "$round", Value: bson.A{
+						bson.D{{Key: "$divide", Value: bson.A{"$avg_size", 30.5}}},
+						3,
+					}}}},
+				}}},
+			}},
+			{Key: "individual_volatility", Value: bson.A{
+				bson.D{{Key: "$match", Value: bson.D{{Key: "user_id", Value: userId}}}},
+				bson.D{{Key: "$group", Value: bson.D{
+					{Key: "_id", Value: nil},
+					{Key: "sizes", Value: bson.D{{Key: "$push", Value: "$size"}}},
+					{Key: "avg_size", Value: bson.D{{Key: "$avg", Value: "$size"}}},
+				}}},
+				bson.D{{Key: "$project", Value: bson.D{
+					{Key: "_id", Value: nil},
+					{Key: "volatility", Value: bson.D{{Key: "$round", Value: bson.A{
+						bson.D{{Key: "$sqrt", Value: bson.D{{Key: "$avg", Value: bson.D{{Key: "$map", Value: bson.D{
+							{Key: "input", Value: "$sizes"},
+							{Key: "as", Value: "size"},
+							{Key: "in", Value: bson.D{{Key: "$pow", Value: bson.A{
+								bson.D{{Key: "$subtract", Value: bson.A{"$$size", "$avg_size"}}},
+								2,
+							}}}},
+						}}}}}}},
+						1,
+					}}}},
+				}}},
+			}},
 		}}},
 	}
 }

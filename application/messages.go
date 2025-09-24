@@ -85,6 +85,8 @@ _Гонка коков – это соревнование, в котором к
 📊 *Персональная динамика кока*
 
 ИРК (Индекс Размера Кока): __*%[10]s*__
+Коэффициент везения: *%[28]s* %[29]s
+Волатильность кока: *%[30]s* %[31]s
 
 Общий посчитанный кок: *%[7]s см* 🤯
 В среднем размер кока: *%[8]s см* %[9]s
@@ -171,6 +173,11 @@ func NewMsgCockDynamicsTemplate(
 
 	totalCocksCount int,
 	userCocksCount int,
+
+	/* Коэффициент везения и волатильность */
+
+	userLuckCoefficient float64,
+	userVolatility float64,
 ) string {
 	var userYesterdayChangePercentEmoji string
 	var userYesterdayChangePercentSymbol string
@@ -230,6 +237,10 @@ func NewMsgCockDynamicsTemplate(
 		/* Всего дёрнуто коков */
 		EscapeMarkdownV2(FormatDickSize(totalCocksCount)),
 		EscapeMarkdownV2(FormatDickSize(userCocksCount)),
+
+		/* Коэффициент везения и волатильность */
+		EscapeMarkdownV2(FormatLuckCoefficient(userLuckCoefficient)), LuckEmoji(userLuckCoefficient),
+		EscapeMarkdownV2(FormatVolatility(userVolatility)), VolatilityEmoji(userVolatility),
 	)
 }
 

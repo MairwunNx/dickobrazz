@@ -57,4 +57,12 @@ type DocumentCockDynamic struct {
 	IndividualCocksCount []struct {
 		UserCount int `bson:"user_count"`
 	} `bson:"individual_cocks_count"`
+
+	IndividualLuck []struct {
+		LuckCoefficient float64 `bson:"luck_coefficient"`
+	} `bson:"individual_luck"`
+
+	IndividualVolatility []struct {
+		Volatility float64 `bson:"volatility"`
+	} `bson:"individual_volatility"`
 }

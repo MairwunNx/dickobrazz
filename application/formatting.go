@@ -148,3 +148,37 @@ func FormatDickSize(size int) string {
 func FormatDickIkr(ikr float64) string {
 	return p.Sprintf("%.3f", ikr)
 }
+
+func FormatLuckCoefficient(luck float64) string {
+	return p.Sprintf("%.3f", luck)
+}
+
+func FormatVolatility(volatility float64) string {
+	return p.Sprintf("%.1f", volatility)
+}
+
+func LuckEmoji(luck float64) string {
+	switch {
+	case luck >= 1.2:
+		return "🍀✨"
+	case luck >= 1.1:
+		return "🍀"
+	case luck >= 0.9:
+		return "⚖️"
+	case luck >= 0.8:
+		return "😔"
+	default:
+		return "💀"
+	}
+}
+
+func VolatilityEmoji(volatility float64) string {
+	switch {
+	case volatility < 10:
+		return "📈"
+	case volatility < 20:
+		return "📊"
+	default:
+		return "🎢"
+	}
+}
