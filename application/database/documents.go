@@ -49,4 +49,12 @@ type DocumentCockDynamic struct {
 		RequestedAt time.Time `bson:"requested_at"`
 		Total       int       `bson:"total"`
 	} `bson:"record"`
+
+	TotalCocksCount []struct {
+		TotalCount int `bson:"total_count"`
+	} `bson:"total_cocks_count"`
+
+	IndividualCocksCount []struct {
+		UserCount int `bson:"user_count"`
+	} `bson:"individual_cocks_count"`
 }

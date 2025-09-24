@@ -208,6 +208,13 @@ func PipelineDynamic(userId int64) mongo.Pipeline {
 				bson.D{{Key: "$sort", Value: bson.D{{Key: "total", Value: -1}}}},
 				bson.D{{Key: "$limit", Value: 1}},
 			}},
+			{Key: "total_cocks_count", Value: bson.A{
+				bson.D{{Key: "$count", Value: "total_count"}},
+			}},
+			{Key: "individual_cocks_count", Value: bson.A{
+				bson.D{{Key: "$match", Value: bson.D{{Key: "user_id", Value: userId}}}},
+				bson.D{{Key: "$count", Value: "user_count"}},
+			}},
 		}}},
 	}
 }

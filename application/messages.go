@@ -73,6 +73,7 @@ _Гонка коков – это соревнование, в котором к
 
 Общий посчитанный кок: *%[1]s см* 🤭
 Всего кокеров: *%[2]s* 🫡
+Всего дёрнуто коков: *%[26]s* ✊🏻
 
 День самого большого кока: *%[21]s*, нарастили аж *%[22]sсм* 🍾
 
@@ -88,6 +89,7 @@ _Гонка коков – это соревнование, в котором к
 Общий посчитанный кок: *%[7]s см* 🤯
 В среднем размер кока: *%[8]s см* %[9]s
 Самый большой кок был: *%[11]s см* %[12]s (*%[13]s*)
+Всего дёрнуто коков: *%[27]s* ✊🏻
 
 Процент доминирования: *%[23]s%%* 👑
 
@@ -164,6 +166,11 @@ func NewMsgCockDynamicsTemplate(
 
 	userSeasonWins int,
 	userCockRespect int,
+
+	/* Всего дёрнуто коков */
+
+	totalCocksCount int,
+	userCocksCount int,
 ) string {
 	var userYesterdayChangePercentEmoji string
 	var userYesterdayChangePercentSymbol string
@@ -219,6 +226,10 @@ func NewMsgCockDynamicsTemplate(
 		/* Сезонные достижения */
 		FormatDickSize(userSeasonWins),
 		FormatDickSize(userCockRespect),
+
+		/* Всего дёрнуто коков */
+		EscapeMarkdownV2(FormatDickSize(totalCocksCount)),
+		EscapeMarkdownV2(FormatDickSize(userCocksCount)),
 	)
 }
 
