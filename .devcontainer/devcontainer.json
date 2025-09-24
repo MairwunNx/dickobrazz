@@ -1,21 +1,41 @@
 {
   "name": "dickobrazz-dev",
-  "dockerComposeFile": ["../docker-compose.dev.yml"],
+  "dockerComposeFile": [
+    "../docker-compose.dev.yml"
+  ],
   "service": "dickobrazz",
   "workspaceFolder": "/workspace",
   "features": {
     "ghcr.io/devcontainers/features/common-utils:2": {},
     "ghcr.io/devcontainers/features/git:1": {},
-    "ghcr.io/devcontainers/features/docker-from-docker:1": {}
+    "ghcr.io/devcontainers/features/docker-from-docker:1": {},
+    "ghcr.io/devcontainers/features/go:1": {
+      "version": "1.25"
+    }
   },
   "forwardPorts": [
-    { "hostPort": 6379, "containerPort": 6379 },
-    { "hostPort": 27017, "containerPort": 27017 }
+    6379,
+    27017,
+    80
   ],
+  "portsAttributes": {
+    "6379": {
+      "label": "Redis",
+      "onAutoForward": "notify"
+    },
+    "27017": {
+      "label": "MongoDB",
+      "onAutoForward": "notify"
+    },
+    "80": {
+      "label": "Dickobrazz",
+      "onAutoForward": "openPreview"
+    }
+  },
   "customizations": {
     "vscode": {
       "extensions": [
-        "golang.Go",
+        "golang.go",
         "ms-azuretools.vscode-docker",
         "mongodb.mongodb-vscode",
         "editorconfig.editorconfig",
@@ -25,11 +45,20 @@
       "settings": {
         "go.gopath": "/go",
         "go.toolsManagement.autoUpdate": true,
-        "go.useLanguageServer": true
+        "go.useLanguageServer": true,
+        "go.buildFlags": [],
+        "go.lintTool": "golangci-lint",
+        "go.formatTool": "goimports",
+        "files.eol": "\n"
       }
     }
   },
-  "postCreateCommand": "go mod download",
-  "runServices": ["dickobrazz-redis", "dickobrazz-mongo", "dickobrazz_bot"],
+  "postCreateCommand": "go mod download && go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest",
+  "postStartCommand": "go version && go env",
+  "runServices": [
+    "dickobrazz-redis",
+    "dickobrazz-mongo",
+    "dickobrazz"
+  ],
   "shutdownAction": "stopCompose"
 }
