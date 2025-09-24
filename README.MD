@@ -1,8 +1,8 @@
 # Dickobrazz
 
-[![AI Capable](https://img.shields.io/badge/AI-Capable-brightgreen?style=flat&logo=openai&logoColor=white)](https://github.com/mairwunnx/ximanager)
+[![AI Capable](https://img.shields.io/badge/AI-Capable-brightgreen?style=flat&logo=openai&logoColor=white)](https://github.com/mairwunnx/dickobrazz)
 
-**Язык**: 🇷🇺 Русский | [🇺🇸 English](README.EN.MD)
+**Язык**: 🇷🇺 Русский | [🇺🇸 English](README.EN.MD) | [🇨🇳 中文](README.CN.MD)
 
 🌶️ Дикобраз бот, он же дикобот, способен в точности до сантиметра выдать размер вашего агрегата, краника или валыны, не обижайтесь, если не удалось понтануться большим прибором, это всего лишь шутка.
 

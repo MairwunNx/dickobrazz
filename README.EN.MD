@@ -1,8 +1,8 @@
 # Dickobrazz
 
-[![AI Capable](https://img.shields.io/badge/AI-Capable-brightgreen?style=flat&logo=openai&logoColor=white)](https://github.com/mairwunnx/ximanager)
+[![AI Capable](https://img.shields.io/badge/AI-Capable-brightgreen?style=flat&logo=openai&logoColor=white)](https://github.com/mairwunnx/dickobrazz)
 
-**Language**: [🇷🇺 Russian](README.MD) | 🇺🇸 English
+**Language**: [🇷🇺 Russian](README.MD) | 🇺🇸 English | [🇨🇳 中文](README.CN.MD)
 
 🌶️ Dickobrazz bot, also known as dickobot, can accurately measure your unit, tap, or tackle down to the centimeter. Don't be offended if you can't boast a big device - it's just a joke.
 
