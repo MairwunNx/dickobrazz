@@ -112,7 +112,7 @@ If you want to use a ready image and manage MongoDB/Redis separately:
 ```yaml
 services:
   dickobrazz:
-    image: ghcr.io/mairwunnx/dickobrazz:latest
+    image: ghcr.io/mairwunnx/dickobrazz:1.0.0
     env_file: .env
     environment:
       REDIS_ADDRESS: ${REDIS_ADDRESS}
