@@ -9,7 +9,7 @@ services:
       dockerfile: Dockerfile
     cap_add: [ "SYS_PTRACE" ]
     command: ["/usr/local/bin/dickobrazz"]
-    container_name: dickobrazz_bot
+    container_name: dickobrazz-bot
     cpus: '0.25'
     depends_on: [ dickobrazz-redis, dickobrazz-mongo ]
     env_file: [ .env.dev ]
