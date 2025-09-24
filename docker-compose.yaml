@@ -45,6 +45,12 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
       TZ: ${TZ}
+    healthcheck:
+      interval: 15s
+      retries: 12
+      start_period: 60s
+      test: ["CMD-SHELL", "mongosh --eval 'db.runCommand(\"ping\")' --quiet | grep -q 1"]
+      timeout: 5s
     image: mongo:8.2
     logging:
       driver: local
@@ -70,6 +76,12 @@ services:
     environment:
       REDIS_PASSWORD: ${REDIS_PASSWORD}
       TZ: ${TZ}
+    healthcheck:
+      interval: 10s
+      retries: 3
+      start_period: 10s
+      test: ["CMD", "sh", "-c", "redis-cli -a ${REDIS_PASSWORD} --no-auth-warning ping"]
+      timeout: 5s
     image: redis:8.2-alpine
     logging:
       driver: local
