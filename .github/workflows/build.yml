@@ -107,7 +107,7 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}
           tags: |
             type=raw,value=latest,enable=true
-            type=raw,value=${{ needs.version-check.outputs.version }},enable=true
+            type=raw,value=${{ needs.version-check.outputs.version }},enable=${{ needs.version-check.outputs.version-changed == 'true' }}
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
