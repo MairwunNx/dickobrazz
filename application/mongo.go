@@ -49,7 +49,6 @@ func InitializeMongoConnection(ctx context.Context, log *logging.Logger) *mongo.
 	}
 
 	uri = os.ExpandEnv(uri)
-	log.I("MONGODB_URI", "uri", uri)
 
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI(uri).SetAppName("Dickobrazz").SetTimeout(10*time.Second))
 	if err != nil {
