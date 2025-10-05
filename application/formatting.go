@@ -1,16 +1,25 @@
 package application
 
 import (
+	"dickobrazz/application/datetime"
 	"dickobrazz/application/logging"
 	"fmt"
 	"strings"
+	"time"
 
 	"golang.org/x/text/language"
 	"golang.org/x/text/message"
 )
 
 func GenerateCockSizeText(size int, emoji string) string {
-	return fmt.Sprintf(MsgCockSize, size, emoji)
+	displaySize := size
+	
+	now := datetime.NowTime()
+	if now.Month() == time.April && now.Day() == 1 {
+		displaySize = -size
+	}
+	
+	return fmt.Sprintf(MsgCockSize, displaySize, emoji)
 }
 
 func (app *Application) GenerateCockRulerText(log *logging.Logger, userID int64, cocks []UserCock) string {
