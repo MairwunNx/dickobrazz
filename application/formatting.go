@@ -134,27 +134,37 @@ func fancyMathOrDefault(n int) string {
 	return strconv.Itoa(n)
 }
 
-func GenerateCockSizeText(size int, emoji string) string {
+// FormatCockSizeForDate форматирует размер в зависимости от текущей даты
+func FormatCockSizeForDate(size int) string {
 	displaySize := size
-	
 	now := datetime.NowTime()
+	
+	// 1 апреля - День смеха: отрицательный размер
 	if now.Month() == time.April && now.Day() == 1 {
 		displaySize = -size
 	}
 
+	// 14 марта - День математика: математические выражения
 	if isMathDay(now) {
-		return fmt.Sprintf(MsgCockSize, fancyMathOrDefault(displaySize), emoji)
+		return fancyMathOrDefault(displaySize)
 	}
 
+	// 256-й день года - День программиста: двоичная/шестнадцатеричная нотация
 	if isProgrammersDay(now) {
-		return fmt.Sprintf(MsgCockSize, toProgrammersNotation(displaySize), emoji)
+		return toProgrammersNotation(displaySize)
 	}
 
+	// 31 октября - Хэллоуин: глитченный текст
 	if now.Month() == time.October && now.Day() == 31 {
-		return fmt.Sprintf(MsgCockSize, glitchify(strconv.Itoa(displaySize)), emoji)
+		return glitchify(strconv.Itoa(displaySize))
 	}
 
-	return fmt.Sprintf(MsgCockSize, strconv.Itoa(displaySize), emoji)
+	return strconv.Itoa(displaySize)
+}
+
+func GenerateCockSizeText(size int, emoji string) string {
+	formattedSize := FormatCockSizeForDate(size)
+	return fmt.Sprintf(MsgCockSize, formattedSize, emoji)
 }
 
 func (app *Application) GenerateCockRulerText(log *logging.Logger, userID int64, cocks []UserCock) string {
@@ -165,13 +175,14 @@ func (app *Application) GenerateCockRulerText(log *logging.Logger, userID int64,
 	for index, cock := range cocks {
 		isCurrentUser := cock.UserId == userID
 		emoji := GetPlaceEmoji(index + 1)
+		formattedSize := FormatCockSizeForDate(cock.Size)
 
 		var line string
 		if isCurrentUser {
 			isUserInScoreboard = true
-			line = fmt.Sprintf(MsgCockRulerScoreboardSelected, emoji, EscapeMarkdownV2(cock.UserName), cock.Size, EmojiFromSize(cock.Size))
+			line = fmt.Sprintf(MsgCockRulerScoreboardSelected, emoji, EscapeMarkdownV2(cock.UserName), formattedSize, EmojiFromSize(cock.Size))
 		} else {
-			line = fmt.Sprintf(MsgCockRulerScoreboardDefault, emoji, EscapeMarkdownV2(cock.UserName), cock.Size, EmojiFromSize(cock.Size))
+			line = fmt.Sprintf(MsgCockRulerScoreboardDefault, emoji, EscapeMarkdownV2(cock.UserName), formattedSize, EmojiFromSize(cock.Size))
 		}
 
 		if index < 3 {
@@ -183,7 +194,8 @@ func (app *Application) GenerateCockRulerText(log *logging.Logger, userID int64,
 
 	if !isUserInScoreboard {
 		if userCock := app.GetCockSizeFromCache(log, userID); userCock != nil {
-			others = append(others, fmt.Sprintf(MsgCockRulerScoreboardOut, EscapeMarkdownV2(CommonDots), *userCock, EmojiFromSize(*userCock)))
+			formattedUserCock := FormatCockSizeForDate(*userCock)
+			others = append(others, fmt.Sprintf(MsgCockRulerScoreboardOut, EscapeMarkdownV2(CommonDots), formattedUserCock, EmojiFromSize(*userCock)))
 		} else {
 			others = append(others, MsgCockScoreboardNotFound)
 		}
