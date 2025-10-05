@@ -112,14 +112,19 @@ docker compose up -d
 ```yaml
 services:
   dickobrazz:
-    image: ghcr.io/mairwunnx/dickobrazz:1.0.0
+    image: ghcr.io/mairwunnx/dickobrazz:1.22.0
     env_file: .env
     environment:
+      DD_DB_HOST: dickobrazz-mongo
+      MONGODB_URI: ${MONGODB_URI}
+      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      RANDOMORG_TOKEN: ${RANDOMORG_TOKEN}
       REDIS_ADDRESS: ${REDIS_ADDRESS}
       REDIS_PASSWORD: ${REDIS_PASSWORD}
-      MONGODB_URI: ${MONGODB_URI}
       TELEGRAM_TOKEN: ${TELEGRAM_TOKEN}
-      RANDOMORG_TOKEN: ${RANDOMORG_TOKEN}
+      TZ: ${TZ}
 ```
 
 > **注意**：需要传递 `.env` 文件中的所有环境变量或通过其他方便的方式。

@@ -112,14 +112,19 @@ If you want to use a ready image and manage MongoDB/Redis separately:
 ```yaml
 services:
   dickobrazz:
-    image: ghcr.io/mairwunnx/dickobrazz:1.0.0
+    image: ghcr.io/mairwunnx/dickobrazz:1.22.0
     env_file: .env
     environment:
+      DD_DB_HOST: dickobrazz-mongo
+      MONGODB_URI: ${MONGODB_URI}
+      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      RANDOMORG_TOKEN: ${RANDOMORG_TOKEN}
       REDIS_ADDRESS: ${REDIS_ADDRESS}
       REDIS_PASSWORD: ${REDIS_PASSWORD}
-      MONGODB_URI: ${MONGODB_URI}
       TELEGRAM_TOKEN: ${TELEGRAM_TOKEN}
-      RANDOMORG_TOKEN: ${RANDOMORG_TOKEN}
+      TZ: ${TZ}
 ```
 
 > **Note**: You'll need to pass all environment variables from `.env` file or any other convenient way.
