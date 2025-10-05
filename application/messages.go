@@ -11,10 +11,10 @@ const (
 
 	MsgCockScoreboardNotFound = "\n🥀 *Тебе соболезнуем... потому что не смотрел на кок!*"
 
-	MsgCockSize                    = "Мой кок: *%dсм* %s"
-	MsgCockRulerScoreboardDefault  = "%s @%s *%dсм* %s"
-	MsgCockRulerScoreboardSelected = "%s *@%s %dсм* %s"
-	MsgCockRulerScoreboardOut      = "\n🥀 *И %s твой кок %dсм* %s"
+	MsgCockSize                    = "Мой кок: *%sсм* %s"
+	MsgCockRulerScoreboardDefault  = "%s @%s *%sсм* %s"
+	MsgCockRulerScoreboardSelected = "%s *@%s %sсм* %s"
+	MsgCockRulerScoreboardOut      = "\n🥀 *И %s твой кок %sсм* %s"
 
 	MsgCockRaceScoreboardDefault  = "%s @%s *%sсм*"
 	MsgCockRaceScoreboardSelected = "%s *@%s %sсм*"
