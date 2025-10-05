@@ -48,6 +48,8 @@ func InitializeMongoConnection(ctx context.Context, log *logging.Logger) *mongo.
 		log.F("MONGODB_URI does not have value, set it in .env file")
 	}
 
+  log.I("MONGODB_URI", "uri", uri)
+
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI(uri).SetAppName("Dickobrazz").SetTimeout(10*time.Second))
 	if err != nil {
 		log.F("Failed to connect to MongoDB", logging.InnerError, err)
