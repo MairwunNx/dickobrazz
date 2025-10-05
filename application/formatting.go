@@ -275,7 +275,19 @@ func GetPlaceEmoji(place int) string {
 	case 3:
 		return "🥉"
 	default:
-		return "🤧"
+		now := time.Now()
+		month := now.Month()
+
+		switch month {
+		case time.March, time.April, time.May:
+			return "🫠"
+		case time.June, time.July, time.August:
+			return "🥵"
+		case time.September, time.October, time.November:
+			return "🤧"
+		default:
+			return "🥶"
+		}
 	}
 }
 
