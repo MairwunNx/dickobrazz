@@ -196,7 +196,7 @@ Also, as of September 23, 2025, AI hints (prompts/rules) have been added to the 
 
 ---
 
-![image](./media.jpg)
+![image](./media.png)
 
 🇷🇺 **Made in Russia with love.** ❤️
 

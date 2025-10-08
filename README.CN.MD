@@ -196,7 +196,7 @@ AI用于创建部分文档和提交，以及优化一些MongoDB聚合管道和�
 
 ---
 
-![image](./media.jpg)
+![image](./media.png)
 
 🇷🇺 **俄罗斯制造，用心打造。** ❤️
 
