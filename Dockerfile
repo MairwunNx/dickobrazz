@@ -24,7 +24,7 @@ RUN go build -o /app/dickobrazz \
         -X dickobrazz/application/logging.BuildRv=$(git describe --always --long)"
 RUN chmod +x /app/dickobrazz
 
-FROM busybox:1.36-musl
+FROM busybox:1.37-musl
 
 COPY --from=certs /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=certs /usr/share/zoneinfo /usr/share/zoneinfo
