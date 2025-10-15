@@ -70,6 +70,7 @@ func PipelineDynamic(userId int64) mongo.Pipeline {
 			{Key: "individual_daily_growth", Value: bson.A{
 				bson.D{{Key: "$match", Value: bson.D{{Key: "user_id", Value: userId}}}},
 				bson.D{{Key: "$sort", Value: bson.D{{Key: "requested_at", Value: -1}}}},
+				bson.D{{Key: "$limit", Value: 10}},
 				bson.D{{Key: "$setWindowFields", Value: bson.D{
 					{Key: "partitionBy", Value: "$user_id"},
 					{Key: "sortBy", Value: bson.D{{Key: "requested_at", Value: -1}}},
@@ -125,6 +126,8 @@ func PipelineDynamic(userId int64) mongo.Pipeline {
 			}},
 			{Key: "individual_cock", Value: bson.A{
 				bson.D{{Key: "$match", Value: bson.D{{Key: "user_id", Value: userId}}}},
+				bson.D{{Key: "$sort", Value: bson.D{{Key: "requested_at", Value: -1}}}},
+				bson.D{{Key: "$limit", Value: 10}},
 				bson.D{{Key: "$group", Value: bson.D{
 					{Key: "_id", Value: nil},
 					{Key: "total", Value: bson.D{{Key: "$sum", Value: "$size"}}},
@@ -138,13 +141,31 @@ func PipelineDynamic(userId int64) mongo.Pipeline {
 			}},
 			{Key: "overall", Value: bson.A{
 				bson.D{{Key: "$group", Value: bson.D{
+					{Key: "_id", Value: "$user_id"},
+					{Key: "cocks", Value: bson.D{{Key: "$push", Value: bson.D{
+						{Key: "size", Value: "$size"},
+						{Key: "requested_at", Value: "$requested_at"},
+					}}}},
+				}}},
+				bson.D{{Key: "$project", Value: bson.D{
 					{Key: "_id", Value: nil},
-					{Key: "size", Value: bson.D{{Key: "$sum", Value: "$size"}}},
+					{Key: "last_cocks", Value: bson.D{{Key: "$slice", Value: bson.A{
+						bson.D{{Key: "$sortArray", Value: bson.D{
+							{Key: "input", Value: "$cocks"},
+							{Key: "sortBy", Value: bson.D{{Key: "requested_at", Value: -1}}},
+						}}},
+						10,
+					}}}},
+				}}},
+				bson.D{{Key: "$unwind", Value: "$last_cocks"}},
+				bson.D{{Key: "$group", Value: bson.D{
+					{Key: "_id", Value: nil},
+					{Key: "size", Value: bson.D{{Key: "$sum", Value: "$last_cocks.size"}}},
 					{Key: "median", Value: bson.D{{Key: "$median", Value: bson.D{
-						{Key: "input", Value: "$size"},
+						{Key: "input", Value: "$last_cocks.size"},
 						{Key: "method", Value: "approximate"},
 					}}}},
-					{Key: "average", Value: bson.D{{Key: "$avg", Value: "$size"}}},
+					{Key: "average", Value: bson.D{{Key: "$avg", Value: "$last_cocks.size"}}},
 				}}},
 				bson.D{{Key: "$project", Value: bson.D{
 					{Key: "_id", Value: nil},
@@ -152,7 +173,6 @@ func PipelineDynamic(userId int64) mongo.Pipeline {
 					{Key: "median", Value: 1},
 					{Key: "average", Value: bson.D{{Key: "$round", Value: bson.A{"$average", 0}}}},
 				}}},
-				bson.D{{Key: "$limit", Value: 1}},
 			}},
 			{Key: "uniques", Value: bson.A{
 				bson.D{{Key: "$group", Value: bson.D{{Key: "_id", Value: "$user_id"}}}},
@@ -160,12 +180,30 @@ func PipelineDynamic(userId int64) mongo.Pipeline {
 			}},
 			{Key: "distribution", Value: bson.A{
 				bson.D{{Key: "$group", Value: bson.D{
+					{Key: "_id", Value: "$user_id"},
+					{Key: "cocks", Value: bson.D{{Key: "$push", Value: bson.D{
+						{Key: "size", Value: "$size"},
+						{Key: "requested_at", Value: "$requested_at"},
+					}}}},
+				}}},
+				bson.D{{Key: "$project", Value: bson.D{
+					{Key: "_id", Value: nil},
+					{Key: "last_cocks", Value: bson.D{{Key: "$slice", Value: bson.A{
+						bson.D{{Key: "$sortArray", Value: bson.D{
+							{Key: "input", Value: "$cocks"},
+							{Key: "sortBy", Value: bson.D{{Key: "requested_at", Value: -1}}},
+						}}},
+						10,
+					}}}},
+				}}},
+				bson.D{{Key: "$unwind", Value: "$last_cocks"}},
+				bson.D{{Key: "$group", Value: bson.D{
 					{Key: "_id", Value: nil},
 					{Key: "huge", Value: bson.D{{Key: "$sum", Value: bson.D{{Key: "$cond", Value: bson.A{
-						bson.D{{Key: "$gte", Value: bson.A{"$size", 19}}}, 1, 0,
+						bson.D{{Key: "$gte", Value: bson.A{"$last_cocks.size", 19}}}, 1, 0,
 					}}}}}},
 					{Key: "little", Value: bson.D{{Key: "$sum", Value: bson.D{{Key: "$cond", Value: bson.A{
-						bson.D{{Key: "$lt", Value: bson.A{"$size", 19}}}, 1, 0,
+						bson.D{{Key: "$lt", Value: bson.A{"$last_cocks.size", 19}}}, 1, 0,
 					}}}}}},
 				}}},
 				bson.D{{Key: "$addFields", Value: bson.D{

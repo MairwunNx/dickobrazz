@@ -266,6 +266,55 @@ func (app *Application) GenerateCockRaceScoreboard(log *logging.Logger, userID i
 	}
 }
 
+func (app *Application) GenerateCockLadderScoreboard(log *logging.Logger, userID int64, sizes []UserCockRace) string {
+	var winners []string
+	var others []string
+	isUserInScoreboard := false
+
+	for index, user := range sizes {
+		isCurrentUser := user.UserID == userID
+		emoji := GetPlaceEmoji(index + 1)
+
+		if isCurrentUser {
+			isUserInScoreboard = true
+		}
+
+		var scoreboardLine string
+		if isCurrentUser {
+			scoreboardLine = fmt.Sprintf(MsgCockLadderScoreboardSelected, emoji, EscapeMarkdownV2(user.Nickname), FormatDickSize(int(user.TotalSize)))
+		} else {
+			scoreboardLine = fmt.Sprintf(MsgCockLadderScoreboardDefault, emoji, EscapeMarkdownV2(user.Nickname), FormatDickSize(int(user.TotalSize)))
+		}
+
+		if index < 3 {
+			winners = append(winners, scoreboardLine)
+		} else {
+			others = append(others, scoreboardLine)
+		}
+	}
+
+	if !isUserInScoreboard {
+		if cock := app.GetUserAggregatedCock(log, userID); cock != nil {
+			others = append(others, fmt.Sprintf(MsgCockLadderScoreboardOut, EscapeMarkdownV2(cock.Nickname), FormatDickSize(int(cock.TotalSize))))
+		} else {
+			others = append(others, MsgCockScoreboardNotFound)
+		}
+	}
+
+	if len(others) != 0 {
+		return fmt.Sprintf(
+			MsgCockLadderScoreboardTemplate,
+			strings.Join(winners, "\n"),
+			strings.Join(others, "\n"),
+		)
+	} else {
+		return fmt.Sprintf(
+			MsgCockLadderScoreboardWinnersTemplate,
+			strings.Join(winners, "\n"),
+		)
+	}
+}
+
 func GetPlaceEmoji(place int) string {
 	switch place {
 	case 1:

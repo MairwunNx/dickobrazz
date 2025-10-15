@@ -22,6 +22,9 @@ func (app *Application) HandleInlineQuery(log *logging.Logger, query *tgbotapi.I
 		timings.ReportExecutionForResult(log.With(logging.QueryType, "CockSize"),
 			func() tgbotapi.InlineQueryResultArticle { return app.InlineQueryCockSize(log, query) }, traceQueryCreated,
 		),
+		timings.ReportExecutionForResult(log.With(logging.QueryType, "CockLadder"),
+			func() tgbotapi.InlineQueryResultArticle { return app.InlineQueryCockLadder(log, query) }, traceQueryCreated,
+		),
 		timings.ReportExecutionForResult(log.With(logging.QueryType, "CockRace"),
 			func() tgbotapi.InlineQueryResultArticle { return app.InlineQueryCockRace(log, query) }, traceQueryCreated,
 		),
@@ -76,6 +79,12 @@ func (app *Application) InlineQueryCockSize(log *logging.Logger, query *tgbotapi
 		"Размер кока",
 		strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(text, ".", "\\."), "-", "\\-"), "!", "\\!"),
 	)
+}
+
+func (app *Application) InlineQueryCockLadder(log *logging.Logger, query *tgbotapi.InlineQuery) tgbotapi.InlineQueryResultArticle {
+	cocks := app.AggregateCockSizes(log)
+	text := app.GenerateCockLadderScoreboard(log, query.From.ID, cocks)
+	return InitializeInlineQuery("Ладдер коков", text)
 }
 
 func (app *Application) InlineQueryCockRace(log *logging.Logger, query *tgbotapi.InlineQuery) tgbotapi.InlineQueryResultArticle {

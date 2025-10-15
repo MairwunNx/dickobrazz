@@ -55,6 +55,7 @@ Dickobrazz works through **inline queries** in Telegram. Simply type `@dickobraz
 - **Cock Size** — get your size for today
 - **Cock Ruler** — top players for the day  
 - **Cock Race** — current season ranking
+- **Cock Ladder** — global ranking of participants by total size of cock over all time
 - **Cock Dynamics** — detailed personal statistics
 - **Cock Seasons** — season history and winners
 
@@ -117,7 +118,7 @@ If you want to use a ready image and manage MongoDB/Redis separately:
 ```yaml
 services:
   dickobrazz:
-    image: ghcr.io/mairwunnx/dickobrazz:1.22.0
+    image: ghcr.io/mairwunnx/dickobrazz:1.23.0
     env_file: .env
     environment:
       DD_DB_HOST: dickobrazz-mongo

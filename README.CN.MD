@@ -55,6 +55,7 @@ Dickobrazz 通过 Telegram 的 **内联查询** 工作。只需在任何聊天�
 - **尺寸测量** — 获取今日尺寸
 - **排行榜** — 当日玩家排行榜  
 - **竞赛** — 当前赛季排名
+- **全球排行榜** — 全球玩家累计尺寸排行榜
 - **动态统计** — 详细个人统计
 - **赛季历史** — 赛季历史和获胜者
 
@@ -117,7 +118,7 @@ docker compose up -d
 ```yaml
 services:
   dickobrazz:
-    image: ghcr.io/mairwunnx/dickobrazz:1.22.0
+    image: ghcr.io/mairwunnx/dickobrazz:1.23.0
     env_file: .env
     environment:
       DD_DB_HOST: dickobrazz-mongo
