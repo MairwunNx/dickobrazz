@@ -118,7 +118,7 @@ If you want to use a ready image and manage MongoDB/Redis separately:
 ```yaml
 services:
   dickobrazz:
-    image: ghcr.io/mairwunnx/dickobrazz:1.23.4
+    image: ghcr.io/mairwunnx/dickobrazz:1.24.0
     env_file: .env
     environment:
       DD_DB_HOST: dickobrazz-mongo
