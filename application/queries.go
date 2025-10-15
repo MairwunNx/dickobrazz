@@ -145,7 +145,8 @@ func (app *Application) InlineQueryCockDynamic(log *logging.Logger, query *tgbot
 		return tgbotapi.InlineQueryResultArticle{}
 	}
 
-	individualCock := result.IndividualCock[0]
+	individualCockTotal := result.IndividualCockTotal[0]
+	individualCockRecent := result.IndividualCockRecent[0]
 	individualRecord := result.IndividualRecord[0]
 	individualIrk := result.IndividualIrk[0]
 	individualDominance := result.IndividualDominance[0]
@@ -175,8 +176,8 @@ func (app *Application) InlineQueryCockDynamic(log *logging.Logger, query *tgbot
 		overallRecent.Median,
 
 		/* Персональная динамика кока */
-		individualCock.Total,
-		individualCock.Average,
+		individualCockTotal.Total,
+		individualCockRecent.Average,
 		individualIrk.Irk,
 		individualRecord.Total,
 		individualRecord.RequestedAt,

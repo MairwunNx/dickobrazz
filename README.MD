@@ -118,7 +118,7 @@ docker compose up -d
 ```yaml
 services:
   dickobrazz:
-    image: ghcr.io/mairwunnx/dickobrazz:1.23.3
+    image: ghcr.io/mairwunnx/dickobrazz:1.23.4
     env_file: .env
     environment:
       DD_DB_HOST: dickobrazz-mongo

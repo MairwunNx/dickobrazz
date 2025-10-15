@@ -3,10 +3,13 @@ package database
 import "time"
 
 type DocumentCockDynamic struct {
-	IndividualCock []struct {
-		Total   int `bson:"total"`
+	IndividualCockTotal []struct {
+		Total int `bson:"total"`
+	} `bson:"individual_cock_total"`
+
+	IndividualCockRecent []struct {
 		Average int `bson:"average"`
-	} `bson:"individual_cock"`
+	} `bson:"individual_cock_recent"`
 
 	IndividualIrk []struct {
 		Irk float64 `bson:"irk"`

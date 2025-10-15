@@ -67,10 +67,10 @@ func PipelineDynamic(userId int64) mongo.Pipeline {
 					}}}},
 				}}},
 			}},
-		{Key: "individual_daily_growth", Value: bson.A{
-			bson.D{{Key: "$match", Value: bson.D{{Key: "user_id", Value: userId}}}},
-			bson.D{{Key: "$sort", Value: bson.D{{Key: "requested_at", Value: -1}}}},
-			bson.D{{Key: "$limit", Value: 5}},
+			{Key: "individual_daily_growth", Value: bson.A{
+				bson.D{{Key: "$match", Value: bson.D{{Key: "user_id", Value: userId}}}},
+				bson.D{{Key: "$sort", Value: bson.D{{Key: "requested_at", Value: -1}}}},
+				bson.D{{Key: "$limit", Value: 5}},
 				bson.D{{Key: "$setWindowFields", Value: bson.D{
 					{Key: "partitionBy", Value: "$user_id"},
 					{Key: "sortBy", Value: bson.D{{Key: "requested_at", Value: -1}}},
@@ -124,82 +124,91 @@ func PipelineDynamic(userId int64) mongo.Pipeline {
 					}}}},
 				}}},
 			}},
-		{Key: "individual_cock", Value: bson.A{
-			bson.D{{Key: "$match", Value: bson.D{{Key: "user_id", Value: userId}}}},
-			bson.D{{Key: "$sort", Value: bson.D{{Key: "requested_at", Value: -1}}}},
-			bson.D{{Key: "$limit", Value: 5}},
-			bson.D{{Key: "$group", Value: bson.D{
-				{Key: "_id", Value: nil},
-				{Key: "total", Value: bson.D{{Key: "$sum", Value: "$size"}}},
-				{Key: "avg_val", Value: bson.D{{Key: "$avg", Value: "$size"}}},
-			}}},
-			bson.D{{Key: "$project", Value: bson.D{
-				{Key: "_id", Value: nil},
-				{Key: "total", Value: 1},
-				{Key: "average", Value: bson.D{{Key: "$round", Value: bson.A{"$avg_val", 0}}}},
-			}}},
-		}},
-		{Key: "overall", Value: bson.A{
-			bson.D{{Key: "$group", Value: bson.D{
-				{Key: "_id", Value: nil},
-				{Key: "size", Value: bson.D{{Key: "$sum", Value: "$size"}}},
-			}}},
-		}},
-		{Key: "overall_recent", Value: bson.A{
-			bson.D{{Key: "$group", Value: bson.D{
-				{Key: "_id", Value: "$user_id"},
-				{Key: "cocks", Value: bson.D{{Key: "$push", Value: bson.D{
-					{Key: "size", Value: "$size"},
-					{Key: "requested_at", Value: "$requested_at"},
-				}}}},
-			}}},
-			bson.D{{Key: "$project", Value: bson.D{
-				{Key: "_id", Value: nil},
-				{Key: "last_cocks", Value: bson.D{{Key: "$slice", Value: bson.A{
-					bson.D{{Key: "$sortArray", Value: bson.D{
-						{Key: "input", Value: "$cocks"},
-						{Key: "sortBy", Value: bson.D{{Key: "requested_at", Value: -1}}},
-					}}},
-					5,
-				}}}},
-			}}},
-			bson.D{{Key: "$unwind", Value: "$last_cocks"}},
-			bson.D{{Key: "$group", Value: bson.D{
-				{Key: "_id", Value: nil},
-				{Key: "median", Value: bson.D{{Key: "$median", Value: bson.D{
-					{Key: "input", Value: "$last_cocks.size"},
-					{Key: "method", Value: "approximate"},
-				}}}},
-				{Key: "average", Value: bson.D{{Key: "$avg", Value: "$last_cocks.size"}}},
-			}}},
-			bson.D{{Key: "$project", Value: bson.D{
-				{Key: "_id", Value: nil},
-				{Key: "median", Value: 1},
-				{Key: "average", Value: bson.D{{Key: "$round", Value: bson.A{"$average", 0}}}},
-			}}},
-		}},
+			{Key: "individual_cock_total", Value: bson.A{
+				bson.D{{Key: "$match", Value: bson.D{{Key: "user_id", Value: userId}}}},
+				bson.D{{Key: "$group", Value: bson.D{
+					{Key: "_id", Value: nil},
+					{Key: "total", Value: bson.D{{Key: "$sum", Value: "$size"}}},
+				}}},
+				bson.D{{Key: "$project", Value: bson.D{
+					{Key: "_id", Value: nil},
+					{Key: "total", Value: 1},
+				}}},
+			}},
+			{Key: "individual_cock_recent", Value: bson.A{
+				bson.D{{Key: "$match", Value: bson.D{{Key: "user_id", Value: userId}}}},
+				bson.D{{Key: "$sort", Value: bson.D{{Key: "requested_at", Value: -1}}}},
+				bson.D{{Key: "$limit", Value: 5}},
+				bson.D{{Key: "$group", Value: bson.D{
+					{Key: "_id", Value: nil},
+					{Key: "avg_val", Value: bson.D{{Key: "$avg", Value: "$size"}}},
+				}}},
+				bson.D{{Key: "$project", Value: bson.D{
+					{Key: "_id", Value: nil},
+					{Key: "average", Value: bson.D{{Key: "$round", Value: bson.A{"$avg_val", 0}}}},
+				}}},
+			}},
+			{Key: "overall", Value: bson.A{
+				bson.D{{Key: "$group", Value: bson.D{
+					{Key: "_id", Value: nil},
+					{Key: "size", Value: bson.D{{Key: "$sum", Value: "$size"}}},
+				}}},
+			}},
+			{Key: "overall_recent", Value: bson.A{
+				bson.D{{Key: "$group", Value: bson.D{
+					{Key: "_id", Value: "$user_id"},
+					{Key: "cocks", Value: bson.D{{Key: "$push", Value: bson.D{
+						{Key: "size", Value: "$size"},
+						{Key: "requested_at", Value: "$requested_at"},
+					}}}},
+				}}},
+				bson.D{{Key: "$project", Value: bson.D{
+					{Key: "_id", Value: nil},
+					{Key: "last_cocks", Value: bson.D{{Key: "$slice", Value: bson.A{
+						bson.D{{Key: "$sortArray", Value: bson.D{
+							{Key: "input", Value: "$cocks"},
+							{Key: "sortBy", Value: bson.D{{Key: "requested_at", Value: -1}}},
+						}}},
+						5,
+					}}}},
+				}}},
+				bson.D{{Key: "$unwind", Value: "$last_cocks"}},
+				bson.D{{Key: "$group", Value: bson.D{
+					{Key: "_id", Value: nil},
+					{Key: "median", Value: bson.D{{Key: "$median", Value: bson.D{
+						{Key: "input", Value: "$last_cocks.size"},
+						{Key: "method", Value: "approximate"},
+					}}}},
+					{Key: "average", Value: bson.D{{Key: "$avg", Value: "$last_cocks.size"}}},
+				}}},
+				bson.D{{Key: "$project", Value: bson.D{
+					{Key: "_id", Value: nil},
+					{Key: "median", Value: 1},
+					{Key: "average", Value: bson.D{{Key: "$round", Value: bson.A{"$average", 0}}}},
+				}}},
+			}},
 			{Key: "uniques", Value: bson.A{
 				bson.D{{Key: "$group", Value: bson.D{{Key: "_id", Value: "$user_id"}}}},
 				bson.D{{Key: "$count", Value: "count"}},
 			}},
-		{Key: "distribution", Value: bson.A{
-			bson.D{{Key: "$group", Value: bson.D{
-				{Key: "_id", Value: "$user_id"},
-				{Key: "cocks", Value: bson.D{{Key: "$push", Value: bson.D{
-					{Key: "size", Value: "$size"},
-					{Key: "requested_at", Value: "$requested_at"},
-				}}}},
-			}}},
-			bson.D{{Key: "$project", Value: bson.D{
-				{Key: "_id", Value: nil},
-				{Key: "last_cocks", Value: bson.D{{Key: "$slice", Value: bson.A{
-					bson.D{{Key: "$sortArray", Value: bson.D{
-						{Key: "input", Value: "$cocks"},
-						{Key: "sortBy", Value: bson.D{{Key: "requested_at", Value: -1}}},
-					}}},
-					5,
-				}}}},
-			}}},
+			{Key: "distribution", Value: bson.A{
+				bson.D{{Key: "$group", Value: bson.D{
+					{Key: "_id", Value: "$user_id"},
+					{Key: "cocks", Value: bson.D{{Key: "$push", Value: bson.D{
+						{Key: "size", Value: "$size"},
+						{Key: "requested_at", Value: "$requested_at"},
+					}}}},
+				}}},
+				bson.D{{Key: "$project", Value: bson.D{
+					{Key: "_id", Value: nil},
+					{Key: "last_cocks", Value: bson.D{{Key: "$slice", Value: bson.A{
+						bson.D{{Key: "$sortArray", Value: bson.D{
+							{Key: "input", Value: "$cocks"},
+							{Key: "sortBy", Value: bson.D{{Key: "requested_at", Value: -1}}},
+						}}},
+						5,
+					}}}},
+				}}},
 				bson.D{{Key: "$unwind", Value: "$last_cocks"}},
 				bson.D{{Key: "$group", Value: bson.D{
 					{Key: "_id", Value: nil},
