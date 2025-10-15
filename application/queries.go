@@ -153,6 +153,7 @@ func (app *Application) InlineQueryCockDynamic(log *logging.Logger, query *tgbot
 	individualDailyDynamics := result.IndividualDailyDynamics[0]
 
 	overall := result.Overall[0]
+	overallRecent := result.OverallRecent[0]
 	overallCockers := result.Uniques[0].Count
 	overallDistribution := result.Distribution[0]
 	overallRecord := result.Record[0]
@@ -170,8 +171,8 @@ func (app *Application) InlineQueryCockDynamic(log *logging.Logger, query *tgbot
 		/* Общая динамика коков */
 		overall.Size,
 		overallCockers,
-		overall.Average,
-		overall.Median,
+		overallRecent.Average,
+		overallRecent.Median,
 
 		/* Персональная динамика кока */
 		individualCock.Total,

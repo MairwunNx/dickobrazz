@@ -31,10 +31,13 @@ type DocumentCockDynamic struct {
 	} `bson:"individual_daily_dynamics"`
 
 	Overall []struct {
-		Size    int `bson:"size"`
+		Size int `bson:"size"`
+	} `bson:"overall"`
+
+	OverallRecent []struct {
 		Average int `bson:"average"`
 		Median  int `bson:"median"`
-	} `bson:"overall"`
+	} `bson:"overall_recent"`
 
 	Uniques []struct {
 		Count int `bson:"count"`
