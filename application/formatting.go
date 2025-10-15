@@ -376,6 +376,12 @@ func FormatVolatility(volatility float64) string {
 
 func LuckEmoji(luck float64) string {
 	switch {
+  case luck >= 1.9:
+		return "🌈🦄🍀🤩"
+  case luck >= 1.7:
+		return "🍀🤩"
+	case luck >= 1.5:
+		return "🤩"
 	case luck >= 1.2:
 		return "🍀✨"
 	case luck >= 1.1:
@@ -384,8 +390,12 @@ func LuckEmoji(luck float64) string {
 		return "⚖️"
 	case luck >= 0.8:
 		return "😔"
-	default:
+	case luck >= 0.6:
 		return "💀"
+  case luck >= 0.4:
+    return "🤡"
+	default:
+		return "☠️"
 	}
 }
 
