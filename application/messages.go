@@ -260,7 +260,7 @@ func NewMsgCockDynamicsTemplate(
 
 		/* Коэффициент везения и волатильность */
 		EscapeMarkdownV2(FormatLuckCoefficient(userLuckCoefficient)), LuckEmoji(userLuckCoefficient),
-		EscapeMarkdownV2(FormatVolatility(userVolatility)), VolatilityEmoji(userVolatility),
+		EscapeMarkdownV2(FormatVolatility(userVolatility)), VolatilityDisplay(userVolatility),
 	)
 }
 
