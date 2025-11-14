@@ -376,7 +376,11 @@ func FormatVolatility(volatility float64) string {
 
 func LuckEmoji(luck float64) string {
 	switch {
-  case luck >= 1.9:
+  case luck >= 1.98: // типа бог рандома :)
+		return "👑🌌🌈🦄🍀🤩"
+	case luck >= 1.92:
+		return "🌌🌈🦄🍀🤩"
+  case luck >= 1.833:
 		return "🌈🦄🍀🤩"
   case luck >= 1.7:
 		return "🍀🤩"
@@ -388,24 +392,57 @@ func LuckEmoji(luck float64) string {
 		return "🍀"
 	case luck >= 0.9:
 		return "⚖️"
-	case luck >= 0.8:
+	case luck >= 0.7:
+		return "😕"
+	case luck >= 0.5:
 		return "😔"
-	case luck >= 0.6:
+	case luck >= 0.3:
 		return "💀"
-  case luck >= 0.4:
-    return "🤡"
-	default:
+	case luck >= 0.2: // адовый тильт
 		return "☠️"
+	default:
+		return "🔥☠️🔥"
 	}
 }
 
 func VolatilityEmoji(volatility float64) string {
 	switch {
-	case volatility < 10:
+	case volatility < 1:
+		return "🧱"
+	case volatility < 3:
+		return "🧊"
+	case volatility < 6:
 		return "📈"
-	case volatility < 20:
-		return "📊"
-	default:
+	case volatility < 10:
+		return "📉📈"
+	case volatility < 15:
 		return "🎢"
+	case volatility < 25:
+		return "🎢🌪️"
+	default:
+		return "🌪️💥"
 	}
+}
+
+func VolatilityLabel(volatility float64) string {
+	switch {
+	case volatility < 1:
+		return "каменный"
+	case volatility < 3:
+		return "стабильный"
+	case volatility < 6:
+		return "умеренный"
+	case volatility < 10:
+		return "живой разброс"
+	case volatility < 15:
+		return "неровный"
+	case volatility < 25:
+		return "хаотичный"
+	default:
+		return "полный рандом"
+	}
+}
+
+func VolatilityDisplay(volatility float64) string {
+	return fmt.Sprintf("%s _(%s)_", VolatilityEmoji(volatility), VolatilityLabel(volatility))
 }
