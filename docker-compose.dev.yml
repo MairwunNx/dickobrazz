@@ -58,7 +58,7 @@ services:
       start_period: 60s
       test: ["CMD-SHELL", "mongosh --eval 'db.runCommand(\"ping\")' --quiet | grep -q 1"]
       timeout: 5s
-    image: mongo:8.2.1
+    image: mongo:8.2.2
     logging:
       driver: local
       options:
