@@ -39,6 +39,12 @@ func (app *Application) HandleInlineQuery(log *logging.Logger, query *tgbotapi.I
 		),
 	}
 
+	for i, q := range queries {
+		if article, ok := q.(tgbotapi.InlineQueryResultArticle); ok {
+			log.I("Inline query text preview", "index", i, "title", article.Title, "text_length", len(article.InputMessageContent.(tgbotapi.InputTextMessageContent).Text))
+		}
+	}
+
 	inlines := tgbotapi.InlineConfig{InlineQueryID: query.ID, IsPersonal: true, CacheTime: 60, Results: queries}
 
 	if _, err := timings.ReportExecutionForResultError(log,
