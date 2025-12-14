@@ -57,15 +57,18 @@ func (app *Application) InlineQueryCockSize(log *logging.Logger, query *tgbotapi
 	} else {
 		size = app.rnd.IntN(log, 60)
 
+		// Нормализуем username (генерируем анонимное имя если пустой)
+		normalizedUsername := NormalizeUsername(query.From.UserName, query.From.ID)
+
 		cock := &Cock{
 			ID:          uuid.NewString(),
 			Size:        int32(size),
-			Nickname:    query.From.UserName,
+			Nickname:    normalizedUsername,
 			UserID:      query.From.ID,
 			RequestedAt: datetime.NowTime(),
 		}
 
-		app.SaveCockToCache(log, query.From.ID, query.From.UserName, size)
+		app.SaveCockToCache(log, query.From.ID, normalizedUsername, size)
 		app.SaveCockToMongo(log, cock)
 	}
 
