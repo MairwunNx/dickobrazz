@@ -252,7 +252,7 @@ func (app *Application) InlineQueryCockRuler(log *logging.Logger, query *tgbotap
 	}
 
 	text := app.GenerateCockRulerText(log, query.From.ID, cocks, totalParticipants)
-	return InitializeInlineQuery("Линейка коков", strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(text, ".", "\\."), "-", "\\-"), "!", "\\!"))
+	return InitializeInlineQuery("Линейка коков", text)
 }
 
 func InitializeInlineQuery(title, message string) tgbotapi.InlineQueryResultArticle {
