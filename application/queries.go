@@ -94,9 +94,10 @@ func (app *Application) InlineQueryCockSize(log *logging.Logger, query *tgbotapi
 
 	text = text + "\n\n" + "_" + subtext + "_"
 
-	return InitializeInlineQuery(
+	return InitializeInlineQueryWithThumb(
 		"Размер кока",
 		strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(text, ".", "\\."), "-", "\\-"), "!", "\\!"),
+		"https://files.mairwunnx.com/raw/public/dickobrazz%2FGemini_Generated_Image_z1bfjxz1bfjxz1bf.png",
 	)
 }
 
@@ -104,7 +105,11 @@ func (app *Application) InlineQueryCockLadder(log *logging.Logger, query *tgbota
 	cocks := app.AggregateCockSizes(log)
 	totalParticipants := app.GetTotalCockersCount(log)
 	text := app.GenerateCockLadderScoreboard(log, query.From.ID, cocks, totalParticipants)
-	return InitializeInlineQuery("Ладдер коков", text)
+	return InitializeInlineQueryWithThumb(
+		"Ладдер коков",
+		text,
+		"https://files.mairwunnx.com/raw/public/dickobrazz%2FGemini_Generated_Image_1rh2rr1rh2rr1rh2.png",
+	)
 }
 
 func (app *Application) InlineQueryCockRace(log *logging.Logger, query *tgbotapi.InlineQuery) tgbotapi.InlineQueryResultArticle {
@@ -125,7 +130,11 @@ func (app *Application) InlineQueryCockRace(log *logging.Logger, query *tgbotapi
 	}
 	
 	text := app.GenerateCockRaceScoreboard(log, query.From.ID, cocks, seasonStartDate, totalParticipants, currentSeason)
-	return InitializeInlineQuery("Гонка коков", text)
+	return InitializeInlineQueryWithThumb(
+		"Гонка коков",
+		text,
+		"https://files.mairwunnx.com/raw/public/dickobrazz%2FGemini_Generated_Image_sx0odzsx0odzsx0o.png",
+	)
 }
 
 func (app *Application) InlineQueryCockDynamic(log *logging.Logger, query *tgbotapi.InlineQuery) tgbotapi.InlineQueryResultArticle {
@@ -239,7 +248,9 @@ func (app *Application) InlineQueryCockDynamic(log *logging.Logger, query *tgbot
 		individualGrowthSpeed.GrowthSpeed,
 	)
 
-	return tgbotapi.NewInlineQueryResultArticleMarkdown(query.ID, "Динамика кока", text)
+	article := tgbotapi.NewInlineQueryResultArticleMarkdown(query.ID, "Динамика кока", text)
+	article.ThumbURL = "https://files.mairwunnx.com/raw/public/dickobrazz%2FGemini_Generated_Image_8fkvy78fkvy78fkv.png"
+	return article
 }
 
 func (app *Application) InlineQueryCockSeason(log *logging.Logger, query *tgbotapi.InlineQuery) tgbotapi.InlineQueryResultArticle {
@@ -251,7 +262,11 @@ func (app *Application) InlineQueryCockSeason(log *logging.Logger, query *tgbota
 	}
 	
 	text := NewMsgCockSeasonsFullText(seasons, totalSeasonsCount, getSeasonWinners)
-	return InitializeInlineQuery("Сезоны коков", text)
+	return InitializeInlineQueryWithThumb(
+		"Сезоны коков",
+		text,
+		"https://files.mairwunnx.com/raw/public/dickobrazz%2FGemini_Generated_Image_jr5v5ijr5v5ijr5v.png",
+	)
 }
 
 func (app *Application) InlineQueryCockRuler(log *logging.Logger, query *tgbotapi.InlineQuery) tgbotapi.InlineQueryResultArticle {
@@ -267,7 +282,11 @@ func (app *Application) InlineQueryCockRuler(log *logging.Logger, query *tgbotap
 	}
 
 	text := app.GenerateCockRulerText(log, query.From.ID, cocks, totalParticipants)
-	return InitializeInlineQuery("Линейка коков", text)
+	return InitializeInlineQueryWithThumb(
+		"Линейка коков",
+		text,
+		"https://files.mairwunnx.com/raw/public/dickobrazz%2FGemini_Generated_Image_zt68kzt68kzt68kz.png",
+	)
 }
 
 func (app *Application) InlineQueryCockAchievements(log *logging.Logger, query *tgbotapi.InlineQuery, page int) tgbotapi.InlineQueryResultArticle {
@@ -276,7 +295,11 @@ func (app *Application) InlineQueryCockAchievements(log *logging.Logger, query *
 	// Проверка только для тестового пользователя
 	if userID != 362695653 {
 		text := "🔒 *Кок\\-ачивки временно доступны только для тестирования*\n\n_Скоро будут доступны для всех\\!_"
-		return InitializeInlineQuery("Кок-ачивки", text)
+		return InitializeInlineQueryWithThumb(
+			"Кок-ачивки",
+			text,
+			"https://files.mairwunnx.com/raw/public/dickobrazz%2FGemini_Generated_Image_qkh4tfqkh4tfqkh4.png",
+		)
 	}
 	
 	// Проверяем и обновляем достижения (только для mairwunnx, раз в сутки)
@@ -331,12 +354,19 @@ func (app *Application) InlineQueryCockAchievements(log *logging.Logger, query *
 		text,
 	)
 	article.ReplyMarkup = &kb
+	article.ThumbURL = "https://files.mairwunnx.com/raw/public/dickobrazz%2FGemini_Generated_Image_qkh4tfqkh4tfqkh4.png"
 	
 	return article
 }
 
 func InitializeInlineQuery(title, message string) tgbotapi.InlineQueryResultArticle {
 	return tgbotapi.NewInlineQueryResultArticleMarkdownV2(uuid.NewString(), title, message)
+}
+
+func InitializeInlineQueryWithThumb(title, message, thumbURL string) tgbotapi.InlineQueryResultArticle {
+	article := tgbotapi.NewInlineQueryResultArticleMarkdownV2(uuid.NewString(), title, message)
+	article.ThumbURL = thumbURL
+	return article
 }
 
 func (app *Application) HandleCallbackQuery(log *logging.Logger, callback *tgbotapi.CallbackQuery) {
