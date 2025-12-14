@@ -409,26 +409,44 @@ func (app *Application) HandleCallbackQuery(log *logging.Logger, callback *tgbot
 			tgbotapi.NewInlineKeyboardRow(buttons...),
 		)
 		
-		// Редактируем существующее сообщение
-		editMsg := tgbotapi.NewEditMessageTextAndMarkup(
-			callback.Message.Chat.ID,
-			callback.Message.MessageID,
-			text,
-			kb,
-		)
-		editMsg.ParseMode = "MarkdownV2"
-		
-		if _, err := app.bot.Send(editMsg); err != nil {
-			log.E("Failed to edit message", logging.InnerError, err)
-		}
-		
 		// Отвечаем на callback (убираем "часики" на кнопке)
-		callbackConfig := tgbotapi.NewCallback(callback.ID, "")
-		if _, err := app.bot.Request(callbackConfig); err != nil {
-			log.E("Failed to answer callback query", logging.InnerError, err)
-		}
+		_, _ = app.bot.Request(tgbotapi.NewCallback(callback.ID, ""))
 		
-		log.I("Successfully handled achievements pagination callback", "page", page)
+		// Редактируем существующее сообщение
+		if callback.InlineMessageID != "" {
+			// INLINE message: редактируем по InlineMessageID
+			edit := tgbotapi.EditMessageTextConfig{
+				BaseEdit: tgbotapi.BaseEdit{
+					InlineMessageID: callback.InlineMessageID,
+					ReplyMarkup:     &kb,
+				},
+				Text:      text,
+				ParseMode: "MarkdownV2",
+			}
+			if _, err := app.bot.Request(edit); err != nil {
+				log.E("Failed to edit inline message", logging.InnerError, err)
+			} else {
+				log.I("Successfully edited inline message", "page", page)
+			}
+		} else if callback.Message != nil {
+			// Обычное сообщение в чате: редактируем по chat_id/message_id
+			edit := tgbotapi.NewEditMessageTextAndMarkup(
+				callback.Message.Chat.ID,
+				callback.Message.MessageID,
+				text,
+				kb,
+			)
+			edit.ParseMode = "MarkdownV2"
+			
+			if _, err := app.bot.Request(edit); err != nil {
+				log.E("Failed to edit chat message", logging.InnerError, err)
+			} else {
+				log.I("Successfully edited chat message", "page", page)
+			}
+		} else {
+			// Крайний случай — некуда редактировать
+			log.E("CallbackQuery has neither Message nor InlineMessageID")
+		}
 	} else if data == "ach_noop" {
 		// Просто отвечаем на callback (для кнопки с текущей страницей)
 		callbackConfig := tgbotapi.NewCallback(callback.ID, "")
