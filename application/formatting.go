@@ -253,14 +253,14 @@ func (app *Application) GenerateCockRulerText(log *logging.Logger, userID int64,
 				posEmoji := GetPlaceEmojiForContext(pos)
 				
 				if isCurrentInContext {
-					contextLines = append(contextLines, fmt.Sprintf("%s *@%s — %sсм %s*", posEmoji, EscapeMarkdownV2(normalizedNick), formattedSize, emoji))
+					contextLines = append(contextLines, fmt.Sprintf("%s *@%s — %sсм %s*", posEmoji, EscapeMarkdownV2(normalizedNick), EscapeMarkdownV2(formattedSize), emoji))
 				} else {
-					contextLines = append(contextLines, fmt.Sprintf("%s @%s — *%sсм* %s", posEmoji, EscapeMarkdownV2(normalizedNick), formattedSize, emoji))
+					contextLines = append(contextLines, fmt.Sprintf("%s @%s — *%sсм* %s", posEmoji, EscapeMarkdownV2(normalizedNick), EscapeMarkdownV2(formattedSize), emoji))
 				}
 			}
 			
 			// Добавляем контекст с соседями
-			contextBlock := "\n...\n\n" + strings.Join(contextLines, "\n") + "\n\n..."
+			contextBlock := "\n" + CommonDots + "\n\n" + strings.Join(contextLines, "\n") + "\n\n" + CommonDots
 			others = append(others, contextBlock)
 		} else {
 			others = append(others, MsgCockScoreboardNotFound)
