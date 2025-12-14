@@ -188,6 +188,7 @@ func (app *Application) GenerateCockRulerText(log *logging.Logger, userID int64,
 	var winners []string
 	var others []string
 	isUserInScoreboard := false
+	totalParticipants := len(cocks)
 
 	for index, cock := range cocks {
 		isCurrentUser := cock.UserId == userID
@@ -224,12 +225,14 @@ func (app *Application) GenerateCockRulerText(log *logging.Logger, userID int64,
 	if len(others) != 0 {
 		return fmt.Sprintf(
 			MsgCockRulerScoreboardTemplate,
+			totalParticipants,
 			strings.Join(winners, "\n"),
 			strings.Join(others, "\n"),
 		)
 	} else {
 		return fmt.Sprintf(
 			MsgCockRulerScoreboardWinnersTemplate,
+			totalParticipants,
 			strings.Join(winners, "\n"),
 		)
 	}
@@ -239,6 +242,7 @@ func (app *Application) GenerateCockRaceScoreboard(log *logging.Logger, userID i
 	var winners []string
 	var others []string
 	isUserInScoreboard := false
+	totalParticipants := len(sizes)
 
 	for index, user := range sizes {
 		isCurrentUser := user.UserID == userID
@@ -277,6 +281,7 @@ func (app *Application) GenerateCockRaceScoreboard(log *logging.Logger, userID i
 	if len(others) != 0 {
 		return fmt.Sprintf(
 			MsgCockRaceScoreboardTemplate,
+			totalParticipants,
 			strings.Join(winners, "\n"),
 			strings.Join(others, "\n"),
 			seasonStart,
@@ -284,6 +289,7 @@ func (app *Application) GenerateCockRaceScoreboard(log *logging.Logger, userID i
 	} else {
 		return fmt.Sprintf(
 			MsgCockRaceScoreboardWinnersTemplate,
+			totalParticipants,
 			strings.Join(winners, "\n"),
 			seasonStart,
 		)
@@ -294,6 +300,7 @@ func (app *Application) GenerateCockLadderScoreboard(log *logging.Logger, userID
 	var winners []string
 	var others []string
 	isUserInScoreboard := false
+	totalParticipants := len(sizes)
 
 	for index, user := range sizes {
 		isCurrentUser := user.UserID == userID
@@ -332,12 +339,14 @@ func (app *Application) GenerateCockLadderScoreboard(log *logging.Logger, userID
 	if len(others) != 0 {
 		return fmt.Sprintf(
 			MsgCockLadderScoreboardTemplate,
+			totalParticipants,
 			strings.Join(winners, "\n"),
 			strings.Join(others, "\n"),
 		)
 	} else {
 		return fmt.Sprintf(
 			MsgCockLadderScoreboardWinnersTemplate,
+			totalParticipants,
 			strings.Join(winners, "\n"),
 		)
 	}
