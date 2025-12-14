@@ -192,7 +192,7 @@ func (app *Application) GenerateCockRulerText(log *logging.Logger, userID int64,
 
 	for index, cock := range cocks {
 		isCurrentUser := cock.UserId == userID
-		emoji := GetPlaceEmoji(index + 1)
+		emoji := GetPlaceEmoji(index + 1, isCurrentUser)
 		formattedSize := FormatCockSizeForDate(cock.Size)
 
 		// Нормализуем username (генерируем анонимное имя если пустой)
@@ -230,27 +230,50 @@ func (app *Application) GenerateCockRulerText(log *logging.Logger, userID int64,
 				}
 			}
 			
-			// Получаем 3 пользователей около позиции (до, текущий, после)
-			startIdx := userPosition - 2
-			if startIdx < 0 {
-				startIdx = 0
-			}
-			endIdx := startIdx + 3
-			if endIdx > len(allCocks) {
-				endIdx = len(allCocks)
+			// Определяем диапазон для показа (обрабатываем edge cases)
+			var startIdx, endIdx int
+			totalCount := len(allCocks)
+			
+			if userPosition == 14 {
+				// Сразу после топ-13 - показываем только текущего и следующего
+				startIdx = userPosition - 1  // индекс 13 (14-е место)
+				endIdx = startIdx + 2
+				if endIdx > totalCount {
+					endIdx = totalCount
+				}
+			} else if userPosition >= totalCount - 1 {
+				// Последние 2 места - показываем предыдущего и текущего
+				startIdx = userPosition - 2
+				if startIdx < 13 {
+					startIdx = 13  // не залезаем в топ-13
+				}
+				endIdx = totalCount
+			} else {
+				// Обычный случай - показываем предыдущего, текущего, следующего
+				startIdx = userPosition - 2
+				if startIdx < 13 {
+					startIdx = 13  // не залезаем в топ-13
+				}
+				endIdx = startIdx + 3
+				if endIdx > totalCount {
+					endIdx = totalCount
+				}
 			}
 			
 			neighbors := allCocks[startIdx:endIdx]
 			
 			// Формируем строки для соседей
 			var contextLines []string
+			showTopDots := startIdx > 13  // Показываем точки сверху если есть пропуск после топ-13
+			showBottomDots := endIdx < totalCount  // Показываем точки снизу если есть что-то дальше
+			
 			for idx, neighbor := range neighbors {
 				pos := startIdx + idx + 1
 				isCurrentInContext := neighbor.UserId == userID
 				normalizedNick := NormalizeUsername(neighbor.UserName, neighbor.UserId)
 				formattedSize := FormatCockSizeForDate(neighbor.Size)
 				emoji := EmojiFromSize(neighbor.Size)
-				posEmoji := GetPlaceEmojiForContext(pos)
+				posEmoji := GetPlaceEmojiForContext(pos, isCurrentInContext)
 				
 				if isCurrentInContext {
 					contextLines = append(contextLines, fmt.Sprintf("%s *@%s — %sсм %s*", posEmoji, EscapeMarkdownV2(normalizedNick), EscapeMarkdownV2(formattedSize), emoji))
@@ -260,7 +283,17 @@ func (app *Application) GenerateCockRulerText(log *logging.Logger, userID int64,
 			}
 			
 			// Добавляем контекст с соседями
-			contextBlock := "\n" + CommonDots + "\n\n" + strings.Join(contextLines, "\n") + "\n\n" + CommonDots
+			var contextBlock string
+			if showTopDots && showBottomDots {
+				contextBlock = "\n" + CommonDots + "\n" + strings.Join(contextLines, "\n") + "\n" + CommonDots
+			} else if showTopDots {
+				contextBlock = "\n" + CommonDots + "\n" + strings.Join(contextLines, "\n")
+			} else if showBottomDots {
+				contextBlock = "\n" + strings.Join(contextLines, "\n") + "\n" + CommonDots
+			} else {
+				contextBlock = "\n" + strings.Join(contextLines, "\n")
+			}
+			
 			others = append(others, contextBlock)
 		} else {
 			others = append(others, MsgCockScoreboardNotFound)
@@ -290,7 +323,7 @@ func (app *Application) GenerateCockRaceScoreboard(log *logging.Logger, userID i
 
 	for index, user := range sizes {
 		isCurrentUser := user.UserID == userID
-		emoji := GetPlaceEmoji(index + 1)
+		emoji := GetPlaceEmoji(index + 1, isCurrentUser)
 
 		if isCurrentUser {
 			isUserInScoreboard = true
@@ -327,11 +360,27 @@ func (app *Application) GenerateCockRaceScoreboard(log *logging.Logger, userID i
 				neighbors = app.GetUsersAroundPositionInLadder(log, userPosition)
 			}
 			
-			// Формируем строки для соседей
+			// Формируем строки для соседей с учетом edge cases
 			var contextLines []string
-			startPos := userPosition - 1
-			if startPos < 1 {
-				startPos = 1
+			var showTopDots, showBottomDots bool
+			
+			if userPosition == 14 {
+				// Сразу после топ-13 - показываем только текущего и следующего
+				showTopDots = false
+				showBottomDots = len(neighbors) == 2 && userPosition < totalParticipants
+			} else if userPosition >= totalParticipants - 1 {
+				// Последние 2 места
+				showTopDots = userPosition > 14
+				showBottomDots = false
+			} else {
+				// Обычный случай
+				showTopDots = userPosition > 14
+				showBottomDots = userPosition < totalParticipants
+			}
+			
+			startPos := userPosition - len(neighbors) + 1
+			if userPosition == 14 {
+				startPos = 14
 			}
 			
 			for idx, neighbor := range neighbors {
@@ -339,7 +388,7 @@ func (app *Application) GenerateCockRaceScoreboard(log *logging.Logger, userID i
 				isCurrentInContext := neighbor.UserID == userID
 				normalizedNick := NormalizeUsername(neighbor.Nickname, neighbor.UserID)
 				formattedSize := EscapeMarkdownV2(FormatDickSize(int(neighbor.TotalSize)))
-				posEmoji := GetPlaceEmojiForContext(pos)
+				posEmoji := GetPlaceEmojiForContext(pos, isCurrentInContext)
 				
 				if isCurrentInContext {
 					contextLines = append(contextLines, fmt.Sprintf("%s *@%s — %sсм*", posEmoji, EscapeMarkdownV2(normalizedNick), formattedSize))
@@ -348,8 +397,18 @@ func (app *Application) GenerateCockRaceScoreboard(log *logging.Logger, userID i
 				}
 			}
 			
-			// Добавляем контекст с соседями  
-			contextBlock := "\n" + CommonDots + "\n\n" + strings.Join(contextLines, "\n") + "\n\n" + CommonDots
+			// Добавляем контекст с соседями
+			var contextBlock string
+			if showTopDots && showBottomDots {
+				contextBlock = "\n" + CommonDots + "\n" + strings.Join(contextLines, "\n") + "\n" + CommonDots
+			} else if showTopDots {
+				contextBlock = "\n" + CommonDots + "\n" + strings.Join(contextLines, "\n")
+			} else if showBottomDots {
+				contextBlock = "\n" + strings.Join(contextLines, "\n") + "\n" + CommonDots
+			} else {
+				contextBlock = "\n" + strings.Join(contextLines, "\n")
+			}
+			
 			others = append(others, contextBlock)
 		} else {
 			others = append(others, MsgCockScoreboardNotFound)
@@ -381,7 +440,7 @@ func (app *Application) GenerateCockLadderScoreboard(log *logging.Logger, userID
 
 	for index, user := range sizes {
 		isCurrentUser := user.UserID == userID
-		emoji := GetPlaceEmoji(index + 1)
+		emoji := GetPlaceEmoji(index + 1, isCurrentUser)
 
 		if isCurrentUser {
 			isUserInScoreboard = true
@@ -410,11 +469,27 @@ func (app *Application) GenerateCockLadderScoreboard(log *logging.Logger, userID
 			userPosition := app.GetUserPositionInLadder(log, userID)
 			neighbors := app.GetUsersAroundPositionInLadder(log, userPosition)
 			
-			// Формируем строки для соседей
+			// Формируем строки для соседей с учетом edge cases
 			var contextLines []string
-			startPos := userPosition - 1
-			if startPos < 1 {
-				startPos = 1
+			var showTopDots, showBottomDots bool
+			
+			if userPosition == 14 {
+				// Сразу после топ-13 - показываем только текущего и следующего
+				showTopDots = false
+				showBottomDots = len(neighbors) == 2 && userPosition < totalParticipants
+			} else if userPosition >= totalParticipants - 1 {
+				// Последние 2 места
+				showTopDots = userPosition > 14
+				showBottomDots = false
+			} else {
+				// Обычный случай
+				showTopDots = userPosition > 14
+				showBottomDots = userPosition < totalParticipants
+			}
+			
+			startPos := userPosition - len(neighbors) + 1
+			if userPosition == 14 {
+				startPos = 14
 			}
 			
 			for idx, neighbor := range neighbors {
@@ -422,7 +497,7 @@ func (app *Application) GenerateCockLadderScoreboard(log *logging.Logger, userID
 				isCurrentInContext := neighbor.UserID == userID
 				normalizedNick := NormalizeUsername(neighbor.Nickname, neighbor.UserID)
 				formattedSize := EscapeMarkdownV2(FormatDickSize(int(neighbor.TotalSize)))
-				posEmoji := GetPlaceEmojiForContext(pos)
+				posEmoji := GetPlaceEmojiForContext(pos, isCurrentInContext)
 				
 				if isCurrentInContext {
 					contextLines = append(contextLines, fmt.Sprintf("%s *@%s — %sсм*", posEmoji, EscapeMarkdownV2(normalizedNick), formattedSize))
@@ -432,7 +507,17 @@ func (app *Application) GenerateCockLadderScoreboard(log *logging.Logger, userID
 			}
 			
 			// Добавляем контекст с соседями  
-			contextBlock := "\n" + CommonDots + "\n\n" + strings.Join(contextLines, "\n") + "\n\n" + CommonDots
+			var contextBlock string
+			if showTopDots && showBottomDots {
+				contextBlock = "\n" + CommonDots + "\n" + strings.Join(contextLines, "\n") + "\n" + CommonDots
+			} else if showTopDots {
+				contextBlock = "\n" + CommonDots + "\n" + strings.Join(contextLines, "\n")
+			} else if showBottomDots {
+				contextBlock = "\n" + strings.Join(contextLines, "\n") + "\n" + CommonDots
+			} else {
+				contextBlock = "\n" + strings.Join(contextLines, "\n")
+			}
+			
 			others = append(others, contextBlock)
 		} else {
 			others = append(others, MsgCockScoreboardNotFound)
@@ -455,7 +540,7 @@ func (app *Application) GenerateCockLadderScoreboard(log *logging.Logger, userID
 	}
 }
 
-func GetPlaceEmoji(place int) string {
+func GetPlaceEmoji(place int, isCurrentUser bool) string {
 	switch place {
 	case 1:
 		return "🥇"
@@ -480,12 +565,20 @@ func GetPlaceEmoji(place int) string {
 		}
 		
 		// Для мест 4+ добавляем номер места (точка экранирована для MarkdownV2)
+		// Номер жирный для текущего пользователя
+		if isCurrentUser {
+			return fmt.Sprintf("%s *%d*\\.", emoji, place)
+		}
 		return fmt.Sprintf("%s %d\\.", emoji, place)
 	}
 }
 
 // GetPlaceEmojiForContext возвращает эмодзи для контекста (пользователи вне топ-13)
-func GetPlaceEmojiForContext(place int) string {
+// Параметр bold определяет, делать ли номер жирным (для текущего пользователя)
+func GetPlaceEmojiForContext(place int, bold bool) string {
+	if bold {
+		return fmt.Sprintf("🥀 *%d*\\.", place)
+	}
 	return fmt.Sprintf("🥀 %d\\.", place)
 }
 
