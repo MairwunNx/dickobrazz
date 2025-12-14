@@ -479,14 +479,14 @@ func GetPlaceEmoji(place int) string {
 			emoji = "🥶"
 		}
 		
-		// Для мест 4+ добавляем номер места
-		return fmt.Sprintf("%s %d.", emoji, place)
+		// Для мест 4+ добавляем номер места (точка экранирована для MarkdownV2)
+		return fmt.Sprintf("%s %d\\.", emoji, place)
 	}
 }
 
 // GetPlaceEmojiForContext возвращает эмодзи для контекста (пользователи вне топ-13)
 func GetPlaceEmojiForContext(place int) string {
-	return fmt.Sprintf("🥀 %d.", place)
+	return fmt.Sprintf("🥀 %d\\.", place)
 }
 
 func EscapeMarkdownV2(input string) string {
