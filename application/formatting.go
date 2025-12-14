@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"math/rand"
+	"sort"
 
 	"golang.org/x/text/language"
 	"golang.org/x/text/message"
@@ -214,8 +215,26 @@ func (app *Application) GenerateCockRulerText(log *logging.Logger, userID int64,
 
 	if !isUserInScoreboard {
 		if userCock := app.GetCockSizeFromCache(log, userID); userCock != nil {
+			// Получаем все коки из кеша для определения позиции
+			allCocks := app.GetCockSizesFromCache(log)
+			sort.Slice(allCocks, func(i, j int) bool {
+				return allCocks[i].Size > allCocks[j].Size
+			})
+			
+			userPosition := 0
+			userName := ""
+			for idx, cock := range allCocks {
+				if cock.UserId == userID {
+					userPosition = idx + 1
+					userName = cock.UserName
+					break
+				}
+			}
+			
+			normalizedUsername := NormalizeUsername(userName, userID)
 			formattedUserCock := FormatCockSizeForDate(*userCock)
-			others = append(others, fmt.Sprintf(MsgCockRulerScoreboardOut, CommonDots, formattedUserCock, EmojiFromSize(*userCock)))
+			positionText := EscapeMarkdownV2(FormatDickSize(userPosition))
+			others = append(others, fmt.Sprintf(MsgCockRulerScoreboardOut, positionText, EscapeMarkdownV2(normalizedUsername), formattedUserCock, EmojiFromSize(*userCock)))
 		} else {
 			others = append(others, MsgCockScoreboardNotFound)
 		}
@@ -237,7 +256,7 @@ func (app *Application) GenerateCockRulerText(log *logging.Logger, userID int64,
 	}
 }
 
-func (app *Application) GenerateCockRaceScoreboard(log *logging.Logger, userID int64, sizes []UserCockRace, seasonStart string, totalParticipants int) string {
+func (app *Application) GenerateCockRaceScoreboard(log *logging.Logger, userID int64, sizes []UserCockRace, seasonStart string, totalParticipants int, currentSeason *CockSeason) string {
 	var winners []string
 	var others []string
 	isUserInScoreboard := false
@@ -270,7 +289,17 @@ func (app *Application) GenerateCockRaceScoreboard(log *logging.Logger, userID i
 	if !isUserInScoreboard {
 		if cock := app.GetUserAggregatedCock(log, userID); cock != nil {
 			normalizedNickname := NormalizeUsername(cock.Nickname, cock.UserID)
-			others = append(others, fmt.Sprintf(MsgCockRaceScoreboardOut, EscapeMarkdownV2(normalizedNickname), EscapeMarkdownV2(FormatDickSize(int(cock.TotalSize)))))
+			
+			// Получаем позицию пользователя
+			var userPosition int
+			if currentSeason != nil {
+				userPosition = app.GetUserPositionInSeason(log, userID, *currentSeason)
+			} else {
+				userPosition = app.GetUserPositionInLadder(log, userID)
+			}
+			
+			positionText := EscapeMarkdownV2(FormatDickSize(userPosition))
+			others = append(others, fmt.Sprintf(MsgCockRaceScoreboardOut, positionText, EscapeMarkdownV2(normalizedNickname), EscapeMarkdownV2(FormatDickSize(int(cock.TotalSize)))))
 		} else {
 			others = append(others, MsgCockScoreboardNotFound)
 		}
@@ -327,7 +356,12 @@ func (app *Application) GenerateCockLadderScoreboard(log *logging.Logger, userID
 	if !isUserInScoreboard {
 		if cock := app.GetUserAggregatedCock(log, userID); cock != nil {
 			normalizedNickname := NormalizeUsername(cock.Nickname, cock.UserID)
-			others = append(others, fmt.Sprintf(MsgCockLadderScoreboardOut, EscapeMarkdownV2(normalizedNickname), EscapeMarkdownV2(FormatDickSize(int(cock.TotalSize)))))
+			
+			// Получаем позицию пользователя в ладдере
+			userPosition := app.GetUserPositionInLadder(log, userID)
+			positionText := EscapeMarkdownV2(FormatDickSize(userPosition))
+			
+			others = append(others, fmt.Sprintf(MsgCockLadderScoreboardOut, positionText, EscapeMarkdownV2(normalizedNickname), EscapeMarkdownV2(FormatDickSize(int(cock.TotalSize)))))
 		} else {
 			others = append(others, MsgCockScoreboardNotFound)
 		}

@@ -14,15 +14,15 @@ const (
 	MsgCockSize                    = "Мой кок: *%sсм* %s"
 	MsgCockRulerScoreboardDefault  = "%s @%s *%sсм* %s"
 	MsgCockRulerScoreboardSelected = "%s *@%s %sсм* %s"
-	MsgCockRulerScoreboardOut      = "\n🥀 *И %s твой кок %sсм* %s"
+	MsgCockRulerScoreboardOut      = "\n🥀 *И %s место – @%s с коком %sсм* %s"
 
 	MsgCockRaceScoreboardDefault  = "%s @%s *%sсм*"
 	MsgCockRaceScoreboardSelected = "%s *@%s %sсм*"
-	MsgCockRaceScoreboardOut      = "\n🥀 *И %s твой кок %sсм*"
+	MsgCockRaceScoreboardOut      = "\n🥀 *И %s место – @%s с коком %sсм*"
 
 	MsgCockLadderScoreboardDefault  = "%s @%s *%sсм*"
 	MsgCockLadderScoreboardSelected = "%s *@%s %sсм*"
-	MsgCockLadderScoreboardOut      = "\n🥀 *И %s твой кок %sсм*"
+	MsgCockLadderScoreboardOut      = "\n🥀 *И %s место – @%s с коком %sсм*"
 
 	MsgCockRulerScoreboardTemplate = `*Линейка коков:*
 👥 Участников: *%d*

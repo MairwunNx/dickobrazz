@@ -114,7 +114,7 @@ func (app *Application) InlineQueryCockRace(log *logging.Logger, query *tgbotapi
 		seasonStartDate = "хуй знает когда" // Заглушка для случая если нет активного сезона (чего в целом быть не может, я в это верю.)
 	}
 	
-	text := app.GenerateCockRaceScoreboard(log, query.From.ID, cocks, seasonStartDate, totalParticipants)
+	text := app.GenerateCockRaceScoreboard(log, query.From.ID, cocks, seasonStartDate, totalParticipants, currentSeason)
 	return InitializeInlineQuery("Гонка коков", text)
 }
 

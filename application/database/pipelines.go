@@ -331,6 +331,32 @@ func PipelineTotalCockersCount() mongo.Pipeline {
 	}
 }
 
+func PipelineUserPositionInLadder(userID int64) mongo.Pipeline {
+	return mongo.Pipeline{
+		{{Key: "$group", Value: bson.D{
+			{Key: "_id", Value: "$user_id"},
+			{Key: "total_size", Value: bson.D{{Key: "$sum", Value: "$size"}}},
+		}}},
+		{{Key: "$sort", Value: bson.D{{Key: "total_size", Value: -1}}}},
+		{{Key: "$group", Value: bson.D{
+			{Key: "_id", Value: nil},
+			{Key: "users", Value: bson.D{{Key: "$push", Value: bson.D{
+				{Key: "user_id", Value: "$_id"},
+				{Key: "total_size", Value: "$total_size"},
+			}}}},
+		}}},
+		{{Key: "$unwind", Value: bson.D{
+			{Key: "path", Value: "$users"},
+			{Key: "includeArrayIndex", Value: "position"},
+		}}},
+		{{Key: "$match", Value: bson.D{{Key: "users.user_id", Value: userID}}}},
+		{{Key: "$project", Value: bson.D{
+			{Key: "_id", Value: 0},
+			{Key: "position", Value: bson.D{{Key: "$add", Value: bson.A{"$position", 1}}}},
+		}}},
+	}
+}
+
 func PipelineUserTotalSize(userID int64) mongo.Pipeline {
 	return mongo.Pipeline{
 		{{Key: "$match", Value: bson.D{{Key: "user_id", Value: userID}}}},
@@ -401,6 +427,38 @@ func PipelineSeasonCockersCount(startDate, endDate time.Time) mongo.Pipeline {
 			{Key: "_id", Value: "$user_id"},
 		}}},
 		{{Key: "$count", Value: "total"}},
+	}
+}
+
+func PipelineUserPositionInSeason(userID int64, startDate, endDate time.Time) mongo.Pipeline {
+	return mongo.Pipeline{
+		{{Key: "$match", Value: bson.D{
+			{Key: "requested_at", Value: bson.D{
+				{Key: "$gte", Value: startDate},
+				{Key: "$lt", Value: endDate},
+			}},
+		}}},
+		{{Key: "$group", Value: bson.D{
+			{Key: "_id", Value: "$user_id"},
+			{Key: "total_size", Value: bson.D{{Key: "$sum", Value: "$size"}}},
+		}}},
+		{{Key: "$sort", Value: bson.D{{Key: "total_size", Value: -1}}}},
+		{{Key: "$group", Value: bson.D{
+			{Key: "_id", Value: nil},
+			{Key: "users", Value: bson.D{{Key: "$push", Value: bson.D{
+				{Key: "user_id", Value: "$_id"},
+				{Key: "total_size", Value: "$total_size"},
+			}}}},
+		}}},
+		{{Key: "$unwind", Value: bson.D{
+			{Key: "path", Value: "$users"},
+			{Key: "includeArrayIndex", Value: "position"},
+		}}},
+		{{Key: "$match", Value: bson.D{{Key: "users.user_id", Value: userID}}}},
+		{{Key: "$project", Value: bson.D{
+			{Key: "_id", Value: 0},
+			{Key: "position", Value: bson.D{{Key: "$add", Value: bson.A{"$position", 1}}}},
+		}}},
 	}
 }
 

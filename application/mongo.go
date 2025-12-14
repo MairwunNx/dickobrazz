@@ -210,6 +210,66 @@ func (app *Application) GetSeasonCockersCount(log *logging.Logger, season CockSe
 	return 0
 }
 
+func (app *Application) GetUserPositionInLadder(log *logging.Logger, userID int64) int {
+	collection := database.CollectionCocks(app.db)
+
+	cursor, err := collection.Aggregate(app.ctx, database.PipelineUserPositionInLadder(userID))
+	if err != nil {
+		log.E("Failed to get user position in ladder", logging.InnerError, err)
+		return 0
+	}
+
+	defer func(cursor *mongo.Cursor, ctx context.Context) {
+		err := cursor.Close(ctx)
+		if err != nil {
+			log.E("Failed to close mongo cursor", logging.InnerError, err)
+		}
+	}(cursor, app.ctx)
+
+	var result struct {
+		Position int `bson:"position"`
+	}
+	if cursor.Next(app.ctx) {
+		if err := cursor.Decode(&result); err != nil {
+			log.E("Failed to decode position result", logging.InnerError, err)
+			return 0
+		}
+		return result.Position
+	}
+
+	return 0
+}
+
+func (app *Application) GetUserPositionInSeason(log *logging.Logger, userID int64, season CockSeason) int {
+	collection := database.CollectionCocks(app.db)
+
+	cursor, err := collection.Aggregate(app.ctx, database.PipelineUserPositionInSeason(userID, season.StartDate, season.EndDate))
+	if err != nil {
+		log.E("Failed to get user position in season", logging.InnerError, err)
+		return 0
+	}
+
+	defer func(cursor *mongo.Cursor, ctx context.Context) {
+		err := cursor.Close(ctx)
+		if err != nil {
+			log.E("Failed to close mongo cursor", logging.InnerError, err)
+		}
+	}(cursor, app.ctx)
+
+	var result struct {
+		Position int `bson:"position"`
+	}
+	if cursor.Next(app.ctx) {
+		if err := cursor.Decode(&result); err != nil {
+			log.E("Failed to decode position result", logging.InnerError, err)
+			return 0
+		}
+		return result.Position
+	}
+
+	return 0
+}
+
 func (app *Application) GetFirstCockDate(log *logging.Logger) *time.Time {
 	collection := database.CollectionCocks(app.db)
 	
