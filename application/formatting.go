@@ -276,9 +276,9 @@ func (app *Application) GenerateCockRulerText(log *logging.Logger, userID int64,
 				posEmoji := GetPlaceEmojiForContext(pos, isCurrentInContext)
 				
 				if isCurrentInContext {
-					contextLines = append(contextLines, fmt.Sprintf("%s *@%s — %sсм %s*", posEmoji, EscapeMarkdownV2(normalizedNick), EscapeMarkdownV2(formattedSize), emoji))
+					contextLines = append(contextLines, fmt.Sprintf("%s *@%s %sсм %s*", posEmoji, EscapeMarkdownV2(normalizedNick), EscapeMarkdownV2(formattedSize), emoji))
 				} else {
-					contextLines = append(contextLines, fmt.Sprintf("%s @%s — *%sсм* %s", posEmoji, EscapeMarkdownV2(normalizedNick), EscapeMarkdownV2(formattedSize), emoji))
+					contextLines = append(contextLines, fmt.Sprintf("%s @%s *%sсм* %s", posEmoji, EscapeMarkdownV2(normalizedNick), EscapeMarkdownV2(formattedSize), emoji))
 				}
 			}
 			
@@ -391,9 +391,9 @@ func (app *Application) GenerateCockRaceScoreboard(log *logging.Logger, userID i
 				posEmoji := GetPlaceEmojiForContext(pos, isCurrentInContext)
 				
 				if isCurrentInContext {
-					contextLines = append(contextLines, fmt.Sprintf("%s *@%s — %sсм*", posEmoji, EscapeMarkdownV2(normalizedNick), formattedSize))
+					contextLines = append(contextLines, fmt.Sprintf("%s *@%s %sсм*", posEmoji, EscapeMarkdownV2(normalizedNick), formattedSize))
 				} else {
-					contextLines = append(contextLines, fmt.Sprintf("%s @%s — *%sсм*", posEmoji, EscapeMarkdownV2(normalizedNick), formattedSize))
+					contextLines = append(contextLines, fmt.Sprintf("%s @%s *%sсм*", posEmoji, EscapeMarkdownV2(normalizedNick), formattedSize))
 				}
 			}
 			
@@ -500,9 +500,9 @@ func (app *Application) GenerateCockLadderScoreboard(log *logging.Logger, userID
 				posEmoji := GetPlaceEmojiForContext(pos, isCurrentInContext)
 				
 				if isCurrentInContext {
-					contextLines = append(contextLines, fmt.Sprintf("%s *@%s — %sсм*", posEmoji, EscapeMarkdownV2(normalizedNick), formattedSize))
+					contextLines = append(contextLines, fmt.Sprintf("%s *@%s %sсм*", posEmoji, EscapeMarkdownV2(normalizedNick), formattedSize))
 				} else {
-					contextLines = append(contextLines, fmt.Sprintf("%s @%s — *%sсм*", posEmoji, EscapeMarkdownV2(normalizedNick), formattedSize))
+					contextLines = append(contextLines, fmt.Sprintf("%s @%s *%sсм*", posEmoji, EscapeMarkdownV2(normalizedNick), formattedSize))
 				}
 			}
 			
