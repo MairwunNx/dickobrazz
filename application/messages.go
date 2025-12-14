@@ -97,7 +97,7 @@ _Ладдер коков – глобальный рейтинг участни�
 Всего кокеров: *%[2]s* 🫡
 Всего дёрнуто коков: *%[26]s* ✊🏻
 
-День самого большого кока: *%[21]s*, нарастили аж *%[22]sсм* 🍾
+День самого большого кока: *%[21]s*, нарастили аж *%[22]s см* 🍾
 
 Средний кок в системе _(5 коков)_: *%[3]s см* %[4]s
 Медиана кока в системе _(5 коков)_: *%[5]s см* %[6]s
@@ -147,7 +147,7 @@ _Ладдер коков – глобальный рейтинг участни�
 
 ℹ️ *Три участника* с наибольшим суммарным размером кока получают максимальные *кок\-респекты™*\!`
 
-	MsgCockSeasonWinnerTemplate = "%[1]s *@%[2]s* с коком *%[3]sсм*"
+	MsgCockSeasonWinnerTemplate = "%[1]s *@%[2]s* с коком *%[3]s см*"
 	
 	MsgCockSeasonNoSeasonsTemplate = `*Сезоны коков*\n\nВ данный момент нет активных сезонов\. Следите за обновлениями\!`
 )
@@ -231,51 +231,66 @@ func NewMsgCockDynamicsTemplate(
 	return fmt.Sprintf(
 		MsgCockDynamicsTemplate,
 
-		/* Общая динамика коков */
+		/* 1-2: Общая динамика коков */
+		EscapeMarkdownV2(FormatDickSize(totalCock)),           // %[1]s
+		EscapeMarkdownV2(FormatDickSize(totalUsers)),          // %[2]s
 
-		EscapeMarkdownV2(FormatDickSize(totalCock)),
-		EscapeMarkdownV2(FormatDickSize(totalUsers)),
-		EscapeMarkdownV2(FormatDickSize(totalAvgCock)), EmojiFromSize(totalAvgCock),
-		EscapeMarkdownV2(FormatDickSize(totalMedianCock)), EmojiFromSize(totalMedianCock),
+		/* 3-6: Средний и медианный кок */
+		EscapeMarkdownV2(FormatDickSize(totalAvgCock)),        // %[3]s
+		EmojiFromSize(totalAvgCock),                           // %[4]s
+		EscapeMarkdownV2(FormatDickSize(totalMedianCock)),     // %[5]s
+		EmojiFromSize(totalMedianCock),                        // %[6]s
 
-		/* Персональная динамика кока */
+		/* 7-13: Персональная динамика кока */
+		EscapeMarkdownV2(FormatDickSize(userTotalCock)),       // %[7]s
+		EscapeMarkdownV2(FormatDickSize(userAvgCock)),         // %[8]s
+		EmojiFromSize(userAvgCock),                            // %[9]s
+		EscapeMarkdownV2(FormatDickIkr(userIrk)),              // %[10]s
+		EscapeMarkdownV2(FormatDickSize(userMaxCock)),         // %[11]s
+		EmojiFromSize(userMaxCock),                            // %[12]s
+		userMaxCockDate.Local().Format("02.01.06"),            // %[13]s
 
-		EscapeMarkdownV2(FormatDickSize(userTotalCock)),
-		EscapeMarkdownV2(FormatDickSize(userAvgCock)), EmojiFromSize(userAvgCock),
-		EscapeMarkdownV2(FormatDickIkr(userIrk)),
-		EscapeMarkdownV2(FormatDickSize(userMaxCock)), EmojiFromSize(userMaxCock), userMaxCockDate.Local().Format("02.01.06"),
+		/* 14-18: Кок-активы (дневная и 5 коков динамика) */
+		userYesterdayChangePercentEmoji,                       // %[14]s
+		fmt.Sprintf("%s%s", userYesterdayChangePercentSymbol, FormatDickPercent(userYesterdayChangePercent)), // %[15]s
+		fmt.Sprintf("%s%s", userYesterdayChangePercentSymbol, FormatDickSize(userYesterdayChangeCock)),       // %[16]s
+		fmt.Sprintf("%s%s", userFiveCocksChangeSymbol, FormatDickPercent(userFiveCocksChangePercent)),        // %[17]s
+		fmt.Sprintf("%s%s", userFiveCocksChangeSymbol, FormatDickSize(userFiveCocksChangeCock)),              // %[18]s
 
-		/* Кок-активы */
-		userYesterdayChangePercentEmoji, fmt.Sprintf("%s%s", userYesterdayChangePercentSymbol, FormatDickPercent(userYesterdayChangePercent)), fmt.Sprintf("%s%s", userYesterdayChangePercentSymbol, FormatDickSize(userYesterdayChangeCock)),
-		userFiveCocksChangeEmoji, fmt.Sprintf("%s%s", userFiveCocksChangeSymbol, FormatDickPercent(userFiveCocksChangePercent)), fmt.Sprintf("%s%s", userFiveCocksChangeSymbol, FormatDickSize(userFiveCocksChangeCock)),
+		/* 19-20: Соотношение коков */
+		FormatDickPercent(totalBigCockRatio),                  // %[19]s
+		FormatDickPercent(totalSmallCockRatio),                // %[20]s
 
-		/* Соотношение коков */
+		/* 21-22: Самый большой кок */
+		totalMaxCockDate.Local().Format("02.01.06"),           // %[21]s
+		FormatDickSize(totalMaxCock),                          // %[22]s
 
-		FormatDickPercent(totalBigCockRatio), FormatDickPercent(totalSmallCockRatio),
+		/* 23: % Доминирования */
+		FormatDickPercent(userDominancePercent),               // %[23]s
 
-		/* Самый большой кок */
-		totalMaxCockDate.Local().Format("02.01.06"), FormatDickSize(totalMaxCock),
+		/* 24-25: Сезонные достижения */
+		FormatDickSize(userSeasonWins),                        // %[24]s
+		FormatDickSize(userCockRespect),                       // %[25]s
 
-		/* % Доминирования */
-		FormatDickPercent(userDominancePercent),
+		/* 26-27: Всего дёрнуто коков */
+		EscapeMarkdownV2(FormatDickSize(totalCocksCount)),     // %[26]s
+		EscapeMarkdownV2(FormatDickSize(userCocksCount)),      // %[27]s
 
-		/* Сезонные достижения */
-		FormatDickSize(userSeasonWins),
-		FormatDickSize(userCockRespect),
+		/* 28-31: Коэффициент везения и волатильность */
+		EscapeMarkdownV2(FormatLuckCoefficient(userLuckCoefficient)), // %[28]s
+		LuckDisplay(userLuckCoefficient),                      // %[29]s
+		EscapeMarkdownV2(FormatVolatility(userVolatility)),    // %[30]s
+		VolatilityDisplay(userVolatility),                     // %[31]s
 
-		/* Всего дёрнуто коков */
-		EscapeMarkdownV2(FormatDickSize(totalCocksCount)),
-		EscapeMarkdownV2(FormatDickSize(userCocksCount)),
+		/* 32: Описание ИРК */
+		IrkLabel(userIrk),                                     // %[32]s
 
-		/* Коэффициент везения и волатильность */
-		EscapeMarkdownV2(FormatLuckCoefficient(userLuckCoefficient)), LuckDisplay(userLuckCoefficient),
-		EscapeMarkdownV2(FormatVolatility(userVolatility)), VolatilityDisplay(userVolatility),
-		
-		/* Описание ИРК */
-		IrkLabel(userIrk),
-		
-		/* Скорость прироста кока */
-		EscapeMarkdownV2(FormatDickPercent(userGrowthSpeed)), GrowthSpeedDisplay(userGrowthSpeed),
+		/* 33: Эмодзи динамики за 5 коков */
+		userFiveCocksChangeEmoji,                              // %[33]s
+
+		/* 34-35: Скорость прироста кока */
+		EscapeMarkdownV2(FormatGrowthSpeed(userGrowthSpeed)),   // %[34]s
+		GrowthSpeedDisplay(userGrowthSpeed),                    // %[35]s
 	)
 }
 

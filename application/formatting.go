@@ -832,6 +832,12 @@ func GrowthSpeedDisplay(speed float64) string {
 	return fmt.Sprintf("%s _(%s)_", emoji, label)
 }
 
+// FormatGrowthSpeed форматирует скорость роста кока (в см/день) с 1 знаком после запятой
+func FormatGrowthSpeed(speed float64) string {
+	p := message.NewPrinter(language.Russian)
+	return p.Sprintf("%.1f", speed)
+}
+
 // GenerateAchievementsText генерирует текст списка достижений с пагинацией
 func GenerateAchievementsText(
 	allAchievements []database.Achievement,
