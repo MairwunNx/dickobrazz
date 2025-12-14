@@ -577,3 +577,198 @@ func PipelineAllUsersInSeason(startDate, endDate time.Time) mongo.Pipeline {
 		{{Key: "$sort", Value: bson.D{{Key: "total_size", Value: -1}}}},
 	}
 }
+
+// PipelineCheckAchievements проверяет все условия достижений для пользователя
+func PipelineCheckAchievements(userId int64) mongo.Pipeline {
+	return mongo.Pipeline{
+		{{Key: "$match", Value: bson.D{{Key: "user_id", Value: userId}}}},
+		{{Key: "$facet", Value: bson.D{
+			// 1. Простой счетчик записей (количество дерганий)
+			{Key: "total_pulls", Value: bson.A{
+				bson.D{{Key: "$count", Value: "count"}},
+			}},
+			
+			// 2. Сумма размеров (накопленный размер)
+			{Key: "total_size", Value: bson.A{
+				bson.D{{Key: "$group", Value: bson.D{
+					{Key: "_id", Value: nil},
+					{Key: "total", Value: bson.D{{Key: "$sum", Value: "$size"}}},
+				}}},
+			}},
+			
+			// 3. Конкретные значения
+			{Key: "sniper_30cm", Value: bson.A{
+				bson.D{{Key: "$match", Value: bson.D{{Key: "size", Value: 30}}}},
+				bson.D{{Key: "$count", Value: "count"}},
+			}},
+			{Key: "half_hundred_50cm", Value: bson.A{
+				bson.D{{Key: "$match", Value: bson.D{{Key: "size", Value: 50}}}},
+				bson.D{{Key: "$count", Value: "count"}},
+			}},
+			{Key: "beautiful_numbers", Value: bson.A{
+				bson.D{{Key: "$match", Value: bson.D{{Key: "size", Value: bson.D{{Key: "$in", Value: bson.A{11, 22, 33, 44, 55}}}}}}},
+				bson.D{{Key: "$group", Value: bson.D{
+					{Key: "_id", Value: "$size"},
+				}}},
+				bson.D{{Key: "$count", Value: "count"}},
+			}},
+			
+			// 4. Последовательности (последние записи)
+			{Key: "recent_10", Value: bson.A{
+				bson.D{{Key: "$sort", Value: bson.D{{Key: "requested_at", Value: -1}}}},
+				bson.D{{Key: "$limit", Value: 10}},
+				bson.D{{Key: "$sort", Value: bson.D{{Key: "requested_at", Value: 1}}}},
+			}},
+			
+			// 5. Экстремумы (максимум и минимум)
+			{Key: "max_size", Value: bson.A{
+				bson.D{{Key: "$group", Value: bson.D{
+					{Key: "_id", Value: nil},
+					{Key: "max", Value: bson.D{{Key: "$max", Value: "$size"}}},
+				}}},
+			}},
+			{Key: "min_size", Value: bson.A{
+				bson.D{{Key: "$group", Value: bson.D{
+					{Key: "_id", Value: nil},
+					{Key: "min", Value: bson.D{{Key: "$min", Value: "$size"}}},
+				}}},
+			}},
+			
+			// 6. Временные (ранняя пташка - до 6:00 МСК)
+			{Key: "early_bird", Value: bson.A{
+				bson.D{{Key: "$project", Value: bson.D{
+					{Key: "hour", Value: bson.D{{Key: "$hour", Value: bson.D{
+						{Key: "date", Value: "$requested_at"},
+						{Key: "timezone", Value: "Europe/Moscow"},
+					}}}},
+				}}},
+				bson.D{{Key: "$match", Value: bson.D{{Key: "hour", Value: bson.D{{Key: "$lt", Value: 6}}}}}},
+				bson.D{{Key: "$count", Value: "count"}},
+			}},
+			
+			// 7. Спидраннер (<30 сек после полуночи)
+			{Key: "speedrunner", Value: bson.A{
+				bson.D{{Key: "$project", Value: bson.D{
+					{Key: "hour", Value: bson.D{{Key: "$hour", Value: bson.D{
+						{Key: "date", Value: "$requested_at"},
+						{Key: "timezone", Value: "Europe/Moscow"},
+					}}}},
+					{Key: "minute", Value: bson.D{{Key: "$minute", Value: bson.D{
+						{Key: "date", Value: "$requested_at"},
+						{Key: "timezone", Value: "Europe/Moscow"},
+					}}}},
+					{Key: "second", Value: bson.D{{Key: "$second", Value: bson.D{
+						{Key: "date", Value: "$requested_at"},
+						{Key: "timezone", Value: "Europe/Moscow"},
+					}}}},
+				}}},
+				bson.D{{Key: "$match", Value: bson.D{
+					{Key: "hour", Value: 0},
+					{Key: "minute", Value: 0},
+					{Key: "second", Value: bson.D{{Key: "$lt", Value: 30}}},
+				}}},
+				bson.D{{Key: "$count", Value: "count"}},
+			}},
+			
+			// 8. Праздничные
+			{Key: "valentine", Value: bson.A{
+				bson.D{{Key: "$project", Value: bson.D{
+					{Key: "size", Value: 1},
+					{Key: "month", Value: bson.D{{Key: "$month", Value: "$requested_at"}}},
+					{Key: "day", Value: bson.D{{Key: "$dayOfMonth", Value: "$requested_at"}}},
+				}}},
+				bson.D{{Key: "$match", Value: bson.D{
+					{Key: "month", Value: 2},
+					{Key: "day", Value: 14},
+					{Key: "size", Value: 14},
+				}}},
+				bson.D{{Key: "$count", Value: "count"}},
+			}},
+			{Key: "new_year_gift", Value: bson.A{
+				bson.D{{Key: "$project", Value: bson.D{
+					{Key: "size", Value: 1},
+					{Key: "month", Value: bson.D{{Key: "$month", Value: "$requested_at"}}},
+					{Key: "day", Value: bson.D{{Key: "$dayOfMonth", Value: "$requested_at"}}},
+				}}},
+				bson.D{{Key: "$match", Value: bson.D{
+					{Key: "month", Value: 12},
+					{Key: "day", Value: 31},
+					{Key: "size", Value: bson.D{{Key: "$gte", Value: 60}}},
+				}}},
+				bson.D{{Key: "$count", Value: "count"}},
+			}},
+			
+			// 9. Динамика (молния - рост на 50+см)
+			{Key: "lightning", Value: bson.A{
+				bson.D{{Key: "$sort", Value: bson.D{{Key: "requested_at", Value: 1}}}},
+				bson.D{{Key: "$setWindowFields", Value: bson.D{
+					{Key: "sortBy", Value: bson.D{{Key: "requested_at", Value: 1}}},
+					{Key: "output", Value: bson.D{
+						{Key: "prev_size", Value: bson.D{
+							{Key: "$shift", Value: bson.D{
+								{Key: "output", Value: "$size"},
+								{Key: "by", Value: -1},
+							}},
+						}},
+					}},
+				}}},
+				bson.D{{Key: "$project", Value: bson.D{
+					{Key: "growth", Value: bson.D{{Key: "$subtract", Value: bson.A{"$size", bson.D{{Key: "$ifNull", Value: bson.A{"$prev_size", "$size"}}}}}}},
+				}}},
+				bson.D{{Key: "$match", Value: bson.D{{Key: "growth", Value: bson.D{{Key: "$gte", Value: 50}}}}}},
+				bson.D{{Key: "$count", Value: "count"}},
+			}},
+			
+			// 10. Последние 31 кок для сложных коллекций
+			{Key: "last_31", Value: bson.A{
+				bson.D{{Key: "$sort", Value: bson.D{{Key: "requested_at", Value: -1}}}},
+				bson.D{{Key: "$limit", Value: 31}},
+			}},
+		}}},
+	}
+}
+
+// PipelineGlobalMaxMin возвращает глобальные максимум и минимум
+func PipelineGlobalMaxMin() mongo.Pipeline {
+	return mongo.Pipeline{
+		{{Key: "$group", Value: bson.D{
+			{Key: "_id", Value: nil},
+			{Key: "max", Value: bson.D{{Key: "$max", Value: "$size"}}},
+			{Key: "min", Value: bson.D{{Key: "$min", Value: "$size"}}},
+		}}},
+	}
+}
+
+// PipelineCountSeasons подсчитывает количество уникальных сезонов для пользователя
+func PipelineCountSeasons(userId int64) mongo.Pipeline {
+	return mongo.Pipeline{
+		{{Key: "$match", Value: bson.D{{Key: "user_id", Value: userId}}}},
+		{{Key: "$group", Value: bson.D{
+			{Key: "_id", Value: "$season_name"},
+		}}},
+		{{Key: "$count", Value: "count"}},
+	}
+}
+
+// PipelineCheckTraveler проверяет, получил ли пользователь все размеры (регионы)
+func PipelineCheckTraveler(userId int64) mongo.Pipeline {
+	return mongo.Pipeline{
+		{{Key: "$match", Value: bson.D{{Key: "user_id", Value: userId}}}},
+		{{Key: "$group", Value: bson.D{
+			{Key: "_id", Value: "$size"},
+		}}},
+		{{Key: "$count", Value: "unique_sizes"}},
+	}
+}
+
+// PipelineCheckMuscovite проверяет, получил ли пользователь размер 50см 5 раз за последние 31 день
+func PipelineCheckMuscovite(userId int64, startDate time.Time) mongo.Pipeline {
+	return mongo.Pipeline{
+		{{Key: "$match", Value: bson.D{
+			{Key: "user_id", Value: userId},
+			{Key: "size", Value: 50},
+			{Key: "requested_at", Value: bson.D{{Key: "$gte", Value: startDate}}},
+		}}},
+		{{Key: "$count", Value: "count"}},
+	}
+}

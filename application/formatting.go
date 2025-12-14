@@ -1,6 +1,7 @@
 package application
 
 import (
+	"dickobrazz/application/database"
 	"dickobrazz/application/datetime"
 	"dickobrazz/application/logging"
 	"fmt"
@@ -829,4 +830,98 @@ func GrowthSpeedDisplay(speed float64) string {
 	emoji := GrowthSpeedEmoji(speed)
 	label := GrowthSpeedLabel(speed)
 	return fmt.Sprintf("%s _(%s)_", emoji, label)
+}
+
+// GenerateAchievementsText генерирует текст списка достижений с пагинацией
+func GenerateAchievementsText(
+	allAchievements []database.Achievement,
+	userAchievements map[string]*database.DocumentUserAchievement,
+	page int,
+	itemsPerPage int,
+) (string, int, int, int) {
+	// Сортируем достижения: сначала выполненные, затем в порядке определения
+	type AchievementWithStatus struct {
+		Achievement database.Achievement
+		UserAch     *database.DocumentUserAchievement
+		IsCompleted bool
+	}
+
+	achievementsWithStatus := make([]AchievementWithStatus, 0, len(allAchievements))
+	completedCount := 0
+	totalRespects := 0
+
+	for _, ach := range allAchievements {
+		userAch, exists := userAchievements[ach.ID]
+		isCompleted := exists && userAch.Completed
+		
+		achievementsWithStatus = append(achievementsWithStatus, AchievementWithStatus{
+			Achievement: ach,
+			UserAch:     userAch,
+			IsCompleted: isCompleted,
+		})
+
+		if isCompleted {
+			completedCount++
+			totalRespects += ach.Respects
+		}
+	}
+
+	// Сортируем: выполненные в начало
+	sort.Slice(achievementsWithStatus, func(i, j int) bool {
+		if achievementsWithStatus[i].IsCompleted != achievementsWithStatus[j].IsCompleted {
+			return achievementsWithStatus[i].IsCompleted
+		}
+		return false // Остальные в порядке определения
+	})
+
+	// Вычисляем пагинацию
+	totalPages := (len(achievementsWithStatus) + itemsPerPage - 1) / itemsPerPage
+	if page < 1 {
+		page = 1
+	}
+	if page > totalPages {
+		page = totalPages
+	}
+
+	startIdx := (page - 1) * itemsPerPage
+	endIdx := startIdx + itemsPerPage
+	if endIdx > len(achievementsWithStatus) {
+		endIdx = len(achievementsWithStatus)
+	}
+
+	// Генерируем текст для текущей страницы
+	var lines []string
+	for i := startIdx; i < endIdx; i++ {
+		achStatus := achievementsWithStatus[i]
+		line := FormatAchievementLine(achStatus.Achievement, achStatus.UserAch, achStatus.IsCompleted)
+		lines = append(lines, line)
+	}
+
+	achievementsList := strings.Join(lines, "\n")
+
+	// Вычисляем процент
+	percentComplete := 0
+	if len(allAchievements) > 0 {
+		percentComplete = (completedCount * 100) / len(allAchievements)
+	}
+
+	return achievementsList, completedCount, totalRespects, percentComplete
+}
+
+// FormatAchievementLine форматирует одну строку достижения
+func FormatAchievementLine(ach database.Achievement, userAch *database.DocumentUserAchievement, isCompleted bool) string {
+	escapedName := EscapeMarkdownV2(ach.Name)
+	escapedDesc := EscapeMarkdownV2(ach.Description)
+	
+	if isCompleted {
+		// Выполненное достижение
+		return fmt.Sprintf("✅ %s *%s* \\- %s", ach.Emoji, escapedName, escapedDesc)
+	} else if userAch != nil && userAch.Progress > 0 && ach.MaxProgress > 0 {
+		// В процессе выполнения
+		return fmt.Sprintf("⏳ %s *%s* \\(%d/%d\\) \\- %s", 
+			ach.Emoji, escapedName, userAch.Progress, ach.MaxProgress, escapedDesc)
+	} else {
+		// Не выполнено
+		return fmt.Sprintf("❌ %s *%s* \\- %s", ach.Emoji, escapedName, escapedDesc)
+	}
 }

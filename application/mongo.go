@@ -374,6 +374,7 @@ func (app *Application) GetUserSeasonWins(log *logging.Logger, userID int64) int
 }
 
 func (app *Application) GetUserCockRespect(log *logging.Logger, userID int64) int {
+	// Респекты из сезонов
 	seasons := app.GetAllSeasonsForStats(log)
 	totalRespect := 0
 	
@@ -383,6 +384,10 @@ func (app *Application) GetUserCockRespect(log *logging.Logger, userID int64) in
 			totalRespect += respect
 		}
 	}
+	
+	// Добавляем респекты из достижений
+	achievementRespects := app.GetUserAchievementRespects(log, userID)
+	totalRespect += achievementRespects
 	
 	return totalRespect
 }
@@ -556,4 +561,457 @@ func (app *Application) GetUsersAroundPositionInSeason(log *logging.Logger, posi
 	}
 
 	return results
+}
+
+// GetUserAchievements получает все достижения пользователя
+func (app *Application) GetUserAchievements(log *logging.Logger, userID int64) map[string]*database.DocumentUserAchievement {
+	collection := database.CollectionAchievements(app.db)
+
+	cursor, err := collection.Find(app.ctx, map[string]interface{}{"user_id": userID})
+	if err != nil {
+		log.E("Failed to get user achievements", logging.InnerError, err)
+		return make(map[string]*database.DocumentUserAchievement)
+	}
+
+	defer func(cursor *mongo.Cursor, ctx context.Context) {
+		err := cursor.Close(ctx)
+		if err != nil {
+			log.E("Failed to close mongo cursor", logging.InnerError, err)
+		}
+	}(cursor, app.ctx)
+
+	var achievements []*database.DocumentUserAchievement
+	if err = cursor.All(app.ctx, &achievements); err != nil {
+		log.E("Failed to parse user achievements", logging.InnerError, err)
+		return make(map[string]*database.DocumentUserAchievement)
+	}
+
+	// Преобразуем в map для быстрого доступа
+	achievementMap := make(map[string]*database.DocumentUserAchievement)
+	for _, ach := range achievements {
+		achievementMap[ach.AchievementID] = ach
+	}
+
+	return achievementMap
+}
+
+// GetUserAchievementRespects подсчитывает общее количество кок-респектов из достижений
+func (app *Application) GetUserAchievementRespects(log *logging.Logger, userID int64) int {
+	// Проверка только для тестового пользователя
+	if userID != 362695653 {
+		return 0
+	}
+	
+	userAchievements := app.GetUserAchievements(log, userID)
+	totalRespects := 0
+
+	for achID, userAch := range userAchievements {
+		if userAch.Completed {
+			ach := GetAchievementByID(achID)
+			if ach != nil {
+				totalRespects += ach.Respects
+			}
+		}
+	}
+
+	return totalRespects
+}
+
+// CheckAndUpdateAchievements проверяет и обновляет достижения пользователя (только для mairwunnx)
+func (app *Application) CheckAndUpdateAchievements(log *logging.Logger, userID int64) {
+	// Проверка только для тестового пользователя
+	if userID != 362695653 {
+		return
+	}
+
+	// Получаем текущие достижения пользователя
+	userAchievements := app.GetUserAchievements(log, userID)
+
+	// Проверяем, когда последний раз проверяли достижения
+	now := time.Now()
+	for _, ach := range userAchievements {
+		if !ach.LastCheckedAt.IsZero() {
+			moscowTime := ach.LastCheckedAt.In(time.FixedZone("MSK", 3*60*60))
+			todayMoscow := now.In(time.FixedZone("MSK", 3*60*60))
+			
+			// Если уже проверяли сегодня, выходим
+			if moscowTime.Year() == todayMoscow.Year() &&
+				moscowTime.Month() == todayMoscow.Month() &&
+				moscowTime.Day() == todayMoscow.Day() {
+				log.I("Achievements already checked today")
+				return
+			}
+		}
+		break // Достаточно проверить одну запись
+	}
+
+	// Запускаем пайплайн проверки
+	collection := database.CollectionCocks(app.db)
+	cursor, err := collection.Aggregate(app.ctx, database.PipelineCheckAchievements(userID))
+	if err != nil {
+		log.E("Failed to check achievements", logging.InnerError, err)
+		return
+	}
+
+	defer func(cursor *mongo.Cursor, ctx context.Context) {
+		err := cursor.Close(ctx)
+		if err != nil {
+			log.E("Failed to close mongo cursor", logging.InnerError, err)
+		}
+	}(cursor, app.ctx)
+
+	var results []map[string]interface{}
+	if err = cursor.All(app.ctx, &results); err != nil {
+		log.E("Failed to parse achievement check results", logging.InnerError, err)
+		return
+	}
+
+	if len(results) == 0 {
+		log.E("No results from achievement check pipeline")
+		return
+	}
+
+	data := results[0]
+
+	// Получаем глобальные максимум и минимум
+	globalCursor, err := collection.Aggregate(app.ctx, database.PipelineGlobalMaxMin())
+	if err != nil {
+		log.E("Failed to get global max/min", logging.InnerError, err)
+		return
+	}
+	defer globalCursor.Close(app.ctx)
+
+	var globalResults []map[string]interface{}
+	if err = globalCursor.All(app.ctx, &globalResults); err != nil {
+		log.E("Failed to parse global max/min", logging.InnerError, err)
+		return
+	}
+
+	var globalMax, globalMin int32
+	if len(globalResults) > 0 {
+		if max, ok := globalResults[0]["max"].(int32); ok {
+			globalMax = max
+		}
+		if min, ok := globalResults[0]["min"].(int32); ok {
+			globalMin = min
+		}
+	}
+
+	// Обновляем достижения
+	achievementCollection := database.CollectionAchievements(app.db)
+
+	// Функция для обновления/создания достижения
+	updateAchievement := func(achID string, completed bool, progress int) {
+		filter := map[string]interface{}{
+			"user_id":        userID,
+			"achievement_id": achID,
+		}
+
+		existingAch := userAchievements[achID]
+		if existingAch != nil && existingAch.Completed {
+			// Уже выполнено, не обновляем
+			return
+		}
+
+		update := map[string]interface{}{
+			"$set": map[string]interface{}{
+				"user_id":         userID,
+				"achievement_id":  achID,
+				"completed":       completed,
+				"progress":        progress,
+				"last_checked_at": now,
+			},
+		}
+
+		if completed && (existingAch == nil || !existingAch.Completed) {
+			update["$set"].(map[string]interface{})["completed_at"] = now
+		}
+
+		opts := options.Update().SetUpsert(true)
+		_, err := achievementCollection.UpdateOne(app.ctx, filter, update, opts)
+		if err != nil {
+			log.E("Failed to update achievement", "achievement_id", achID, logging.InnerError, err)
+		}
+	}
+
+	// Проверяем достижения по количеству дерганий
+	if totalPulls, ok := data["total_pulls"].([]interface{}); ok && len(totalPulls) > 0 {
+		if pullData, ok := totalPulls[0].(map[string]interface{}); ok {
+			if count, ok := pullData["count"].(int32); ok {
+				updateAchievement("not_rubbed_yet", count >= 10, int(count))
+				updateAchievement("diary", count >= 31, int(count))
+				updateAchievement("skillful_hands", count >= 100, int(count))
+				updateAchievement("anniversary", count >= 365, int(count))
+				updateAchievement("wonder_stranger", count >= 500, int(count))
+				updateAchievement("bazooka_hands", count >= 1000, int(count))
+				updateAchievement("annihilator_cannon", count >= 5000, int(count))
+			}
+		}
+	}
+
+	// Проверяем достижения по накопленному размеру
+	if totalSize, ok := data["total_size"].([]interface{}); ok && len(totalSize) > 0 {
+		if sizeData, ok := totalSize[0].(map[string]interface{}); ok {
+			if total, ok := sizeData["total"].(int32); ok {
+				updateAchievement("golden_hundred", total >= 100, int(total))
+				updateAchievement("solid_thousand", total >= 1000, int(total))
+				updateAchievement("five_k", total >= 5000, int(total))
+				updateAchievement("golden_cock", total >= 10000, int(total))
+				updateAchievement("cosmic_cock", total >= 20000, int(total))
+				updateAchievement("greek_myth", total >= 30000, int(total))
+			}
+		}
+	}
+
+	// Проверяем достижение "Снайпер" (30см 5 раз)
+	if sniper, ok := data["sniper_30cm"].([]interface{}); ok && len(sniper) > 0 {
+		if sniperData, ok := sniper[0].(map[string]interface{}); ok {
+			if count, ok := sniperData["count"].(int32); ok {
+				updateAchievement("sniper", count >= 5, int(count))
+			}
+		}
+	}
+
+	// Проверяем достижение "Полсотни" (50см)
+	if halfHundred, ok := data["half_hundred_50cm"].([]interface{}); ok && len(halfHundred) > 0 {
+		if hhData, ok := halfHundred[0].(map[string]interface{}); ok {
+			if count, ok := hhData["count"].(int32); ok {
+				updateAchievement("half_hundred", count >= 1, int(count))
+			}
+		}
+	}
+
+	// Проверяем "Коллекционер чисел"
+	if beautifulNumbers, ok := data["beautiful_numbers"].([]interface{}); ok && len(beautifulNumbers) > 0 {
+		if bnData, ok := beautifulNumbers[0].(map[string]interface{}); ok {
+			if count, ok := bnData["count"].(int32); ok {
+				updateAchievement("number_collector", count >= 5, int(count))
+			}
+		}
+	}
+
+	// Проверяем экстремумы (Эверест и Марианская впадина)
+	if maxSize, ok := data["max_size"].([]interface{}); ok && len(maxSize) > 0 {
+		if maxData, ok := maxSize[0].(map[string]interface{}); ok {
+			if userMax, ok := maxData["max"].(int32); ok {
+				updateAchievement("everest", userMax == globalMax && globalMax > 0, int(userMax))
+			}
+		}
+	}
+
+	if minSize, ok := data["min_size"].([]interface{}); ok && len(minSize) > 0 {
+		if minData, ok := minSize[0].(map[string]interface{}); ok {
+			if userMin, ok := minData["min"].(int32); ok {
+				updateAchievement("mariana_trench", userMin == globalMin && globalMin >= 0, int(userMin))
+			}
+		}
+	}
+
+	// Проверяем временные достижения
+	if earlyBird, ok := data["early_bird"].([]interface{}); ok && len(earlyBird) > 0 {
+		if ebData, ok := earlyBird[0].(map[string]interface{}); ok {
+			if count, ok := ebData["count"].(int32); ok {
+				updateAchievement("early_bird", count >= 20, int(count))
+			}
+		}
+	}
+
+	if speedrunner, ok := data["speedrunner"].([]interface{}); ok && len(speedrunner) > 0 {
+		if srData, ok := speedrunner[0].(map[string]interface{}); ok {
+			if count, ok := srData["count"].(int32); ok {
+				updateAchievement("speedrunner", count >= 5, int(count))
+			}
+		}
+	}
+
+	// Проверяем праздничные
+	if valentine, ok := data["valentine"].([]interface{}); ok && len(valentine) > 0 {
+		if vData, ok := valentine[0].(map[string]interface{}); ok {
+			if count, ok := vData["count"].(int32); ok {
+				updateAchievement("valentine", count >= 1, int(count))
+			}
+		}
+	}
+
+	if newYearGift, ok := data["new_year_gift"].([]interface{}); ok && len(newYearGift) > 0 {
+		if nygData, ok := newYearGift[0].(map[string]interface{}); ok {
+			if count, ok := nygData["count"].(int32); ok {
+				updateAchievement("new_year_gift", count >= 1, int(count))
+			}
+		}
+	}
+
+	// Проверяем "Молния"
+	if lightning, ok := data["lightning"].([]interface{}); ok && len(lightning) > 0 {
+		if lData, ok := lightning[0].(map[string]interface{}); ok {
+			if count, ok := lData["count"].(int32); ok {
+				updateAchievement("lightning", count >= 1, int(count))
+			}
+		}
+	}
+
+	// Проверяем последовательности в последних 10 коках
+	if recent10, ok := data["recent_10"].([]interface{}); ok && len(recent10) > 0 {
+		sizes := make([]int32, 0, len(recent10))
+		for _, item := range recent10 {
+			if doc, ok := item.(map[string]interface{}); ok {
+				if size, ok := doc["size"].(int32); ok {
+					sizes = append(sizes, size)
+				}
+			}
+		}
+
+		// Проверяем последовательности одинаковых
+		if len(sizes) >= 2 {
+			updateAchievement("deja_vu", sizes[len(sizes)-1] == sizes[len(sizes)-2], 0)
+		}
+
+		// Проверяем тройки, покер, глаз алмаз
+		for i := 0; i <= len(sizes)-3; i++ {
+			if sizes[i] == sizes[i+1] && sizes[i+1] == sizes[i+2] {
+				updateAchievement("triple", true, 0)
+				if i <= len(sizes)-4 && sizes[i+2] == sizes[i+3] {
+					updateAchievement("poker", true, 0)
+					if i <= len(sizes)-5 && sizes[i+3] == sizes[i+4] {
+						updateAchievement("diamond_eye", true, 0)
+					}
+				}
+			}
+		}
+
+		// Проверяем тренды (рост/падение 5 дней)
+		if len(sizes) >= 5 {
+			allGrowth := true
+			allDecline := true
+			for i := 1; i < 5; i++ {
+				if sizes[i] <= sizes[i-1] {
+					allGrowth = false
+				}
+				if sizes[i] >= sizes[i-1] {
+					allDecline = false
+				}
+			}
+			updateAchievement("bull_trend", allGrowth, 0)
+			updateAchievement("bear_market", allDecline, 0)
+		}
+
+		// Проверяем "Мороз по коже" (5 коков <20см)
+		if len(sizes) >= 5 {
+			allFrozen := true
+			for i := 0; i < 5; i++ {
+				if sizes[len(sizes)-5+i] >= 20 {
+					allFrozen = false
+					break
+				}
+			}
+			updateAchievement("freeze", allFrozen, 0)
+		}
+
+		// Проверяем "Алмазные руки" (7 коков 40+см)
+		if len(sizes) >= 7 {
+			allDiamond := true
+			for i := 0; i < 7; i++ {
+				if sizes[len(sizes)-7+i] < 40 {
+					allDiamond = false
+					break
+				}
+			}
+			updateAchievement("diamond_hands", allDiamond, 0)
+		}
+
+		// Проверяем "Черепаха" (10 коков с изменением <5см)
+		if len(sizes) >= 10 {
+			turtleCount := 0
+			for i := 1; i < 10; i++ {
+				diff := sizes[i] - sizes[i-1]
+				if diff < 0 {
+					diff = -diff
+				}
+				if diff < 5 {
+					turtleCount++
+				}
+			}
+			updateAchievement("turtle", turtleCount >= 9, turtleCount)
+		}
+	}
+
+	// Проверяем сложные коллекции в последних 31 коке
+	if last31, ok := data["last_31"].([]interface{}); ok && len(last31) >= 31 {
+		sizes := make(map[int32]bool)
+		for _, item := range last31 {
+			if doc, ok := item.(map[string]interface{}); ok {
+				if size, ok := doc["size"].(int32); ok {
+					sizes[size] = true
+				}
+			}
+		}
+
+		// Проверяем "Округлятор"
+		rounderCount := 0
+		for _, val := range []int32{10, 20, 30, 40, 50, 60} {
+			if sizes[val] {
+				rounderCount++
+			}
+		}
+		updateAchievement("rounder", rounderCount == 6, rounderCount)
+
+		// Проверяем "Отец фибоначчи"
+		fibonacciCount := 0
+		for _, val := range []int32{1, 2, 3, 5, 8, 13, 21, 34, 55} {
+			if sizes[val] {
+				fibonacciCount++
+			}
+		}
+		updateAchievement("fibonacci_father", fibonacciCount == 9, fibonacciCount)
+	}
+
+	// Проверяем достижения по сезонам
+	seasonCursor, err := collection.Aggregate(app.ctx, database.PipelineCountSeasons(userID))
+	if err != nil {
+		log.E("Failed to get season count", logging.InnerError, err)
+	} else {
+		defer seasonCursor.Close(app.ctx)
+		
+		var seasonResults []map[string]interface{}
+		if err = seasonCursor.All(app.ctx, &seasonResults); err == nil && len(seasonResults) > 0 {
+			if count, ok := seasonResults[0]["count"].(int32); ok {
+				updateAchievement("oldtimer", count >= 3, int(count))
+				updateAchievement("veteran", count >= 5, int(count))
+				updateAchievement("keeper", count >= 10, int(count))
+			}
+		}
+	}
+
+	// Проверяем достижение "Путешественник" (все 61 размер: 0-60)
+	travelerCursor, err := collection.Aggregate(app.ctx, database.PipelineCheckTraveler(userID))
+	if err != nil {
+		log.E("Failed to check traveler achievement", logging.InnerError, err)
+	} else {
+		defer travelerCursor.Close(app.ctx)
+		
+		var travelerResults []map[string]interface{}
+		if err = travelerCursor.All(app.ctx, &travelerResults); err == nil && len(travelerResults) > 0 {
+			if uniqueSizes, ok := travelerResults[0]["unique_sizes"].(int32); ok {
+				updateAchievement("traveler", uniqueSizes >= 61, int(uniqueSizes))
+			}
+		}
+	}
+
+	// Проверяем достижение "Москвич" (размер 50см 5 раз за последние 31 день)
+	thirtyOneDaysAgo := now.AddDate(0, 0, -31)
+	muscoviteCursor, err := collection.Aggregate(app.ctx, database.PipelineCheckMuscovite(userID, thirtyOneDaysAgo))
+	if err != nil {
+		log.E("Failed to check muscovite achievement", logging.InnerError, err)
+	} else {
+		defer muscoviteCursor.Close(app.ctx)
+		
+		var muscoviteResults []map[string]interface{}
+		if err = muscoviteCursor.All(app.ctx, &muscoviteResults); err == nil && len(muscoviteResults) > 0 {
+			if count, ok := muscoviteResults[0]["count"].(int32); ok {
+				updateAchievement("muscovite", count >= 5, int(count))
+			}
+		}
+	}
+
+	log.I("Successfully checked and updated achievements")
 }

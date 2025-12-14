@@ -7,7 +7,9 @@ import (
 	"dickobrazz/application/geo"
 	"dickobrazz/application/logging"
 	"dickobrazz/application/timings"
+	"fmt"
 	"sort"
+	"strconv"
 	"strings"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -36,6 +38,14 @@ func (app *Application) HandleInlineQuery(log *logging.Logger, query *tgbotapi.I
 		),
 		timings.ReportExecutionForResult(log.With(logging.QueryType, "CockSeason"),
 			func() tgbotapi.InlineQueryResultArticle { return app.InlineQueryCockSeason(log, query) }, traceQueryCreated,
+		),
+		timings.ReportExecutionForResult(log.With(logging.QueryType, "CockAchievements"),
+			func() tgbotapi.InlineQueryResultArticle { 
+				// Парсим номер страницы из query (если есть)
+				page := 1
+				// По умолчанию страница 1, можно расширить парсинг в будущем
+				return app.InlineQueryCockAchievements(log, query, page) 
+			}, traceQueryCreated,
 		),
 	}
 
@@ -260,6 +270,170 @@ func (app *Application) InlineQueryCockRuler(log *logging.Logger, query *tgbotap
 	return InitializeInlineQuery("Линейка коков", text)
 }
 
+func (app *Application) InlineQueryCockAchievements(log *logging.Logger, query *tgbotapi.InlineQuery, page int) tgbotapi.InlineQueryResultArticle {
+	userID := query.From.ID
+	
+	// Проверка только для тестового пользователя
+	if userID != 362695653 {
+		text := "🔒 *Кок\\-ачивки временно доступны только для тестирования*\n\n_Скоро будут доступны для всех\\!_"
+		return InitializeInlineQuery("Кок-ачивки", text)
+	}
+	
+	// Проверяем и обновляем достижения (только для mairwunnx, раз в сутки)
+	app.CheckAndUpdateAchievements(log, userID)
+	
+	// Получаем достижения пользователя
+	userAchievements := app.GetUserAchievements(log, userID)
+	
+	// Генерируем текст с пагинацией (10 ачивок на страницу)
+	achievementsList, completedCount, totalRespects, percentComplete := GenerateAchievementsText(
+		AllAchievements,
+		userAchievements,
+		page,
+		10,
+	)
+	
+	totalAchievements := len(AllAchievements)
+	totalPages := (totalAchievements + 9) / 10
+	
+	text := fmt.Sprintf(
+		MsgCockAchievementsTemplate,
+		completedCount,
+		totalAchievements,
+		percentComplete,
+		totalRespects,
+		achievementsList,
+	)
+	
+	// Создаем кнопки пагинации
+	var buttons []tgbotapi.InlineKeyboardButton
+	
+	if page > 1 {
+		// Кнопка "предыдущая страница"
+		buttons = append(buttons, tgbotapi.NewInlineKeyboardButtonData("◀️", fmt.Sprintf("ach_page:%d", page-1)))
+	}
+	
+	// Кнопка "текущая страница / всего страниц"
+	buttons = append(buttons, tgbotapi.NewInlineKeyboardButtonData(fmt.Sprintf("%d/%d", page, totalPages), "ach_noop"))
+	
+	if page < totalPages {
+		// Кнопка "следующая страница"
+		buttons = append(buttons, tgbotapi.NewInlineKeyboardButtonData("▶️", fmt.Sprintf("ach_page:%d", page+1)))
+	}
+	
+	kb := tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(buttons...),
+	)
+	
+	article := tgbotapi.NewInlineQueryResultArticleMarkdownV2(
+		uuid.NewString(),
+		"Кок-ачивки",
+		text,
+	)
+	article.ReplyMarkup = &kb
+	
+	return article
+}
+
 func InitializeInlineQuery(title, message string) tgbotapi.InlineQueryResultArticle {
 	return tgbotapi.NewInlineQueryResultArticleMarkdownV2(uuid.NewString(), title, message)
+}
+
+func (app *Application) HandleCallbackQuery(log *logging.Logger, callback *tgbotapi.CallbackQuery) {
+	// Парсим callback data
+	data := callback.Data
+	
+	// Обрабатываем пагинацию ачивок
+	if strings.HasPrefix(data, "ach_page:") {
+		// Парсим номер страницы
+		pageStr := strings.TrimPrefix(data, "ach_page:")
+		page := 1
+		if parsedPage, err := strconv.Atoi(pageStr); err != nil {
+			log.E("Failed to parse page number", logging.InnerError, err)
+			page = 1
+		} else {
+			page = parsedPage
+		}
+		
+		// Проверяем, что callback от тестового пользователя
+		userID := callback.From.ID
+		if userID != 362695653 {
+			// Отвечаем на callback и выходим
+			callbackConfig := tgbotapi.NewCallback(callback.ID, "Ачивки доступны только для тестирования")
+			if _, err := app.bot.Request(callbackConfig); err != nil {
+				log.E("Failed to answer callback query", logging.InnerError, err)
+			}
+			return
+		}
+		
+		// Проверяем и обновляем достижения (раз в сутки)
+		app.CheckAndUpdateAchievements(log, userID)
+		
+		// Получаем достижения пользователя
+		userAchievements := app.GetUserAchievements(log, userID)
+		
+		// Генерируем текст для запрошенной страницы
+		achievementsList, completedCount, totalRespects, percentComplete := GenerateAchievementsText(
+			AllAchievements,
+			userAchievements,
+			page,
+			10,
+		)
+		
+		totalAchievements := len(AllAchievements)
+		totalPages := (totalAchievements + 9) / 10
+		
+		text := fmt.Sprintf(
+			MsgCockAchievementsTemplate,
+			completedCount,
+			totalAchievements,
+			percentComplete,
+			totalRespects,
+			achievementsList,
+		)
+		
+		// Создаем кнопки пагинации для новой страницы
+		var buttons []tgbotapi.InlineKeyboardButton
+		
+		if page > 1 {
+			buttons = append(buttons, tgbotapi.NewInlineKeyboardButtonData("◀️", fmt.Sprintf("ach_page:%d", page-1)))
+		}
+		
+		buttons = append(buttons, tgbotapi.NewInlineKeyboardButtonData(fmt.Sprintf("%d/%d", page, totalPages), "ach_noop"))
+		
+		if page < totalPages {
+			buttons = append(buttons, tgbotapi.NewInlineKeyboardButtonData("▶️", fmt.Sprintf("ach_page:%d", page+1)))
+		}
+		
+		kb := tgbotapi.NewInlineKeyboardMarkup(
+			tgbotapi.NewInlineKeyboardRow(buttons...),
+		)
+		
+		// Редактируем существующее сообщение
+		editMsg := tgbotapi.NewEditMessageTextAndMarkup(
+			callback.Message.Chat.ID,
+			callback.Message.MessageID,
+			text,
+			kb,
+		)
+		editMsg.ParseMode = "MarkdownV2"
+		
+		if _, err := app.bot.Send(editMsg); err != nil {
+			log.E("Failed to edit message", logging.InnerError, err)
+		}
+		
+		// Отвечаем на callback (убираем "часики" на кнопке)
+		callbackConfig := tgbotapi.NewCallback(callback.ID, "")
+		if _, err := app.bot.Request(callbackConfig); err != nil {
+			log.E("Failed to answer callback query", logging.InnerError, err)
+		}
+		
+		log.I("Successfully handled achievements pagination callback", "page", page)
+	} else if data == "ach_noop" {
+		// Просто отвечаем на callback (для кнопки с текущей страницей)
+		callbackConfig := tgbotapi.NewCallback(callback.ID, "")
+		if _, err := app.bot.Request(callbackConfig); err != nil {
+			log.E("Failed to answer callback query", logging.InnerError, err)
+		}
+	}
 }

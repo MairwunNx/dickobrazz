@@ -89,5 +89,17 @@ func (app *Application) Run() {
 
 			app.HandleInlineQuery(log, query)
 		}
+
+		if callback := update.CallbackQuery; callback != nil {
+			user := update.SentFrom()
+			log := app.log.With(
+				logging.UserId, user.ID,
+				logging.UserName, user.UserName,
+				"callback_id", callback.ID,
+				"callback_data", callback.Data,
+			)
+
+			app.HandleCallbackQuery(log, callback)
+		}
 	}
 }

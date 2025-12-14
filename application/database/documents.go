@@ -81,3 +81,23 @@ type DocumentCockDynamic struct {
 		GrowthSpeed float64 `bson:"growth_speed"`
 	} `bson:"individual_growth_speed"`
 }
+
+// DocumentUserAchievement представляет достижение пользователя в MongoDB
+type DocumentUserAchievement struct {
+	UserID        int64     `bson:"user_id"`
+	AchievementID string    `bson:"achievement_id"`
+	Completed     bool      `bson:"completed"`
+	CompletedAt   time.Time `bson:"completed_at,omitempty"`
+	Progress      int       `bson:"progress"` // Текущий прогресс для ачивок с прогрессом
+	LastCheckedAt time.Time `bson:"last_checked_at"`
+}
+
+// Achievement представляет определение достижения
+type Achievement struct {
+	ID          string
+	Emoji       string
+	Name        string
+	Description string
+	Respects    int // Количество кок-респектов за выполнение
+	MaxProgress int // Максимальный прогресс (0 если без прогресса)
+}
