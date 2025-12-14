@@ -306,6 +306,61 @@ func PipelineDynamic(userId int64) mongo.Pipeline {
 					}}}},
 				}}},
 			}},
+			{Key: "individual_five_cocks_dynamics", Value: bson.A{
+				bson.D{{Key: "$match", Value: bson.D{{Key: "user_id", Value: userId}}}},
+				bson.D{{Key: "$sort", Value: bson.D{{Key: "requested_at", Value: -1}}}},
+				bson.D{{Key: "$limit", Value: 5}},
+				bson.D{{Key: "$group", Value: bson.D{
+					{Key: "_id", Value: nil},
+					{Key: "first_cock", Value: bson.D{{Key: "$first", Value: "$size"}}},
+					{Key: "last_cock", Value: bson.D{{Key: "$last", Value: "$size"}}},
+				}}},
+				bson.D{{Key: "$project", Value: bson.D{
+					{Key: "_id", Value: nil},
+					{Key: "five_cocks_change", Value: bson.D{{Key: "$subtract", Value: bson.A{"$first_cock", "$last_cock"}}}},
+					{Key: "five_cocks_change_percent", Value: bson.D{{Key: "$round", Value: bson.A{
+						bson.D{{Key: "$cond", Value: bson.A{
+							bson.D{{Key: "$eq", Value: bson.A{"$last_cock", 0}}},
+							0,
+							bson.D{{Key: "$multiply", Value: bson.A{
+								bson.D{{Key: "$divide", Value: bson.A{
+									bson.D{{Key: "$subtract", Value: bson.A{"$first_cock", "$last_cock"}}},
+									"$last_cock",
+								}}},
+								100,
+							}}},
+						}}},
+						1,
+					}}}},
+				}}},
+			}},
+			{Key: "individual_growth_speed", Value: bson.A{
+				bson.D{{Key: "$match", Value: bson.D{{Key: "user_id", Value: userId}}}},
+				bson.D{{Key: "$sort", Value: bson.D{{Key: "requested_at", Value: -1}}}},
+				bson.D{{Key: "$limit", Value: 5}},
+				bson.D{{Key: "$setWindowFields", Value: bson.D{
+					{Key: "partitionBy", Value: "$user_id"},
+					{Key: "sortBy", Value: bson.D{{Key: "requested_at", Value: -1}}},
+					{Key: "output", Value: bson.D{
+						{Key: "prev_size", Value: bson.D{{Key: "$shift", Value: bson.D{
+							{Key: "output", Value: "$size"},
+							{Key: "by", Value: 1},
+						}}}},
+					}},
+				}}},
+				bson.D{{Key: "$match", Value: bson.D{{Key: "prev_size", Value: bson.D{{Key: "$ne", Value: nil}}}}}},
+				bson.D{{Key: "$project", Value: bson.D{
+					{Key: "growth", Value: bson.D{{Key: "$abs", Value: bson.D{{Key: "$subtract", Value: bson.A{"$size", "$prev_size"}}}}}},
+				}}},
+				bson.D{{Key: "$group", Value: bson.D{
+					{Key: "_id", Value: nil},
+					{Key: "avg_growth_speed", Value: bson.D{{Key: "$avg", Value: "$growth"}}},
+				}}},
+				bson.D{{Key: "$project", Value: bson.D{
+					{Key: "_id", Value: nil},
+					{Key: "growth_speed", Value: bson.D{{Key: "$round", Value: bson.A{"$avg_growth_speed", 1}}}},
+				}}},
+			}},
 		}}},
 	}
 }

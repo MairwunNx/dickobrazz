@@ -163,8 +163,9 @@ func (app *Application) InlineQueryCockDynamic(log *logging.Logger, query *tgbot
 	individualRecord := result.IndividualRecord[0]
 	individualIrk := result.IndividualIrk[0]
 	individualDominance := result.IndividualDominance[0]
-	individualDailyGrowth := result.IndividualDailyGrowth[0]
 	individualDailyDynamics := result.IndividualDailyDynamics[0]
+	individualFiveCocksDynamics := result.IndividualFiveCocksDynamics[0]
+	individualGrowthSpeed := result.IndividualGrowthSpeed[0]
 
 	overall := result.Overall[0]
 	overallRecent := result.OverallRecent[0]
@@ -198,7 +199,8 @@ func (app *Application) InlineQueryCockDynamic(log *logging.Logger, query *tgbot
 		/* Кок-активы */
 		individualDailyDynamics.YesterdayCockChangePercent,
 		individualDailyDynamics.YesterdayCockChange,
-		individualDailyGrowth.Average,
+		individualFiveCocksDynamics.FiveCocksChangePercent,
+		individualFiveCocksDynamics.FiveCocksChange,
 
 		/* Соотношение коков */
 		overallDistribution.HugePercent,
@@ -222,6 +224,9 @@ func (app *Application) InlineQueryCockDynamic(log *logging.Logger, query *tgbot
 		/* Коэффициент везения и волатильность */
 		userLuckCoefficient,
 		userVolatility,
+		
+		/* Средняя скорость прироста */
+		individualGrowthSpeed.GrowthSpeed,
 	)
 
 	return tgbotapi.NewInlineQueryResultArticleMarkdown(query.ID, "Динамика кока", text)

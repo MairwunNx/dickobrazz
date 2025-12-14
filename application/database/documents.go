@@ -71,4 +71,13 @@ type DocumentCockDynamic struct {
 	IndividualVolatility []struct {
 		Volatility float64 `bson:"volatility"`
 	} `bson:"individual_volatility"`
+
+	IndividualFiveCocksDynamics []struct {
+		FiveCocksChange        int     `bson:"five_cocks_change"`
+		FiveCocksChangePercent float64 `bson:"five_cocks_change_percent"`
+	} `bson:"individual_five_cocks_dynamics"`
+
+	IndividualGrowthSpeed []struct {
+		GrowthSpeed float64 `bson:"growth_speed"`
+	} `bson:"individual_growth_speed"`
 }

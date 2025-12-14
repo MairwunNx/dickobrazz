@@ -99,23 +99,25 @@ _Ладдер коков – глобальный рейтинг участни�
 
 День самого большого кока: *%[21]s*, нарастили аж *%[22]sсм* 🍾
 
-Средний кок в системе _(5 дн.)_: *%[3]s см* %[4]s
-Медиана кока в системе _(5 дн.)_: *%[5]s см* %[6]s
+Средний кок в системе _(5 коков)_: *%[3]s см* %[4]s
+Медиана кока в системе _(5 коков)_: *%[5]s см* %[6]s
 
-Соотношение коков _(5 дн.)_: 💪 *%[19]s%%* 🤏 *%[20]s%%*
+Соотношение коков _(5 коков)_: 💪 *%[19]s%%* 🤏 *%[20]s%%*
 
 📊 *Персональная динамика кока*
 
-ИРК (Индекс Размера Кока): __*%[10]s*__
-Коэффициент везения _(5 дн.)_: *%[28]s* %[29]s
-Волатильность кока _(5 дн.)_: *%[30]s* %[31]s
-
 Общий посчитанный кок: *%[7]s см* 🤯
-В среднем размер кока _(5 дн.)_: *%[8]s см* %[9]s
-Самый большой кок был: *%[11]s см* %[12]s (*%[13]s*)
 Всего дёрнуто коков: *%[27]s* ✊🏻
 
+ИРК (Индекс Размера Кока): __*%[10]s*__ _%[32]s_
+В среднем размер кока _(5 коков)_: *%[8]s см* %[9]s
+Самый большой кок был: *%[11]s см* %[12]s (*%[13]s*)
+
+Коэффициент везения _(5 коков)_: *%[28]s* %[29]s
+Волатильность кока _(5 коков)_: *%[30]s* %[31]s
+
 Процент доминирования: *%[23]s%%* 👑
+Скорость роста кока _(5 коков)_: *%[34]s см/день* %[35]s
 
 🏆 *Сезонные достижения*
 
@@ -124,8 +126,8 @@ _Ладдер коков – глобальный рейтинг участни�
 
 📈 *Кок-активы*
 
-%[14]s Вчерашняя динамика: *%[15]s%%* (*%[16]s см*)
-%[17]s Средний дневной прирост _(5 дн.)_: *%[18]s см/день*`
+%[14]s Дневная динамика: *%[15]s%%* (*%[16]s см*)
+%[33]s Динамика за 5 коков: *%[17]s%%* (*%[18]s см*)`
 
 	MsgCockSeasonTemplate = `*Сезон коков* \(🟡 Текущий\)
 ⏱️ Период: *%[2]s \- %[3]s*
@@ -170,7 +172,8 @@ func NewMsgCockDynamicsTemplate(
 
 	userYesterdayChangePercent float64,
 	userYesterdayChangeCock int,
-	userDailyGrowth float64,
+	userFiveCocksChangePercent float64,
+	userFiveCocksChangeCock int,
 
 	/* Соотношение коков */
 
@@ -200,6 +203,10 @@ func NewMsgCockDynamicsTemplate(
 
 	userLuckCoefficient float64,
 	userVolatility float64,
+	
+	/* Средняя скорость прироста */
+	
+	userGrowthSpeed float64,
 ) string {
 	var userYesterdayChangePercentEmoji string
 	var userYesterdayChangePercentSymbol string
@@ -211,14 +218,14 @@ func NewMsgCockDynamicsTemplate(
 		userYesterdayChangePercentSymbol = ""
 	}
 
-	var userDailyGrowthEmoji string
-	var userDailyGrowthSymbol string
-	if userDailyGrowth >= 0 {
-		userDailyGrowthEmoji = "🟩"
-		userDailyGrowthSymbol = "+"
+	var userFiveCocksChangeEmoji string
+	var userFiveCocksChangeSymbol string
+	if userFiveCocksChangePercent >= 0 {
+		userFiveCocksChangeEmoji = "🟩"
+		userFiveCocksChangeSymbol = "+"
 	} else {
-		userDailyGrowthEmoji = "🟥"
-		userDailyGrowthSymbol = ""
+		userFiveCocksChangeEmoji = "🟥"
+		userFiveCocksChangeSymbol = ""
 	}
 
 	return fmt.Sprintf(
@@ -240,7 +247,7 @@ func NewMsgCockDynamicsTemplate(
 
 		/* Кок-активы */
 		userYesterdayChangePercentEmoji, fmt.Sprintf("%s%s", userYesterdayChangePercentSymbol, FormatDickPercent(userYesterdayChangePercent)), fmt.Sprintf("%s%s", userYesterdayChangePercentSymbol, FormatDickSize(userYesterdayChangeCock)),
-		userDailyGrowthEmoji, fmt.Sprintf("%s%s", userDailyGrowthSymbol, FormatDickPercent(userDailyGrowth)),
+		userFiveCocksChangeEmoji, fmt.Sprintf("%s%s", userFiveCocksChangeSymbol, FormatDickPercent(userFiveCocksChangePercent)), fmt.Sprintf("%s%s", userFiveCocksChangeSymbol, FormatDickSize(userFiveCocksChangeCock)),
 
 		/* Соотношение коков */
 
@@ -261,8 +268,14 @@ func NewMsgCockDynamicsTemplate(
 		EscapeMarkdownV2(FormatDickSize(userCocksCount)),
 
 		/* Коэффициент везения и волатильность */
-		EscapeMarkdownV2(FormatLuckCoefficient(userLuckCoefficient)), LuckEmoji(userLuckCoefficient),
+		EscapeMarkdownV2(FormatLuckCoefficient(userLuckCoefficient)), LuckDisplay(userLuckCoefficient),
 		EscapeMarkdownV2(FormatVolatility(userVolatility)), VolatilityDisplay(userVolatility),
+		
+		/* Описание ИРК */
+		IrkLabel(userIrk),
+		
+		/* Скорость прироста кока */
+		EscapeMarkdownV2(FormatDickPercent(userGrowthSpeed)), GrowthSpeedDisplay(userGrowthSpeed),
 	)
 }
 

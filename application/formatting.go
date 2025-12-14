@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"math"
 	"math/rand"
 	"sort"
 
@@ -647,6 +648,41 @@ func LuckEmoji(luck float64) string {
 	}
 }
 
+func LuckLabel(luck float64) string {
+	switch {
+	case luck >= 1.98: // типа бог рандома :)
+		return "бог рандома"
+	case luck >= 1.92:
+		return "космическая удача"
+	case luck >= 1.833:
+		return "сказочная удача"
+	case luck >= 1.7:
+		return "супер-удача"
+	case luck >= 1.5:
+		return "невероятная удача"
+	case luck >= 1.2:
+		return "очень везёт"
+	case luck >= 1.1:
+		return "везёт"
+	case luck >= 0.9:
+		return "в балансе"
+	case luck >= 0.7:
+		return "не везёт"
+	case luck >= 0.5:
+		return "плохо"
+	case luck >= 0.3:
+		return "мрак"
+	case luck >= 0.2: // адовый тильт
+		return "адовый тильт"
+	default:
+		return "горю в аду"
+	}
+}
+
+func LuckDisplay(luck float64) string {
+	return fmt.Sprintf("%s _(%s)_", LuckEmoji(luck), LuckLabel(luck))
+}
+
 func VolatilityEmoji(volatility float64) string {
 	switch {
 	case volatility < 1:
@@ -687,4 +723,110 @@ func VolatilityLabel(volatility float64) string {
 
 func VolatilityDisplay(volatility float64) string {
 	return fmt.Sprintf("%s _(%s)_", VolatilityEmoji(volatility), VolatilityLabel(volatility))
+}
+
+func clamp01(x float64) float64 {
+	if math.IsNaN(x) {
+		return 0
+	}
+	if x < 0 {
+		return 0
+	}
+	if x > 1 {
+		return 1
+	}
+	return x
+}
+
+// IrkLabel возвращает однословное описание ИРК (0.0-1.0+)
+func IrkLabel(irk float64) string {
+	irk = clamp01(irk)
+
+	bucket := int(math.Floor(irk * 10)) // 0..9
+	if irk >= 1.0 {
+		bucket = 10
+	}
+
+	labels := [...]string{
+		"нулевой",      // 0.0..0.099
+		"минимальный",  // 0.1..0.199
+		"оченьмалый",   // 0.2..0.299
+		"малый",        // 0.3..0.399
+		"уменьшенный",  // 0.4..0.499
+		"средний",      // 0.5..0.599
+		"увеличенный",  // 0.6..0.699
+		"крупный",      // 0.7..0.799
+		"оченькрупный", // 0.8..0.899
+		"максимальный", // 0.9..0.999
+		"предельный",   // 1.0
+	}
+
+	return labels[bucket]
+}
+
+// GrowthSpeedLabel возвращает описание скорости прироста (0-61см)
+func GrowthSpeedLabel(speed float64) string {
+	absSpeed := speed
+	if absSpeed < 0 {
+		absSpeed = -absSpeed
+	}
+	
+	switch {
+	case absSpeed >= 50:
+		return "космическая"
+	case absSpeed >= 40:
+		return "экстремальная"
+	case absSpeed >= 30:
+		return "очень быстрая"
+	case absSpeed >= 20:
+		return "быстрая"
+	case absSpeed >= 15:
+		return "умеренная"
+	case absSpeed >= 10:
+		return "средняя"
+	case absSpeed >= 5:
+		return "медленная"
+	case absSpeed >= 2:
+		return "очень медленная"
+	case absSpeed >= 0.5:
+		return "черепашья"
+	default:
+		return "стоячая"
+	}
+}
+
+func GrowthSpeedEmoji(speed float64) string {
+	absSpeed := speed
+	if absSpeed < 0 {
+		absSpeed = -absSpeed
+	}
+	
+	switch {
+	case absSpeed >= 50:
+		return "👑🌌🚀💫"
+	case absSpeed >= 40:
+		return "🚀🔥⚡"
+	case absSpeed >= 30:
+		return "⚡💨🏎️"
+	case absSpeed >= 20:
+		return "🏃💨"
+	case absSpeed >= 15:
+		return "🚶‍♂️⏱️"
+	case absSpeed >= 10:
+		return "🚶"
+	case absSpeed >= 5:
+		return "🐢⏳"
+	case absSpeed >= 2:
+		return "🐌🕰️"
+	case absSpeed >= 0.5:
+		return "🐢🌿"
+	default:
+		return "🗿⛔"
+	}
+}
+
+func GrowthSpeedDisplay(speed float64) string {
+	emoji := GrowthSpeedEmoji(speed)
+	label := GrowthSpeedLabel(speed)
+	return fmt.Sprintf("%s _(%s)_", emoji, label)
 }
