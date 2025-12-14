@@ -194,12 +194,15 @@ func (app *Application) GenerateCockRulerText(log *logging.Logger, userID int64,
 		emoji := GetPlaceEmoji(index + 1)
 		formattedSize := FormatCockSizeForDate(cock.Size)
 
+		// Нормализуем username (генерируем анонимное имя если пустой)
+		normalizedUsername := NormalizeUsername(cock.UserName, cock.UserId)
+
 		var line string
 		if isCurrentUser {
 			isUserInScoreboard = true
-			line = fmt.Sprintf(MsgCockRulerScoreboardSelected, emoji, EscapeMarkdownV2(cock.UserName), formattedSize, EmojiFromSize(cock.Size))
+			line = fmt.Sprintf(MsgCockRulerScoreboardSelected, emoji, EscapeMarkdownV2(normalizedUsername), formattedSize, EmojiFromSize(cock.Size))
 		} else {
-			line = fmt.Sprintf(MsgCockRulerScoreboardDefault, emoji, EscapeMarkdownV2(cock.UserName), formattedSize, EmojiFromSize(cock.Size))
+			line = fmt.Sprintf(MsgCockRulerScoreboardDefault, emoji, EscapeMarkdownV2(normalizedUsername), formattedSize, EmojiFromSize(cock.Size))
 		}
 
 		if index < 3 {
@@ -245,11 +248,14 @@ func (app *Application) GenerateCockRaceScoreboard(log *logging.Logger, userID i
 			isUserInScoreboard = true
 		}
 
+		// Нормализуем username (генерируем анонимное имя если пустой)
+		normalizedNickname := NormalizeUsername(user.Nickname, user.UserID)
+
 		var scoreboardLine string
 		if isCurrentUser {
-			scoreboardLine = fmt.Sprintf(MsgCockRaceScoreboardSelected, emoji, EscapeMarkdownV2(user.Nickname), FormatDickSize(int(user.TotalSize)))
+			scoreboardLine = fmt.Sprintf(MsgCockRaceScoreboardSelected, emoji, EscapeMarkdownV2(normalizedNickname), EscapeMarkdownV2(FormatDickSize(int(user.TotalSize))))
 		} else {
-			scoreboardLine = fmt.Sprintf(MsgCockRaceScoreboardDefault, emoji, EscapeMarkdownV2(user.Nickname), FormatDickSize(int(user.TotalSize)))
+			scoreboardLine = fmt.Sprintf(MsgCockRaceScoreboardDefault, emoji, EscapeMarkdownV2(normalizedNickname), EscapeMarkdownV2(FormatDickSize(int(user.TotalSize))))
 		}
 
 		if index < 3 {
@@ -261,7 +267,8 @@ func (app *Application) GenerateCockRaceScoreboard(log *logging.Logger, userID i
 
 	if !isUserInScoreboard {
 		if cock := app.GetUserAggregatedCock(log, userID); cock != nil {
-			others = append(others, fmt.Sprintf(MsgCockRaceScoreboardOut, EscapeMarkdownV2(cock.Nickname), FormatDickSize(int(cock.TotalSize))))
+			normalizedNickname := NormalizeUsername(cock.Nickname, cock.UserID)
+			others = append(others, fmt.Sprintf(MsgCockRaceScoreboardOut, EscapeMarkdownV2(normalizedNickname), EscapeMarkdownV2(FormatDickSize(int(cock.TotalSize)))))
 		} else {
 			others = append(others, MsgCockScoreboardNotFound)
 		}
@@ -296,11 +303,14 @@ func (app *Application) GenerateCockLadderScoreboard(log *logging.Logger, userID
 			isUserInScoreboard = true
 		}
 
+		// Нормализуем username (генерируем анонимное имя если пустой)
+		normalizedNickname := NormalizeUsername(user.Nickname, user.UserID)
+
 		var scoreboardLine string
 		if isCurrentUser {
-			scoreboardLine = fmt.Sprintf(MsgCockLadderScoreboardSelected, emoji, EscapeMarkdownV2(user.Nickname), FormatDickSize(int(user.TotalSize)))
+			scoreboardLine = fmt.Sprintf(MsgCockLadderScoreboardSelected, emoji, EscapeMarkdownV2(normalizedNickname), EscapeMarkdownV2(FormatDickSize(int(user.TotalSize))))
 		} else {
-			scoreboardLine = fmt.Sprintf(MsgCockLadderScoreboardDefault, emoji, EscapeMarkdownV2(user.Nickname), FormatDickSize(int(user.TotalSize)))
+			scoreboardLine = fmt.Sprintf(MsgCockLadderScoreboardDefault, emoji, EscapeMarkdownV2(normalizedNickname), EscapeMarkdownV2(FormatDickSize(int(user.TotalSize))))
 		}
 
 		if index < 3 {
@@ -312,7 +322,8 @@ func (app *Application) GenerateCockLadderScoreboard(log *logging.Logger, userID
 
 	if !isUserInScoreboard {
 		if cock := app.GetUserAggregatedCock(log, userID); cock != nil {
-			others = append(others, fmt.Sprintf(MsgCockLadderScoreboardOut, EscapeMarkdownV2(cock.Nickname), FormatDickSize(int(cock.TotalSize))))
+			normalizedNickname := NormalizeUsername(cock.Nickname, cock.UserID)
+			others = append(others, fmt.Sprintf(MsgCockLadderScoreboardOut, EscapeMarkdownV2(normalizedNickname), EscapeMarkdownV2(FormatDickSize(int(cock.TotalSize)))))
 		} else {
 			others = append(others, MsgCockScoreboardNotFound)
 		}
