@@ -507,3 +507,53 @@ func (app *Application) GetSeasonWinners(log *logging.Logger, season CockSeason)
 	
 	return results
 }
+
+func (app *Application) GetUsersAroundPositionInLadder(log *logging.Logger, position int) []UserCockRace {
+	collection := database.CollectionCocks(app.db)
+
+	cursor, err := collection.Aggregate(app.ctx, database.PipelineUsersAroundPositionInLadder(position))
+	if err != nil {
+		log.E("Failed to get users around position in ladder", logging.InnerError, err)
+		return []UserCockRace{}
+	}
+
+	defer func(cursor *mongo.Cursor, ctx context.Context) {
+		err := cursor.Close(ctx)
+		if err != nil {
+			log.E("Failed to close mongo cursor", logging.InnerError, err)
+		}
+	}(cursor, app.ctx)
+
+	var results []UserCockRace
+	if err = cursor.All(app.ctx, &results); err != nil {
+		log.E("Failed to parse users around position", logging.InnerError, err)
+		return []UserCockRace{}
+	}
+
+	return results
+}
+
+func (app *Application) GetUsersAroundPositionInSeason(log *logging.Logger, position int, season CockSeason) []UserCockRace {
+	collection := database.CollectionCocks(app.db)
+
+	cursor, err := collection.Aggregate(app.ctx, database.PipelineUsersAroundPositionInSeason(position, season.StartDate, season.EndDate))
+	if err != nil {
+		log.E("Failed to get users around position in season", logging.InnerError, err)
+		return []UserCockRace{}
+	}
+
+	defer func(cursor *mongo.Cursor, ctx context.Context) {
+		err := cursor.Close(ctx)
+		if err != nil {
+			log.E("Failed to close mongo cursor", logging.InnerError, err)
+		}
+	}(cursor, app.ctx)
+
+	var results []UserCockRace
+	if err = cursor.All(app.ctx, &results); err != nil {
+		log.E("Failed to parse users around position in season", logging.InnerError, err)
+		return []UserCockRace{}
+	}
+
+	return results
+}

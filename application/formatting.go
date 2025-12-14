@@ -215,26 +215,53 @@ func (app *Application) GenerateCockRulerText(log *logging.Logger, userID int64,
 
 	if !isUserInScoreboard {
 		if userCock := app.GetCockSizeFromCache(log, userID); userCock != nil {
-			// Получаем все коки из кеша для определения позиции
+			// Получаем все коки из кеша для определения позиции и соседей
 			allCocks := app.GetCockSizesFromCache(log)
 			sort.Slice(allCocks, func(i, j int) bool {
 				return allCocks[i].Size > allCocks[j].Size
 			})
 			
+			// Находим позицию пользователя
 			userPosition := 0
-			userName := ""
 			for idx, cock := range allCocks {
 				if cock.UserId == userID {
 					userPosition = idx + 1
-					userName = cock.UserName
 					break
 				}
 			}
 			
-			normalizedUsername := NormalizeUsername(userName, userID)
-			formattedUserCock := FormatCockSizeForDate(*userCock)
-			positionText := EscapeMarkdownV2(FormatDickSize(userPosition))
-			others = append(others, fmt.Sprintf(MsgCockRulerScoreboardOut, positionText, EscapeMarkdownV2(normalizedUsername), formattedUserCock, EmojiFromSize(*userCock)))
+			// Получаем 3 пользователей около позиции (до, текущий, после)
+			startIdx := userPosition - 2
+			if startIdx < 0 {
+				startIdx = 0
+			}
+			endIdx := startIdx + 3
+			if endIdx > len(allCocks) {
+				endIdx = len(allCocks)
+			}
+			
+			neighbors := allCocks[startIdx:endIdx]
+			
+			// Формируем строки для соседей
+			var contextLines []string
+			for idx, neighbor := range neighbors {
+				pos := startIdx + idx + 1
+				isCurrentInContext := neighbor.UserId == userID
+				normalizedNick := NormalizeUsername(neighbor.UserName, neighbor.UserId)
+				formattedSize := FormatCockSizeForDate(neighbor.Size)
+				emoji := EmojiFromSize(neighbor.Size)
+				posEmoji := GetPlaceEmojiForContext(pos)
+				
+				if isCurrentInContext {
+					contextLines = append(contextLines, fmt.Sprintf("%s *@%s — %sсм %s*", posEmoji, EscapeMarkdownV2(normalizedNick), formattedSize, emoji))
+				} else {
+					contextLines = append(contextLines, fmt.Sprintf("%s @%s — *%sсм* %s", posEmoji, EscapeMarkdownV2(normalizedNick), formattedSize, emoji))
+				}
+			}
+			
+			// Добавляем контекст с соседями
+			contextBlock := "\n...\n\n" + strings.Join(contextLines, "\n") + "\n\n..."
+			others = append(others, contextBlock)
 		} else {
 			others = append(others, MsgCockScoreboardNotFound)
 		}
@@ -288,18 +315,42 @@ func (app *Application) GenerateCockRaceScoreboard(log *logging.Logger, userID i
 
 	if !isUserInScoreboard {
 		if cock := app.GetUserAggregatedCock(log, userID); cock != nil {
-			normalizedNickname := NormalizeUsername(cock.Nickname, cock.UserID)
-			
 			// Получаем позицию пользователя
 			var userPosition int
+			var neighbors []UserCockRace
+			
 			if currentSeason != nil {
 				userPosition = app.GetUserPositionInSeason(log, userID, *currentSeason)
+				neighbors = app.GetUsersAroundPositionInSeason(log, userPosition, *currentSeason)
 			} else {
 				userPosition = app.GetUserPositionInLadder(log, userID)
+				neighbors = app.GetUsersAroundPositionInLadder(log, userPosition)
 			}
 			
-			positionText := EscapeMarkdownV2(FormatDickSize(userPosition))
-			others = append(others, fmt.Sprintf(MsgCockRaceScoreboardOut, positionText, EscapeMarkdownV2(normalizedNickname), EscapeMarkdownV2(FormatDickSize(int(cock.TotalSize)))))
+			// Формируем строки для соседей
+			var contextLines []string
+			startPos := userPosition - 1
+			if startPos < 1 {
+				startPos = 1
+			}
+			
+			for idx, neighbor := range neighbors {
+				pos := startPos + idx
+				isCurrentInContext := neighbor.UserID == userID
+				normalizedNick := NormalizeUsername(neighbor.Nickname, neighbor.UserID)
+				formattedSize := EscapeMarkdownV2(FormatDickSize(int(neighbor.TotalSize)))
+				posEmoji := GetPlaceEmojiForContext(pos)
+				
+				if isCurrentInContext {
+					contextLines = append(contextLines, fmt.Sprintf("%s *@%s — %sсм*", posEmoji, EscapeMarkdownV2(normalizedNick), formattedSize))
+				} else {
+					contextLines = append(contextLines, fmt.Sprintf("%s @%s — *%sсм*", posEmoji, EscapeMarkdownV2(normalizedNick), formattedSize))
+				}
+			}
+			
+			// Добавляем контекст с соседями  
+			contextBlock := "\n" + CommonDots + "\n\n" + strings.Join(contextLines, "\n") + "\n\n" + CommonDots
+			others = append(others, contextBlock)
 		} else {
 			others = append(others, MsgCockScoreboardNotFound)
 		}
@@ -355,13 +406,34 @@ func (app *Application) GenerateCockLadderScoreboard(log *logging.Logger, userID
 
 	if !isUserInScoreboard {
 		if cock := app.GetUserAggregatedCock(log, userID); cock != nil {
-			normalizedNickname := NormalizeUsername(cock.Nickname, cock.UserID)
-			
-			// Получаем позицию пользователя в ладдере
+			// Получаем позицию пользователя в ладдере и соседей
 			userPosition := app.GetUserPositionInLadder(log, userID)
-			positionText := EscapeMarkdownV2(FormatDickSize(userPosition))
+			neighbors := app.GetUsersAroundPositionInLadder(log, userPosition)
 			
-			others = append(others, fmt.Sprintf(MsgCockLadderScoreboardOut, positionText, EscapeMarkdownV2(normalizedNickname), EscapeMarkdownV2(FormatDickSize(int(cock.TotalSize)))))
+			// Формируем строки для соседей
+			var contextLines []string
+			startPos := userPosition - 1
+			if startPos < 1 {
+				startPos = 1
+			}
+			
+			for idx, neighbor := range neighbors {
+				pos := startPos + idx
+				isCurrentInContext := neighbor.UserID == userID
+				normalizedNick := NormalizeUsername(neighbor.Nickname, neighbor.UserID)
+				formattedSize := EscapeMarkdownV2(FormatDickSize(int(neighbor.TotalSize)))
+				posEmoji := GetPlaceEmojiForContext(pos)
+				
+				if isCurrentInContext {
+					contextLines = append(contextLines, fmt.Sprintf("%s *@%s — %sсм*", posEmoji, EscapeMarkdownV2(normalizedNick), formattedSize))
+				} else {
+					contextLines = append(contextLines, fmt.Sprintf("%s @%s — *%sсм*", posEmoji, EscapeMarkdownV2(normalizedNick), formattedSize))
+				}
+			}
+			
+			// Добавляем контекст с соседями  
+			contextBlock := "\n" + CommonDots + "\n\n" + strings.Join(contextLines, "\n") + "\n\n" + CommonDots
+			others = append(others, contextBlock)
 		} else {
 			others = append(others, MsgCockScoreboardNotFound)
 		}
@@ -395,17 +467,26 @@ func GetPlaceEmoji(place int) string {
 		now := time.Now()
 		month := now.Month()
 
+		var emoji string
 		switch month {
 		case time.March, time.April, time.May:
-			return "🫠"
+			emoji = "🫠"
 		case time.June, time.July, time.August:
-			return "🥵"
+			emoji = "🥵"
 		case time.September, time.October, time.November:
-			return "🤧"
+			emoji = "🤧"
 		default:
-			return "🥶"
+			emoji = "🥶"
 		}
+		
+		// Для мест 4+ добавляем номер места
+		return fmt.Sprintf("%s %d.", emoji, place)
 	}
+}
+
+// GetPlaceEmojiForContext возвращает эмодзи для контекста (пользователи вне топ-13)
+func GetPlaceEmojiForContext(place int) string {
+	return fmt.Sprintf("🥀 %d.", place)
 }
 
 func EscapeMarkdownV2(input string) string {
