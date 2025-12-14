@@ -14,6 +14,23 @@ import (
 	"golang.org/x/text/message"
 )
 
+// GenerateAnonymousName генерирует анонимное имя для пользователя без username
+// Использует PRNG с seed из userID для генерации стабильного номера (0-9999)
+func GenerateAnonymousName(userID int64) string {
+	// Создаем отдельный генератор с seed из userID для стабильности
+	rng := rand.New(rand.NewSource(userID))
+	number := rng.Intn(10000)
+	return fmt.Sprintf("Anonym%04d", number)
+}
+
+// NormalizeUsername возвращает username пользователя или генерирует анонимное имя
+func NormalizeUsername(username string, userID int64) string {
+	if username == "" {
+		return GenerateAnonymousName(userID)
+	}
+	return username
+}
+
 var glitchMarks = []rune{
 	'\u0335', '\u0336', '\u0337', '\u0338', // зачёркивание
 	'\u0300', '\u0301', '\u0302', '\u0303', // диакритика
@@ -195,7 +212,7 @@ func (app *Application) GenerateCockRulerText(log *logging.Logger, userID int64,
 	if !isUserInScoreboard {
 		if userCock := app.GetCockSizeFromCache(log, userID); userCock != nil {
 			formattedUserCock := FormatCockSizeForDate(*userCock)
-			others = append(others, fmt.Sprintf(MsgCockRulerScoreboardOut, EscapeMarkdownV2(CommonDots), formattedUserCock, EmojiFromSize(*userCock)))
+			others = append(others, fmt.Sprintf(MsgCockRulerScoreboardOut, CommonDots, formattedUserCock, EmojiFromSize(*userCock)))
 		} else {
 			others = append(others, MsgCockScoreboardNotFound)
 		}
