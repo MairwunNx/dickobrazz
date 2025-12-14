@@ -148,6 +148,68 @@ func (app *Application) GetUserAggregatedCock(log *logging.Logger, userID int64)
 	return nil
 }
 
+// GetTotalCockersCount возвращает общее количество уникальных участников за все время
+func (app *Application) GetTotalCockersCount(log *logging.Logger) int {
+	collection := database.CollectionCocks(app.db)
+
+	cursor, err := collection.Aggregate(app.ctx, database.PipelineTotalCockersCount())
+	if err != nil {
+		log.E("Failed to count total cockers", logging.InnerError, err)
+		return 0
+	}
+
+	defer func(cursor *mongo.Cursor, ctx context.Context) {
+		err := cursor.Close(ctx)
+		if err != nil {
+			log.E("Failed to close mongo cursor", logging.InnerError, err)
+		}
+	}(cursor, app.ctx)
+
+	var result struct {
+		Total int `bson:"total"`
+	}
+	if cursor.Next(app.ctx) {
+		if err := cursor.Decode(&result); err != nil {
+			log.E("Failed to decode count result", logging.InnerError, err)
+			return 0
+		}
+		return result.Total
+	}
+
+	return 0
+}
+
+// GetSeasonCockersCount возвращает количество уникальных участников в сезоне
+func (app *Application) GetSeasonCockersCount(log *logging.Logger, season CockSeason) int {
+	collection := database.CollectionCocks(app.db)
+
+	cursor, err := collection.Aggregate(app.ctx, database.PipelineSeasonCockersCount(season.StartDate, season.EndDate))
+	if err != nil {
+		log.E("Failed to count season cockers", logging.InnerError, err)
+		return 0
+	}
+
+	defer func(cursor *mongo.Cursor, ctx context.Context) {
+		err := cursor.Close(ctx)
+		if err != nil {
+			log.E("Failed to close mongo cursor", logging.InnerError, err)
+		}
+	}(cursor, app.ctx)
+
+	var result struct {
+		Total int `bson:"total"`
+	}
+	if cursor.Next(app.ctx) {
+		if err := cursor.Decode(&result); err != nil {
+			log.E("Failed to decode count result", logging.InnerError, err)
+			return 0
+		}
+		return result.Total
+	}
+
+	return 0
+}
+
 func (app *Application) GetFirstCockDate(log *logging.Logger) *time.Time {
 	collection := database.CollectionCocks(app.db)
 	

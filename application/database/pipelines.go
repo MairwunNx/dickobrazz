@@ -322,6 +322,15 @@ func PipelineTopUsersBySize() mongo.Pipeline {
 	}
 }
 
+func PipelineTotalCockersCount() mongo.Pipeline {
+	return mongo.Pipeline{
+		{{Key: "$group", Value: bson.D{
+			{Key: "_id", Value: "$user_id"},
+		}}},
+		{{Key: "$count", Value: "total"}},
+	}
+}
+
 func PipelineUserTotalSize(userID int64) mongo.Pipeline {
 	return mongo.Pipeline{
 		{{Key: "$match", Value: bson.D{{Key: "user_id", Value: userID}}}},
@@ -377,6 +386,21 @@ func PipelineTopUsersInSeason(startDate, endDate time.Time) mongo.Pipeline {
 		}}},
 		{{Key: "$sort", Value: bson.D{{Key: "total_size", Value: -1}}}},
 		{{Key: "$limit", Value: 13}},
+	}
+}
+
+func PipelineSeasonCockersCount(startDate, endDate time.Time) mongo.Pipeline {
+	return mongo.Pipeline{
+		{{Key: "$match", Value: bson.D{
+			{Key: "requested_at", Value: bson.D{
+				{Key: "$gte", Value: startDate},
+				{Key: "$lt", Value: endDate},
+			}},
+		}}},
+		{{Key: "$group", Value: bson.D{
+			{Key: "_id", Value: "$user_id"},
+		}}},
+		{{Key: "$count", Value: "total"}},
 	}
 }
 

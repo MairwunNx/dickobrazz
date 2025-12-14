@@ -92,7 +92,8 @@ func (app *Application) InlineQueryCockSize(log *logging.Logger, query *tgbotapi
 
 func (app *Application) InlineQueryCockLadder(log *logging.Logger, query *tgbotapi.InlineQuery) tgbotapi.InlineQueryResultArticle {
 	cocks := app.AggregateCockSizes(log)
-	text := app.GenerateCockLadderScoreboard(log, query.From.ID, cocks)
+	totalParticipants := app.GetTotalCockersCount(log)
+	text := app.GenerateCockLadderScoreboard(log, query.From.ID, cocks, totalParticipants)
 	return InitializeInlineQuery("Ладдер коков", text)
 }
 
@@ -101,16 +102,19 @@ func (app *Application) InlineQueryCockRace(log *logging.Logger, query *tgbotapi
 	
 	var cocks []UserCockRace
 	var seasonStartDate string
+	var totalParticipants int
 	
 	if currentSeason != nil {
 		cocks = app.AggregateCockSizesForSeason(log, *currentSeason)
+		totalParticipants = app.GetSeasonCockersCount(log, *currentSeason)
 		seasonStartDate = EscapeMarkdownV2(currentSeason.StartDate.Format("02.01.2006"))
 	} else {
 		cocks = app.AggregateCockSizes(log)
+		totalParticipants = app.GetTotalCockersCount(log)
 		seasonStartDate = "хуй знает когда" // Заглушка для случая если нет активного сезона (чего в целом быть не может, я в это верю.)
 	}
 	
-	text := app.GenerateCockRaceScoreboard(log, query.From.ID, cocks, seasonStartDate)
+	text := app.GenerateCockRaceScoreboard(log, query.From.ID, cocks, seasonStartDate, totalParticipants)
 	return InitializeInlineQuery("Гонка коков", text)
 }
 
@@ -237,6 +241,7 @@ func (app *Application) InlineQueryCockSeason(log *logging.Logger, query *tgbota
 
 func (app *Application) InlineQueryCockRuler(log *logging.Logger, query *tgbotapi.InlineQuery) tgbotapi.InlineQueryResultArticle {
 	cocks := app.GetCockSizesFromCache(log)
+	totalParticipants := len(cocks)
 
 	sort.Slice(cocks, func(i, j int) bool {
 		return cocks[i].Size > cocks[j].Size
@@ -246,7 +251,7 @@ func (app *Application) InlineQueryCockRuler(log *logging.Logger, query *tgbotap
 		cocks = cocks[:13]
 	}
 
-	text := app.GenerateCockRulerText(log, query.From.ID, cocks)
+	text := app.GenerateCockRulerText(log, query.From.ID, cocks, totalParticipants)
 	return InitializeInlineQuery("Линейка коков", strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(text, ".", "\\."), "-", "\\-"), "!", "\\!"))
 }
 

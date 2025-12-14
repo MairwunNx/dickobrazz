@@ -184,11 +184,10 @@ func GenerateCockSizeText(size int, emoji string) string {
 	return fmt.Sprintf(MsgCockSize, formattedSize, emoji)
 }
 
-func (app *Application) GenerateCockRulerText(log *logging.Logger, userID int64, cocks []UserCock) string {
+func (app *Application) GenerateCockRulerText(log *logging.Logger, userID int64, cocks []UserCock, totalParticipants int) string {
 	var winners []string
 	var others []string
 	isUserInScoreboard := false
-	totalParticipants := len(cocks)
 
 	for index, cock := range cocks {
 		isCurrentUser := cock.UserId == userID
@@ -238,11 +237,10 @@ func (app *Application) GenerateCockRulerText(log *logging.Logger, userID int64,
 	}
 }
 
-func (app *Application) GenerateCockRaceScoreboard(log *logging.Logger, userID int64, sizes []UserCockRace, seasonStart string) string {
+func (app *Application) GenerateCockRaceScoreboard(log *logging.Logger, userID int64, sizes []UserCockRace, seasonStart string, totalParticipants int) string {
 	var winners []string
 	var others []string
 	isUserInScoreboard := false
-	totalParticipants := len(sizes)
 
 	for index, user := range sizes {
 		isCurrentUser := user.UserID == userID
@@ -296,11 +294,10 @@ func (app *Application) GenerateCockRaceScoreboard(log *logging.Logger, userID i
 	}
 }
 
-func (app *Application) GenerateCockLadderScoreboard(log *logging.Logger, userID int64, sizes []UserCockRace) string {
+func (app *Application) GenerateCockLadderScoreboard(log *logging.Logger, userID int64, sizes []UserCockRace, totalParticipants int) string {
 	var winners []string
 	var others []string
 	isUserInScoreboard := false
-	totalParticipants := len(sizes)
 
 	for index, user := range sizes {
 		isCurrentUser := user.UserID == userID
