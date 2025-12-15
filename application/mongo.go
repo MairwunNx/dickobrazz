@@ -626,6 +626,7 @@ func (app *Application) CheckAndUpdateAchievements(log *logging.Logger, userID i
 
 	// Получаем текущие достижения пользователя
 	userAchievements := app.GetUserAchievements(log, userID)
+	log.I("Ach: Current user achievements count", "count", len(userAchievements))
 
 	// Проверяем, когда последний раз проверяли достижения
 	now := time.Now()
@@ -633,6 +634,8 @@ func (app *Application) CheckAndUpdateAchievements(log *logging.Logger, userID i
 		if !ach.LastCheckedAt.IsZero() {
 			moscowTime := ach.LastCheckedAt.In(time.FixedZone("MSK", 3*60*60))
 			todayMoscow := now.In(time.FixedZone("MSK", 3*60*60))
+			
+			log.I("Ach: Last check time", "last_checked", moscowTime, "today", todayMoscow, "achievement_id", ach.AchievementID)
 			
 			// Если уже проверяли сегодня, выходим
 			if moscowTime.Year() == todayMoscow.Year() &&
@@ -644,6 +647,8 @@ func (app *Application) CheckAndUpdateAchievements(log *logging.Logger, userID i
 		}
 		break // Достаточно проверить одну запись
 	}
+	
+	log.I("Ach: Starting achievements check")
 
 	// Запускаем пайплайн проверки
 	collection := database.CollectionCocks(app.db)
@@ -710,8 +715,11 @@ func (app *Application) CheckAndUpdateAchievements(log *logging.Logger, userID i
 		existingAch := userAchievements[achID]
 		if existingAch != nil && existingAch.Completed {
 			// Уже выполнено, не обновляем
+			log.I("Ach: Achievement already completed, skipping", "achievement_id", achID)
 			return
 		}
+
+		log.I("Ach: Updating achievement", "achievement_id", achID, "completed", completed, "progress", progress)
 
 		update := map[string]interface{}{
 			"$set": map[string]interface{}{
@@ -725,6 +733,7 @@ func (app *Application) CheckAndUpdateAchievements(log *logging.Logger, userID i
 
 		if completed && (existingAch == nil || !existingAch.Completed) {
 			update["$set"].(map[string]interface{})["completed_at"] = now
+			log.I("Ach: Achievement completed!", "achievement_id", achID)
 		}
 
 		opts := options.Update().SetUpsert(true)
@@ -738,6 +747,7 @@ func (app *Application) CheckAndUpdateAchievements(log *logging.Logger, userID i
 	if totalPulls, ok := data["total_pulls"].([]interface{}); ok && len(totalPulls) > 0 {
 		if pullData, ok := totalPulls[0].(map[string]interface{}); ok {
 			if count, ok := pullData["count"].(int32); ok {
+				log.I("Ach: Total pulls from pipeline", "count", count)
 				updateAchievement("not_rubbed_yet", count >= 10, int(count))
 				updateAchievement("diary", count >= 31, int(count))
 				updateAchievement("skillful_hands", count >= 100, int(count))
@@ -747,12 +757,15 @@ func (app *Application) CheckAndUpdateAchievements(log *logging.Logger, userID i
 				updateAchievement("annihilator_cannon", count >= 5000, int(count))
 			}
 		}
+	} else {
+		log.W("Ach: No total_pulls data in pipeline results")
 	}
 
 	// Проверяем достижения по накопленному размеру
 	if totalSize, ok := data["total_size"].([]interface{}); ok && len(totalSize) > 0 {
 		if sizeData, ok := totalSize[0].(map[string]interface{}); ok {
 			if total, ok := sizeData["total"].(int32); ok {
+				log.I("Ach: Total size from pipeline", "total", total)
 				updateAchievement("golden_hundred", total >= 100, int(total))
 				updateAchievement("solid_thousand", total >= 1000, int(total))
 				updateAchievement("five_k", total >= 5000, int(total))
@@ -761,6 +774,8 @@ func (app *Application) CheckAndUpdateAchievements(log *logging.Logger, userID i
 				updateAchievement("greek_myth", total >= 30000, int(total))
 			}
 		}
+	} else {
+		log.W("Ach: No total_size data in pipeline results")
 	}
 
 	// Проверяем достижение "Снайпер" (30см 5 раз)

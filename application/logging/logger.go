@@ -49,6 +49,10 @@ func (l *Logger) I(msg string, args ...any) {
 	l.log.Info(msg, args...)
 }
 
+func (l *Logger) W(msg string, args ...any) {
+	l.log.Warn(msg, args...)
+}
+
 func (l *Logger) E(msg string, args ...any) {
 	l.log.Error(msg, args...)
 }
