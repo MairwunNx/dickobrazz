@@ -630,23 +630,23 @@ func (app *Application) CheckAndUpdateAchievements(log *logging.Logger, userID i
 
 	// Проверяем, когда последний раз проверяли достижения
 	now := time.Now()
-	for _, ach := range userAchievements {
-		if !ach.LastCheckedAt.IsZero() {
-			moscowTime := ach.LastCheckedAt.In(time.FixedZone("MSK", 3*60*60))
-			todayMoscow := now.In(time.FixedZone("MSK", 3*60*60))
+	// for _, ach := range userAchievements {
+	// 	if !ach.LastCheckedAt.IsZero() {
+	// 		moscowTime := ach.LastCheckedAt.In(time.FixedZone("MSK", 3*60*60))
+	// 		todayMoscow := now.In(time.FixedZone("MSK", 3*60*60))
 			
-			log.I("Ach: Last check time", "last_checked", moscowTime, "today", todayMoscow, "achievement_id", ach.AchievementID)
+	// 		log.I("Ach: Last check time", "last_checked", moscowTime, "today", todayMoscow, "achievement_id", ach.AchievementID)
 			
-			// Если уже проверяли сегодня, выходим
-			if moscowTime.Year() == todayMoscow.Year() &&
-				moscowTime.Month() == todayMoscow.Month() &&
-				moscowTime.Day() == todayMoscow.Day() {
-				log.I("Achievements already checked today")
-				return
-			}
-		}
-		break // Достаточно проверить одну запись
-	}
+	// 		// Если уже проверяли сегодня, выходим
+	// 		if moscowTime.Year() == todayMoscow.Year() &&
+	// 			moscowTime.Month() == todayMoscow.Month() &&
+	// 			moscowTime.Day() == todayMoscow.Day() {
+	// 			log.I("Achievements already checked today")
+	// 			return
+	// 		}
+	// 	}
+	// 	break // Достаточно проверить одну запись
+	// }
 	
 	log.I("Ach: Starting achievements check")
 
