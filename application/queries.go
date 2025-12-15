@@ -11,6 +11,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/google/uuid"
@@ -177,14 +178,61 @@ func (app *Application) InlineQueryCockDynamic(log *logging.Logger, query *tgbot
 		return tgbotapi.InlineQueryResultArticle{}
 	}
 
+	// Проверяем, что у пользователя есть данные
+	if len(result.IndividualCockTotal) == 0 || len(result.Overall) == 0 {
+		log.E("User has no cock data yet")
+		text := "🤔 *Недостаточно данных для динамики*\n\n_Сначала дёрни кок хотя бы раз\\!_"
+		return InitializeInlineQueryWithThumb(
+			"Динамика кока",
+			text,
+			"https://files.mairwunnx.com/raw/public/dickobrazz%2FGemini_Generated_Image_8fkvy78fkvy78fkv.png",
+		)
+	}
+
 	individualCockTotal := result.IndividualCockTotal[0]
-	individualCockRecent := result.IndividualCockRecent[0]
-	individualRecord := result.IndividualRecord[0]
+	
+	// Проверяем наличие данных по среднему коку (требует минимум 5 коков)
+	var individualCockRecentAverage int
+	if len(result.IndividualCockRecent) > 0 {
+		individualCockRecentAverage = result.IndividualCockRecent[0].Average
+	}
+	
+	// Проверяем наличие данных по рекорду
+	var individualRecordTotal int
+	var individualRecordDate time.Time
+	if len(result.IndividualRecord) > 0 {
+		individualRecordTotal = result.IndividualRecord[0].Total
+		individualRecordDate = result.IndividualRecord[0].RequestedAt
+	} else {
+		// Если нет рекорда, используем данные из общего
+		individualRecordTotal = individualCockTotal.Total
+		individualRecordDate = time.Now()
+	}
+	
 	individualIrk := result.IndividualIrk[0]
 	individualDominance := result.IndividualDominance[0]
-	individualDailyDynamics := result.IndividualDailyDynamics[0]
-	individualFiveCocksDynamics := result.IndividualFiveCocksDynamics[0]
-	individualGrowthSpeed := result.IndividualGrowthSpeed[0]
+	
+	// Проверяем наличие данных для дневной динамики (может отсутствовать у новых пользователей)
+	var yesterdayCockChange int
+	var yesterdayCockChangePercent float64
+	if len(result.IndividualDailyDynamics) > 0 {
+		yesterdayCockChange = result.IndividualDailyDynamics[0].YesterdayCockChange
+		yesterdayCockChangePercent = result.IndividualDailyDynamics[0].YesterdayCockChangePercent
+	}
+	
+	// Проверяем наличие данных для динамики за 5 коков (требует минимум 5 коков)
+	var fiveCocksChange int
+	var fiveCocksChangePercent float64
+	if len(result.IndividualFiveCocksDynamics) > 0 {
+		fiveCocksChange = result.IndividualFiveCocksDynamics[0].FiveCocksChange
+		fiveCocksChangePercent = result.IndividualFiveCocksDynamics[0].FiveCocksChangePercent
+	}
+	
+	// Проверяем наличие данных для скорости роста (требует минимум 5 коков)
+	var growthSpeed float64
+	if len(result.IndividualGrowthSpeed) > 0 {
+		growthSpeed = result.IndividualGrowthSpeed[0].GrowthSpeed
+	}
 
 	overall := result.Overall[0]
 	overallRecent := result.OverallRecent[0]
@@ -193,10 +241,26 @@ func (app *Application) InlineQueryCockDynamic(log *logging.Logger, query *tgbot
 	overallRecord := result.Record[0]
 	
 	totalCocksCount := result.TotalCocksCount[0].TotalCount
-	userCocksCount := result.IndividualCocksCount[0].UserCount
 	
-	userLuckCoefficient := result.IndividualLuck[0].LuckCoefficient
-	userVolatility := result.IndividualVolatility[0].Volatility
+	// Проверяем наличие данных по количеству коков пользователя
+	var userCocksCount int
+	if len(result.IndividualCocksCount) > 0 {
+		userCocksCount = result.IndividualCocksCount[0].UserCount
+	}
+	
+	// Проверяем наличие данных для коэффициента везения (требует минимум 5 коков)
+	var userLuckCoefficient float64
+	if len(result.IndividualLuck) > 0 {
+		userLuckCoefficient = result.IndividualLuck[0].LuckCoefficient
+	} else {
+		userLuckCoefficient = 1.0 // Нейтральное значение
+	}
+	
+	// Проверяем наличие данных для волатильности (требует минимум 5 коков)
+	var userVolatility float64
+	if len(result.IndividualVolatility) > 0 {
+		userVolatility = result.IndividualVolatility[0].Volatility
+	}
 
 	userSeasonWins := app.GetUserSeasonWins(log, query.From.ID)
 	userCockRespect := app.GetUserCockRespect(log, query.From.ID)
@@ -210,16 +274,16 @@ func (app *Application) InlineQueryCockDynamic(log *logging.Logger, query *tgbot
 
 		/* Персональная динамика кока */
 		individualCockTotal.Total,
-		individualCockRecent.Average,
+		individualCockRecentAverage,
 		individualIrk.Irk,
-		individualRecord.Total,
-		individualRecord.RequestedAt,
+		individualRecordTotal,
+		individualRecordDate,
 
 		/* Кок-активы */
-		individualDailyDynamics.YesterdayCockChangePercent,
-		individualDailyDynamics.YesterdayCockChange,
-		individualFiveCocksDynamics.FiveCocksChangePercent,
-		individualFiveCocksDynamics.FiveCocksChange,
+		yesterdayCockChangePercent,
+		yesterdayCockChange,
+		fiveCocksChangePercent,
+		fiveCocksChange,
 
 		/* Соотношение коков */
 		overallDistribution.HugePercent,
@@ -245,7 +309,7 @@ func (app *Application) InlineQueryCockDynamic(log *logging.Logger, query *tgbot
 		userVolatility,
 		
 		/* Средняя скорость прироста */
-		individualGrowthSpeed.GrowthSpeed,
+		growthSpeed,
 	)
 
 	article := tgbotapi.NewInlineQueryResultArticleMarkdown(query.ID, "Динамика кока", text)
