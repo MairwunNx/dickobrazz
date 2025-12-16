@@ -200,7 +200,7 @@ func (app *Application) InlineQueryCockDynamic(log *logging.Logger, query *tgbot
 	} else {
 		// Если нет рекорда, используем данные из общего
 		individualRecordTotal = individualCockTotal.Total
-		individualRecordDate = time.Now()
+		individualRecordDate = datetime.NowTime()
 	}
 	
 	individualIrk := result.IndividualIrk[0]

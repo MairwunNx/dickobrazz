@@ -317,7 +317,7 @@ func GetHolidayEmojiSet() []EmojiRange {
 }
 
 func GetCurrentSeason() Season {
-	now := time.Now()
+	now := datetime.NowTime()
 	month := now.Month()
 	
 	switch month {

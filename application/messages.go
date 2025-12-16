@@ -1,6 +1,7 @@
 package application
 
 import (
+	"dickobrazz/application/datetime"
 	"fmt"
 	"strings"
 	"time"
@@ -248,7 +249,7 @@ func NewMsgCockDynamicsTemplate(
 		EscapeMarkdownV2(FormatDickIkr(userIrk)),              // %[10]s
 		EscapeMarkdownV2(FormatDickSize(userMaxCock)),         // %[11]s
 		EmojiFromSize(userMaxCock),                            // %[12]s
-		userMaxCockDate.Local().Format("02.01.06"),            // %[13]s
+		userMaxCockDate.In(datetime.NowLocation()).Format("02.01.06"), // %[13]s
 
 		/* 14-18: Кок-активы (дневная и 5 коков динамика) */
 		userYesterdayChangePercentEmoji,                       // %[14]s
@@ -262,7 +263,7 @@ func NewMsgCockDynamicsTemplate(
 		FormatDickPercent(totalSmallCockRatio),                // %[20]s
 
 		/* 21-22: Самый большой кок */
-		totalMaxCockDate.Local().Format("02.01.06"),           // %[21]s
+		totalMaxCockDate.In(datetime.NowLocation()).Format("02.01.06"), // %[21]s
 		FormatDickSize(totalMaxCock),                          // %[22]s
 
 		/* 23: % Доминирования */

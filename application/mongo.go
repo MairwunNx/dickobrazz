@@ -3,6 +3,7 @@ package application
 import (
 	"context"
 	"dickobrazz/application/database"
+	"dickobrazz/application/datetime"
 	"dickobrazz/application/logging"
 	"math"
 	"os"
@@ -310,12 +311,12 @@ func (app *Application) GetAllSeasons(log *logging.Logger) []CockSeason {
 	var seasons []CockSeason
 	currentDate := *firstCockDate
 	seasonNum := 1
-	now := time.Now()
+	now := datetime.NowTime()
 	
 	for currentDate.Before(now) {
 		// Каждый сезон длится 3 месяца
 		endDate := currentDate.AddDate(0, 3, 0)
-		isActive := now.After(currentDate) && now.Before(endDate)
+		isActive := (now.After(currentDate) || now.Equal(currentDate)) && now.Before(endDate)
 		
 		seasons = append(seasons, CockSeason{
 			StartDate: currentDate,
@@ -343,7 +344,7 @@ func (app *Application) GetAllSeasonsCount(log *logging.Logger) int {
 	
 	currentDate := *firstCockDate
 	count := 0
-	now := time.Now()
+	now := datetime.NowTime()
 	
 	for currentDate.Before(now) {
 		endDate := currentDate.AddDate(0, 3, 0)
@@ -453,11 +454,11 @@ func (app *Application) GetAllSeasonsForStats(log *logging.Logger) []CockSeason 
 	var seasons []CockSeason
 	currentDate := *firstCockDate
 	seasonNum := 1
-	now := time.Now()
+	now := datetime.NowTime()
 	
 	for currentDate.Before(now) {
 		endDate := currentDate.AddDate(0, 3, 0)
-		isActive := now.After(currentDate) && now.Before(endDate)
+		isActive := (now.After(currentDate) || now.Equal(currentDate)) && now.Before(endDate)
 		
 		seasons = append(seasons, CockSeason{
 			StartDate: currentDate,
@@ -628,11 +629,11 @@ func (app *Application) CheckAndUpdateAchievements(log *logging.Logger, userID i
 	userAchievements := app.GetUserAchievements(log, userID)
 
 	// Проверяем, когда последний раз проверяли достижения
-	now := time.Now()
+	now := datetime.NowTime()
 	for _, ach := range userAchievements {
 		if !ach.LastCheckedAt.IsZero() {
-			moscowTime := ach.LastCheckedAt.In(time.FixedZone("MSK", 3*60*60))
-			todayMoscow := now.In(time.FixedZone("MSK", 3*60*60))
+			moscowTime := ach.LastCheckedAt.In(datetime.NowLocation())
+			todayMoscow := now
 			
 			// Если уже проверяли сегодня, выходим
 			if moscowTime.Year() == todayMoscow.Year() &&
@@ -979,7 +980,7 @@ func (app *Application) CheckAndUpdateAchievements(log *logging.Logger, userID i
 		
 		// Проверяем последний кок на совпадения с временем
 		lastCock := recent[2]
-		moscowTime := lastCock.RequestedAt.In(time.FixedZone("MSK", 3*60*60))
+		moscowTime := lastCock.RequestedAt.In(datetime.NowLocation())
 		
 		hour := moscowTime.Hour()
 		minute := moscowTime.Minute()

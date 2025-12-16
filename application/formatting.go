@@ -551,7 +551,7 @@ func GetPlaceEmoji(place int, isCurrentUser bool) string {
 	case 3:
 		return "🥉"
 	default:
-		now := time.Now()
+		now := datetime.NowTime()
 		month := now.Month()
 
 		var emoji string
