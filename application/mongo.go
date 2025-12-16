@@ -308,15 +308,25 @@ func (app *Application) GetAllSeasons(log *logging.Logger) []CockSeason {
 		return []CockSeason{}
 	}
 	
+	moscowLoc := datetime.NowLocation()
+	
+	// Нормализуем дату первого кока к началу дня (00:00:00) в московской локации
+	year, month, day := firstCockDate.Year(), firstCockDate.Month(), firstCockDate.Day()
+	normalizedFirstDate := time.Date(year, month, day, 0, 0, 0, 0, moscowLoc)
+	
 	var seasons []CockSeason
-	currentDate := *firstCockDate
+	currentDate := normalizedFirstDate
 	seasonNum := 1
 	now := datetime.NowTime()
 	
-	for currentDate.Before(now) {
+	// Нормализуем текущую дату к началу дня для корректного сравнения
+	nowYear, nowMonth, nowDay := now.Year(), now.Month(), now.Day()
+	normalizedNow := time.Date(nowYear, nowMonth, nowDay, 0, 0, 0, 0, moscowLoc)
+	
+	for currentDate.Before(normalizedNow) || currentDate.Equal(normalizedNow) {
 		// Каждый сезон длится 3 месяца
 		endDate := currentDate.AddDate(0, 3, 0)
-		isActive := (now.After(currentDate) || now.Equal(currentDate)) && now.Before(endDate)
+		isActive := (normalizedNow.After(currentDate) || normalizedNow.Equal(currentDate)) && normalizedNow.Before(endDate)
 		
 		seasons = append(seasons, CockSeason{
 			StartDate: currentDate,
@@ -342,11 +352,21 @@ func (app *Application) GetAllSeasonsCount(log *logging.Logger) int {
 		return 0
 	}
 	
-	currentDate := *firstCockDate
+	moscowLoc := datetime.NowLocation()
+	
+	// Нормализуем дату первого кока к началу дня (00:00:00) в московской локации
+	year, month, day := firstCockDate.Year(), firstCockDate.Month(), firstCockDate.Day()
+	normalizedFirstDate := time.Date(year, month, day, 0, 0, 0, 0, moscowLoc)
+	
+	currentDate := normalizedFirstDate
 	count := 0
 	now := datetime.NowTime()
 	
-	for currentDate.Before(now) {
+	// Нормализуем текущую дату к началу дня для корректного сравнения
+	nowYear, nowMonth, nowDay := now.Year(), now.Month(), now.Day()
+	normalizedNow := time.Date(nowYear, nowMonth, nowDay, 0, 0, 0, 0, moscowLoc)
+	
+	for currentDate.Before(normalizedNow) || currentDate.Equal(normalizedNow) {
 		endDate := currentDate.AddDate(0, 3, 0)
 		count++
 		currentDate = endDate
@@ -451,14 +471,24 @@ func (app *Application) GetAllSeasonsForStats(log *logging.Logger) []CockSeason 
 		return []CockSeason{}
 	}
 	
+	moscowLoc := datetime.NowLocation()
+	
+	// Нормализуем дату первого кока к началу дня (00:00:00) в московской локации
+	year, month, day := firstCockDate.Year(), firstCockDate.Month(), firstCockDate.Day()
+	normalizedFirstDate := time.Date(year, month, day, 0, 0, 0, 0, moscowLoc)
+	
 	var seasons []CockSeason
-	currentDate := *firstCockDate
+	currentDate := normalizedFirstDate
 	seasonNum := 1
 	now := datetime.NowTime()
 	
-	for currentDate.Before(now) {
+	// Нормализуем текущую дату к началу дня для корректного сравнения
+	nowYear, nowMonth, nowDay := now.Year(), now.Month(), now.Day()
+	normalizedNow := time.Date(nowYear, nowMonth, nowDay, 0, 0, 0, 0, moscowLoc)
+	
+	for currentDate.Before(normalizedNow) || currentDate.Equal(normalizedNow) {
 		endDate := currentDate.AddDate(0, 3, 0)
-		isActive := (now.After(currentDate) || now.Equal(currentDate)) && now.Before(endDate)
+		isActive := (normalizedNow.After(currentDate) || normalizedNow.Equal(currentDate)) && normalizedNow.Before(endDate)
 		
 		seasons = append(seasons, CockSeason{
 			StartDate: currentDate,

@@ -239,9 +239,24 @@ func PipelineDynamic(userId int64) mongo.Pipeline {
 			{Key: "record", Value: bson.A{
 				bson.D{{Key: "$group", Value: bson.D{
 					{Key: "_id", Value: bson.D{
-						{Key: "year", Value: bson.D{{Key: "$year", Value: "$requested_at"}}},
-						{Key: "month", Value: bson.D{{Key: "$month", Value: "$requested_at"}}},
-						{Key: "day", Value: bson.D{{Key: "$dayOfMonth", Value: "$requested_at"}}},
+						{Key: "year", Value: bson.D{
+							{Key: "$year", Value: bson.D{
+								{Key: "date", Value: "$requested_at"},
+								{Key: "timezone", Value: "Europe/Moscow"},
+							}},
+						}},
+						{Key: "month", Value: bson.D{
+							{Key: "$month", Value: bson.D{
+								{Key: "date", Value: "$requested_at"},
+								{Key: "timezone", Value: "Europe/Moscow"},
+							}},
+						}},
+						{Key: "day", Value: bson.D{
+							{Key: "$dayOfMonth", Value: bson.D{
+								{Key: "date", Value: "$requested_at"},
+								{Key: "timezone", Value: "Europe/Moscow"},
+							}},
+						}},
 					}},
 					{Key: "requested_at", Value: bson.D{{Key: "$first", Value: "$requested_at"}}},
 					{Key: "total", Value: bson.D{{Key: "$sum", Value: "$size"}}},
@@ -674,8 +689,18 @@ func PipelineCheckAchievements(userId int64) mongo.Pipeline {
 			{Key: "valentine", Value: bson.A{
 				bson.D{{Key: "$project", Value: bson.D{
 					{Key: "size", Value: 1},
-					{Key: "month", Value: bson.D{{Key: "$month", Value: "$requested_at"}}},
-					{Key: "day", Value: bson.D{{Key: "$dayOfMonth", Value: "$requested_at"}}},
+					{Key: "month", Value: bson.D{
+						{Key: "$month", Value: bson.D{
+							{Key: "date", Value: "$requested_at"},
+							{Key: "timezone", Value: "Europe/Moscow"},
+						}},
+					}},
+					{Key: "day", Value: bson.D{
+						{Key: "$dayOfMonth", Value: bson.D{
+							{Key: "date", Value: "$requested_at"},
+							{Key: "timezone", Value: "Europe/Moscow"},
+						}},
+					}},
 				}}},
 				bson.D{{Key: "$match", Value: bson.D{
 					{Key: "month", Value: 2},
@@ -687,8 +712,18 @@ func PipelineCheckAchievements(userId int64) mongo.Pipeline {
 			{Key: "new_year_gift", Value: bson.A{
 				bson.D{{Key: "$project", Value: bson.D{
 					{Key: "size", Value: 1},
-					{Key: "month", Value: bson.D{{Key: "$month", Value: "$requested_at"}}},
-					{Key: "day", Value: bson.D{{Key: "$dayOfMonth", Value: "$requested_at"}}},
+					{Key: "month", Value: bson.D{
+						{Key: "$month", Value: bson.D{
+							{Key: "date", Value: "$requested_at"},
+							{Key: "timezone", Value: "Europe/Moscow"},
+						}},
+					}},
+					{Key: "day", Value: bson.D{
+						{Key: "$dayOfMonth", Value: bson.D{
+							{Key: "date", Value: "$requested_at"},
+							{Key: "timezone", Value: "Europe/Moscow"},
+						}},
+					}},
 				}}},
 				bson.D{{Key: "$match", Value: bson.D{
 					{Key: "month", Value: 12},
