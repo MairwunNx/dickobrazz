@@ -724,6 +724,13 @@ func PipelineCheckAchievements(userId int64) mongo.Pipeline {
 				bson.D{{Key: "$sort", Value: bson.D{{Key: "requested_at", Value: -1}}}},
 				bson.D{{Key: "$limit", Value: 31}},
 			}},
+			
+			// 11. Последние 3 кока для проверки специальных совпадений
+			{Key: "recent_3", Value: bson.A{
+				bson.D{{Key: "$sort", Value: bson.D{{Key: "requested_at", Value: -1}}}},
+				bson.D{{Key: "$limit", Value: 3}},
+				bson.D{{Key: "$sort", Value: bson.D{{Key: "requested_at", Value: 1}}}},
+			}},
 		}}},
 	}
 }

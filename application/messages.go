@@ -396,7 +396,7 @@ func NewMsgCockSeasonsFullText(seasons []CockSeason, totalSeasonsCount int, getS
 	return finalText
 }
 
-// MsgCockAchievementsTemplate - шаблон для списка достижений
+// MsgCockAchievementsTemplate - шаблон для списка достижений (первая страница с описанием)
 const MsgCockAchievementsTemplate = `🏆 *Кок\-ачивки*
 Выполнено: *%d/%d* _\(%d%%\)_ • 🌟 Респекты: *%d*
 
@@ -404,5 +404,8 @@ const MsgCockAchievementsTemplate = `🏆 *Кок\-ачивки*
 
 %s`
 
-// MsgCockAchievementFooter - футер для достижений с пагинацией
-const MsgCockAchievementFooter = "\n\n_Страница %d из %d_"
+// MsgCockAchievementsTemplateOtherPages - шаблон для остальных страниц (без описания)
+const MsgCockAchievementsTemplateOtherPages = `🏆 *Кок\-ачивки*
+Выполнено: *%d/%d* _\(%d%%\)_ • 🌟 Респекты: *%d*
+
+%s`

@@ -626,38 +626,26 @@ func (app *Application) CheckAndUpdateAchievements(log *logging.Logger, userID i
 
 	// Получаем текущие достижения пользователя
 	userAchievements := app.GetUserAchievements(log, userID)
-	log.I("Ach: Current user achievements count", "count", len(userAchievements))
 
 	// Проверяем, когда последний раз проверяли достижения
 	now := time.Now()
-	// for _, ach := range userAchievements {
-	// 	if !ach.LastCheckedAt.IsZero() {
-	// 		moscowTime := ach.LastCheckedAt.In(time.FixedZone("MSK", 3*60*60))
-	// 		todayMoscow := now.In(time.FixedZone("MSK", 3*60*60))
+	for _, ach := range userAchievements {
+		if !ach.LastCheckedAt.IsZero() {
+			moscowTime := ach.LastCheckedAt.In(time.FixedZone("MSK", 3*60*60))
+			todayMoscow := now.In(time.FixedZone("MSK", 3*60*60))
 			
-	// 		log.I("Ach: Last check time", "last_checked", moscowTime, "today", todayMoscow, "achievement_id", ach.AchievementID)
-			
-	// 		// Если уже проверяли сегодня, выходим
-	// 		if moscowTime.Year() == todayMoscow.Year() &&
-	// 			moscowTime.Month() == todayMoscow.Month() &&
-	// 			moscowTime.Day() == todayMoscow.Day() {
-	// 			log.I("Achievements already checked today")
-	// 			return
-	// 		}
-	// 	}
-	// 	break // Достаточно проверить одну запись
-	// }
-	
-	log.I("Ach: Starting achievements check")
-
-	// Сначала проверим, есть ли вообще коки у пользователя
-	collection := database.CollectionCocks(app.db)
-	testCount, err := collection.CountDocuments(app.ctx, map[string]interface{}{"user_id": userID})
-	if err != nil {
-		log.E("Failed to count user cocks", logging.InnerError, err)
-	} else {
-		log.I("Ach: User cocks count in DB", "count", testCount)
+			// Если уже проверяли сегодня, выходим
+			if moscowTime.Year() == todayMoscow.Year() &&
+				moscowTime.Month() == todayMoscow.Month() &&
+				moscowTime.Day() == todayMoscow.Day() {
+				log.I("Achievements already checked today")
+				return
+			}
+		}
+		break // Достаточно проверить одну запись
 	}
+
+	collection := database.CollectionCocks(app.db)
 
 	// Запускаем пайплайн проверки
 	cursor, err := collection.Aggregate(app.ctx, database.PipelineCheckAchievements(userID))
@@ -685,7 +673,6 @@ func (app *Application) CheckAndUpdateAchievements(log *logging.Logger, userID i
 	}
 
 	data := results[0]
-	log.I("Ach: Pipeline result", "total_pulls_len", len(data.TotalPulls), "total_size_len", len(data.TotalSize))
 
 	// Получаем глобальные максимум и минимум
 	globalCursor, err := collection.Aggregate(app.ctx, database.PipelineGlobalMaxMin())
@@ -705,7 +692,6 @@ func (app *Application) CheckAndUpdateAchievements(log *logging.Logger, userID i
 	if len(globalResults) > 0 {
 		globalMax = globalResults[0].Max
 		globalMin = globalResults[0].Min
-		log.I("Ach: Global max/min", "max", globalMax, "min", globalMin)
 	}
 
 	// Обновляем достижения
@@ -721,11 +707,8 @@ func (app *Application) CheckAndUpdateAchievements(log *logging.Logger, userID i
 		existingAch := userAchievements[achID]
 		if existingAch != nil && existingAch.Completed {
 			// Уже выполнено, не обновляем
-			log.I("Ach: Achievement already completed, skipping", "achievement_id", achID)
 			return
 		}
-
-		log.I("Ach: Updating achievement", "achievement_id", achID, "completed", completed, "progress", progress)
 
 		update := map[string]interface{}{
 			"$set": map[string]interface{}{
@@ -739,7 +722,6 @@ func (app *Application) CheckAndUpdateAchievements(log *logging.Logger, userID i
 
 		if completed && (existingAch == nil || !existingAch.Completed) {
 			update["$set"].(map[string]interface{})["completed_at"] = now
-			log.I("Ach: Achievement completed!", "achievement_id", achID)
 		}
 
 		opts := options.Update().SetUpsert(true)
@@ -752,7 +734,6 @@ func (app *Application) CheckAndUpdateAchievements(log *logging.Logger, userID i
 	// Проверяем достижения по количеству дерганий
 	if len(data.TotalPulls) > 0 {
 		count := data.TotalPulls[0].Count
-		log.I("Ach: Total pulls from pipeline", "count", count)
 		updateAchievement("not_rubbed_yet", count >= 10, int(count))
 		updateAchievement("diary", count >= 31, int(count))
 		updateAchievement("skillful_hands", count >= 100, int(count))
@@ -760,22 +741,17 @@ func (app *Application) CheckAndUpdateAchievements(log *logging.Logger, userID i
 		updateAchievement("wonder_stranger", count >= 500, int(count))
 		updateAchievement("bazooka_hands", count >= 1000, int(count))
 		updateAchievement("annihilator_cannon", count >= 5000, int(count))
-	} else {
-		log.W("Ach: No total_pulls data in pipeline results")
 	}
 
 	// Проверяем достижения по накопленному размеру
 	if len(data.TotalSize) > 0 {
 		total := data.TotalSize[0].Total
-		log.I("Ach: Total size from pipeline", "total", total)
 		updateAchievement("golden_hundred", total >= 100, int(total))
 		updateAchievement("solid_thousand", total >= 1000, int(total))
 		updateAchievement("five_k", total >= 5000, int(total))
 		updateAchievement("golden_cock", total >= 10000, int(total))
 		updateAchievement("cosmic_cock", total >= 20000, int(total))
 		updateAchievement("greek_myth", total >= 30000, int(total))
-	} else {
-		log.W("Ach: No total_size data in pipeline results")
 	}
 
 	// Проверяем достижение "Снайпер" (30см 5 раз)
@@ -952,7 +928,6 @@ func (app *Application) CheckAndUpdateAchievements(log *logging.Logger, userID i
 		var seasonResults []database.DocumentSeasonCount
 		if err = seasonCursor.All(app.ctx, &seasonResults); err == nil && len(seasonResults) > 0 {
 			count := seasonResults[0].Count
-			log.I("Ach: Season count", "count", count)
 			updateAchievement("oldtimer", count >= 3, int(count))
 			updateAchievement("veteran", count >= 5, int(count))
 			updateAchievement("keeper", count >= 10, int(count))
@@ -969,7 +944,6 @@ func (app *Application) CheckAndUpdateAchievements(log *logging.Logger, userID i
 		var travelerResults []database.DocumentTravelerCheck
 		if err = travelerCursor.All(app.ctx, &travelerResults); err == nil && len(travelerResults) > 0 {
 			uniqueSizes := travelerResults[0].UniqueSizes
-			log.I("Ach: Traveler unique sizes", "unique_sizes", uniqueSizes)
 			updateAchievement("traveler", uniqueSizes >= 61, int(uniqueSizes))
 		}
 	}
@@ -985,8 +959,45 @@ func (app *Application) CheckAndUpdateAchievements(log *logging.Logger, userID i
 		var muscoviteResults []database.DocumentMuscoviteCheck
 		if err = muscoviteCursor.All(app.ctx, &muscoviteResults); err == nil && len(muscoviteResults) > 0 {
 			count := muscoviteResults[0].Count
-			log.I("Ach: Muscovite count", "count", count)
 			updateAchievement("muscovite", count >= 5, int(count))
+		}
+	}
+
+	// Проверяем специальные совпадения в последних 3 коках
+	if len(data.Recent3) >= 3 {
+		recent := data.Recent3
+		
+		// 1. Сумма предыдущих: recent[2] == recent[0] + recent[1]
+		if recent[2].Size == recent[0].Size+recent[1].Size {
+			updateAchievement("sum_of_previous", true, 0)
+		}
+		
+		// 2. Контрастный душ: после 60+ получить 0-3
+		if recent[1].Size >= 60 && recent[2].Size <= 3 {
+			updateAchievement("contrast_shower", true, 0)
+		}
+		
+		// Проверяем последний кок на совпадения с временем
+		lastCock := recent[2]
+		moscowTime := lastCock.RequestedAt.In(time.FixedZone("MSK", 3*60*60))
+		
+		hour := moscowTime.Hour()
+		minute := moscowTime.Minute()
+		day := moscowTime.Day()
+		
+		// 3. Минутная точность: размер == минуты (например 24см в xx:24)
+		if int32(minute) == lastCock.Size {
+			updateAchievement("minute_precision", true, 0)
+		}
+		
+		// 4. Часовая точность: размер == час (например 11см в 11:xx)
+		if int32(hour) == lastCock.Size {
+			updateAchievement("hour_precision", true, 0)
+		}
+		
+		// 5. День = Размер: размер == день месяца (например 15см 15 числа)
+		if int32(day) == lastCock.Size {
+			updateAchievement("day_equals_size", true, 0)
 		}
 	}
 

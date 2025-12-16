@@ -168,6 +168,12 @@ type DocumentAchievementCheck struct {
 	Last31 []struct {
 		Size int32 `bson:"size"`
 	} `bson:"last_31"`
+
+	// Последние 3 кока для специальных проверок
+	Recent3 []struct {
+		Size        int32     `bson:"size"`
+		RequestedAt time.Time `bson:"requested_at"`
+	} `bson:"recent_3"`
 }
 
 type DocumentSeasonCount struct {

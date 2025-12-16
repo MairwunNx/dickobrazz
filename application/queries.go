@@ -50,12 +50,6 @@ func (app *Application) HandleInlineQuery(log *logging.Logger, query *tgbotapi.I
 		),
 	}
 
-	for i, q := range queries {
-		if article, ok := q.(tgbotapi.InlineQueryResultArticle); ok {
-			log.I("Inline query text preview", "index", i, "title", article.Title, "text_length", len(article.InputMessageContent.(tgbotapi.InputTextMessageContent).Text), "text", article.InputMessageContent.(tgbotapi.InputTextMessageContent).Text)
-		}
-	}
-
 	inlines := tgbotapi.InlineConfig{InlineQueryID: query.ID, IsPersonal: true, CacheTime: 60, Results: queries}
 
 	if _, err := timings.ReportExecutionForResultError(log,
@@ -383,8 +377,16 @@ func (app *Application) InlineQueryCockAchievements(log *logging.Logger, query *
 	totalAchievements := len(AllAchievements)
 	totalPages := (totalAchievements + 9) / 10
 	
+	// Выбираем шаблон в зависимости от страницы
+	var template string
+	if page == 1 {
+		template = MsgCockAchievementsTemplate
+	} else {
+		template = MsgCockAchievementsTemplateOtherPages
+	}
+	
 	text := fmt.Sprintf(
-		MsgCockAchievementsTemplate,
+		template,
 		completedCount,
 		totalAchievements,
 		percentComplete,
@@ -477,8 +479,16 @@ func (app *Application) HandleCallbackQuery(log *logging.Logger, callback *tgbot
 		totalAchievements := len(AllAchievements)
 		totalPages := (totalAchievements + 9) / 10
 		
+		// Выбираем шаблон в зависимости от страницы
+		var template string
+		if page == 1 {
+			template = MsgCockAchievementsTemplate
+		} else {
+			template = MsgCockAchievementsTemplateOtherPages
+		}
+		
 		text := fmt.Sprintf(
-			MsgCockAchievementsTemplate,
+			template,
 			completedCount,
 			totalAchievements,
 			percentComplete,
