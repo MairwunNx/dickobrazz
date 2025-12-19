@@ -43,31 +43,31 @@ _Линейка коков – чистый рандом, сегодня ты б
 
 _Линейка коков – чистый рандом, сегодня ты бог, завтра ты лох\. Все коки сбрасываются каждые сутки по МСК\!_`
 
-	MsgCockRaceScoreboardTemplate = `*Участники гонки коков:*
-👥 Участников в сезоне: *%d*
+	MsgCockRaceScoreboardTemplate = `*Участники гонки коков %[5]d %[6]s:*
+👥 Участников в сезоне: *%[1]d*
 
 🏆 Победители в номинации:
 
-%s
+%[2]s
 
 🥀 Остальным соболезнуем:
 
-%s
+%[3]s
 
 _Гонка коков – это соревнование, в котором коки участников суммируются за весь сезон\. Период обновления коков – сутки_
   
-🚀 Текущий сезон гонки коков стартовал *%s*`
+%[4]s`
 
-	MsgCockRaceScoreboardWinnersTemplate = `*Участники гонки коков:*
-👥 Участников в сезоне: *%d*
+	MsgCockRaceScoreboardWinnersTemplate = `*Участники гонки коков %[4]d %[5]s:*
+👥 Участников в сезоне: *%[1]d*
 
 🏆 Победители в номинации:
 
-%s
+%[2]s
 
 _Гонка коков – это соревнование, в котором коки участников суммируются за весь сезон\. Период обновления коков – сутки_
   
-🚀 Текущий сезон гонки коков стартовал *%s*`
+%[3]s`
 
 	MsgCockLadderScoreboardTemplate = `*Ладдер коков:*
 👥 Всего участников: *%d*
@@ -130,14 +130,14 @@ _Ладдер коков – глобальный рейтинг участни�
 %[14]s Дневная динамика: *%[15]s%%* (*%[16]s см*)
 %[33]s Динамика за 5 коков: *%[17]s%%* (*%[18]s см*)`
 
-	MsgCockSeasonTemplate = `*Сезон коков* \(🟡 Текущий\)
+	MsgCockSeasonTemplate = `*Сезон коков %[4]d* \(🟡 Текущий\)
 ⏱️ Период: *%[2]s \- %[3]s*
 
 🔮 Претенденты сезона:
 
 %[1]s`
 
-	MsgCockSeasonWithWinnersTemplate = `*Сезон коков* \(🟢 Завершён\)
+	MsgCockSeasonWithWinnersTemplate = `*Сезон коков %[4]d* \(🟢 Завершён\)
 ⏱️ Период: *%[2]s \- %[3]s*
 
 🎖 Победители сезона:
@@ -308,31 +308,35 @@ func GetMedalByPosition(position int) string {
 	}
 }
 
-func NewMsgCockSeasonTemplate(pretenders string, startDate, endDate string) string {
+func NewMsgCockSeasonTemplate(pretenders string, startDate, endDate string, seasonNum int) string {
 	return fmt.Sprintf(
 		MsgCockSeasonTemplate,
 		pretenders,
 		startDate,
 		endDate,
+		seasonNum,
 	)
 }
 
-func NewMsgCockSeasonWithWinnersTemplate(winners string, startDate, endDate string) string {
+func NewMsgCockSeasonWithWinnersTemplate(winners string, startDate, endDate string, seasonNum int) string {
 	return fmt.Sprintf(
 		MsgCockSeasonWithWinnersTemplate,
 		winners,
 		startDate,
 		endDate,
+		seasonNum,
 	)
 }
 
-func NewMsgCockSeasonWinnerTemplate(medal, nickname, totalSize string) string {
-	return fmt.Sprintf(
+func NewMsgCockSeasonWinnerTemplate(medal, nickname, totalSize string, respects int) string {
+	formattedRespects := EscapeMarkdownV2(FormatDickSize(respects))
+	winnersLine := fmt.Sprintf(
 		MsgCockSeasonWinnerTemplate,
 		medal,
 		EscapeMarkdownV2(nickname),
 		EscapeMarkdownV2(totalSize),
 	)
+	return fmt.Sprintf("%s *\\(\\+%s 🫡\\)*", winnersLine, formattedRespects)
 }
 
 func NewMsgCockSeasonTemplateFooter() string {
@@ -341,6 +345,40 @@ func NewMsgCockSeasonTemplateFooter() string {
 
 func NewMsgCockSeasonNoSeasonsTemplate() string {
 	return MsgCockSeasonNoSeasonsTemplate
+}
+
+// NewMsgCockSeasonSinglePage генерирует текст для одной страницы сезона (постраничная навигация)
+func NewMsgCockSeasonSinglePage(season CockSeason, getSeasonWinners func(CockSeason) []SeasonWinner) string {
+	startDate := EscapeMarkdownV2(season.StartDate.Format("02.01.2006"))
+	endDate := EscapeMarkdownV2(season.EndDate.Format("02.01.2006"))
+	
+	winners := getSeasonWinners(season)
+	var winnerLines []string
+	
+	for _, winner := range winners {
+		medal := GetMedalByPosition(winner.Place - 1)
+		normalizedNickname := NormalizeUsername(winner.Nickname, winner.UserID)
+		respects := CalculateCockRespect(winner.Place)
+		line := NewMsgCockSeasonWinnerTemplate(
+			medal,
+			normalizedNickname,
+			FormatDickSize(int(winner.TotalSize)),
+			respects,
+		)
+		winnerLines = append(winnerLines, line)
+	}
+	
+	winnersText := strings.Join(winnerLines, "\n")
+	
+	var seasonBlock string
+	if season.IsActive {
+		seasonBlock = NewMsgCockSeasonTemplate(winnersText, startDate, endDate, season.SeasonNum)
+	} else {
+		seasonBlock = NewMsgCockSeasonWithWinnersTemplate(winnersText, startDate, endDate, season.SeasonNum)
+	}
+	
+	footer := NewMsgCockSeasonTemplateFooter()
+	return seasonBlock + "\n\n" + footer
 }
 
 func NewMsgCockSeasonsFullText(seasons []CockSeason, totalSeasonsCount int, getSeasonWinners func(CockSeason) []SeasonWinner) string {
@@ -363,10 +401,13 @@ func NewMsgCockSeasonsFullText(seasons []CockSeason, totalSeasonsCount int, getS
 			medal := GetMedalByPosition(winner.Place - 1)
 			// Нормализуем nickname (генерируем анонимное имя если пустой)
 			normalizedNickname := NormalizeUsername(winner.Nickname, winner.UserID)
+			// Вычисляем респекты для этого места
+			respects := CalculateCockRespect(winner.Place)
 			line := NewMsgCockSeasonWinnerTemplate(
 				medal,
 				normalizedNickname,
 				FormatDickSize(int(winner.TotalSize)),
+				respects,
 			)
 			winnerLines = append(winnerLines, line)
 		}
@@ -375,9 +416,9 @@ func NewMsgCockSeasonsFullText(seasons []CockSeason, totalSeasonsCount int, getS
 		
 		var seasonBlock string
 		if season.IsActive {
-			seasonBlock = NewMsgCockSeasonTemplate(winnersText, startDate, endDate)
+			seasonBlock = NewMsgCockSeasonTemplate(winnersText, startDate, endDate, season.SeasonNum)
 		} else {
-			seasonBlock = NewMsgCockSeasonWithWinnersTemplate(winnersText, startDate, endDate)
+			seasonBlock = NewMsgCockSeasonWithWinnersTemplate(winnersText, startDate, endDate, season.SeasonNum)
 		}
 		
 		seasonBlocks = append(seasonBlocks, seasonBlock)

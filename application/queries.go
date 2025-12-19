@@ -312,19 +312,56 @@ func (app *Application) InlineQueryCockDynamic(log *logging.Logger, query *tgbot
 }
 
 func (app *Application) InlineQueryCockSeason(log *logging.Logger, query *tgbotapi.InlineQuery) tgbotapi.InlineQueryResultArticle {
-	seasons := app.GetAllSeasons(log)
-	totalSeasonsCount := app.GetAllSeasonsCount(log)
+	allSeasons := app.GetAllSeasonsForStats(log)
+	
+	if len(allSeasons) == 0 {
+		text := NewMsgCockSeasonNoSeasonsTemplate()
+		return InitializeInlineQueryWithThumb(
+			"Сезоны коков",
+			text,
+			"https://files.mairwunnx.com/raw/public/dickobrazz%2FGemini_Generated_Image_jr5v5ijr5v5ijr5v.png",
+		)
+	}
+	
+	// Начинаем с последнего (самого нового) сезона
+	currentSeasonIdx := len(allSeasons) - 1
+	currentSeason := allSeasons[currentSeasonIdx]
 	
 	getSeasonWinners := func(season CockSeason) []SeasonWinner {
 		return app.GetSeasonWinners(log, season)
 	}
 	
-	text := NewMsgCockSeasonsFullText(seasons, totalSeasonsCount, getSeasonWinners)
-	return InitializeInlineQueryWithThumb(
+	text := NewMsgCockSeasonSinglePage(currentSeason, getSeasonWinners)
+	
+	// Создаем кнопки навигации
+	var buttons []tgbotapi.InlineKeyboardButton
+	
+	// Кнопка "предыдущий сезон" (более старый, влево)
+	if currentSeasonIdx > 0 {
+		prevSeason := allSeasons[currentSeasonIdx-1]
+		buttons = append(buttons, tgbotapi.NewInlineKeyboardButtonData(
+			fmt.Sprintf("◀️ Сезон %d", prevSeason.SeasonNum),
+			fmt.Sprintf("season_page:%d", prevSeason.SeasonNum),
+		))
+	}
+	
+	// Кнопка "следующий сезон" (более новый, вправо) - только если есть более новый
+	// (на самом деле, если мы на последнем сезоне, следующего нет)
+	// Но для будущих сезонов это может быть полезно
+	
+	kb := tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(buttons...),
+	)
+	
+	article := tgbotapi.NewInlineQueryResultArticleMarkdownV2(
+		uuid.NewString(),
 		"Сезоны коков",
 		text,
-		"https://files.mairwunnx.com/raw/public/dickobrazz%2FGemini_Generated_Image_jr5v5ijr5v5ijr5v.png",
 	)
+	article.ReplyMarkup = &kb
+	article.ThumbURL = "https://files.mairwunnx.com/raw/public/dickobrazz%2FGemini_Generated_Image_jr5v5ijr5v5ijr5v.png"
+	
+	return article
 }
 
 func (app *Application) InlineQueryCockRuler(log *logging.Logger, query *tgbotapi.InlineQuery) tgbotapi.InlineQueryResultArticle {
@@ -439,8 +476,108 @@ func (app *Application) HandleCallbackQuery(log *logging.Logger, callback *tgbot
 	// Парсим callback data
 	data := callback.Data
 	
-	// Обрабатываем пагинацию ачивок
-	if strings.HasPrefix(data, "ach_page:") {
+	// Обрабатываем пагинацию сезонов
+	if strings.HasPrefix(data, "season_page:") {
+		// Парсим номер сезона
+		seasonNumStr := strings.TrimPrefix(data, "season_page:")
+		seasonNum := 1
+		if parsedSeasonNum, err := strconv.Atoi(seasonNumStr); err != nil {
+			log.E("Failed to parse season number", logging.InnerError, err)
+			seasonNum = 1
+		} else {
+			seasonNum = parsedSeasonNum
+		}
+		
+		// Получаем все сезоны
+		allSeasons := app.GetAllSeasonsForStats(log)
+		
+		// Находим нужный сезон
+		var targetSeason *CockSeason
+		var targetIdx int
+		for idx, s := range allSeasons {
+			if s.SeasonNum == seasonNum {
+				targetSeason = &s
+				targetIdx = idx
+				break
+			}
+		}
+		
+		if targetSeason == nil {
+			log.E("Season not found", "season_num", seasonNum)
+			callbackConfig := tgbotapi.NewCallback(callback.ID, "Сезон не найден")
+			if _, err := app.bot.Request(callbackConfig); err != nil {
+				log.E("Failed to answer callback query", logging.InnerError, err)
+			}
+			return
+		}
+		
+		getSeasonWinners := func(season CockSeason) []SeasonWinner {
+			return app.GetSeasonWinners(log, season)
+		}
+		
+		text := NewMsgCockSeasonSinglePage(*targetSeason, getSeasonWinners)
+		
+		// Создаем кнопки навигации
+		var buttons []tgbotapi.InlineKeyboardButton
+		
+		// Кнопка "предыдущий сезон" (более старый, влево)
+		if targetIdx > 0 {
+			prevSeason := allSeasons[targetIdx-1]
+			buttons = append(buttons, tgbotapi.NewInlineKeyboardButtonData(
+				fmt.Sprintf("◀️ Сезон %d", prevSeason.SeasonNum),
+				fmt.Sprintf("season_page:%d", prevSeason.SeasonNum),
+			))
+		}
+		
+		// Кнопка "следующий сезон" (более новый, вправо)
+		if targetIdx < len(allSeasons)-1 {
+			nextSeason := allSeasons[targetIdx+1]
+			buttons = append(buttons, tgbotapi.NewInlineKeyboardButtonData(
+				fmt.Sprintf("▶️ Сезон %d", nextSeason.SeasonNum),
+				fmt.Sprintf("season_page:%d", nextSeason.SeasonNum),
+			))
+		}
+		
+		kb := tgbotapi.NewInlineKeyboardMarkup(
+			tgbotapi.NewInlineKeyboardRow(buttons...),
+		)
+		
+		// Отвечаем на callback
+		_, _ = app.bot.Request(tgbotapi.NewCallback(callback.ID, ""))
+		
+		// Редактируем существующее сообщение
+		if callback.InlineMessageID != "" {
+			edit := tgbotapi.EditMessageTextConfig{
+				BaseEdit: tgbotapi.BaseEdit{
+					InlineMessageID: callback.InlineMessageID,
+					ReplyMarkup:     &kb,
+				},
+				Text:      text,
+				ParseMode: "MarkdownV2",
+			}
+			if _, err := app.bot.Request(edit); err != nil {
+				log.E("Failed to edit inline message", logging.InnerError, err)
+			} else {
+				log.I("Successfully edited inline message", "season_num", seasonNum)
+			}
+		} else if callback.Message != nil {
+			edit := tgbotapi.NewEditMessageTextAndMarkup(
+				callback.Message.Chat.ID,
+				callback.Message.MessageID,
+				text,
+				kb,
+			)
+			edit.ParseMode = "MarkdownV2"
+			
+			if _, err := app.bot.Request(edit); err != nil {
+				log.E("Failed to edit chat message", logging.InnerError, err)
+			} else {
+				log.I("Successfully edited chat message", "season_num", seasonNum)
+			}
+		} else {
+			log.E("CallbackQuery has neither Message nor InlineMessageID")
+		}
+	} else if strings.HasPrefix(data, "ach_page:") {
 		// Парсим номер страницы
 		pageStr := strings.TrimPrefix(data, "ach_page:")
 		page := 1

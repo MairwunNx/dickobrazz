@@ -782,12 +782,84 @@ func PipelineGlobalMaxMin() mongo.Pipeline {
 }
 
 // PipelineCountSeasons подсчитывает количество уникальных сезонов для пользователя
+// Сезон = 3-месячный период с момента первого кока в системе
+// Логика: вычисляем номер сезона как разницу в месяцах / 3 (округленную вниз)
 func PipelineCountSeasons(userId int64) mongo.Pipeline {
 	return mongo.Pipeline{
-		{{Key: "$match", Value: bson.D{{Key: "user_id", Value: userId}}}},
+		// Получаем дату первого кока в системе (в московском часовом поясе)
 		{{Key: "$group", Value: bson.D{
-			{Key: "_id", Value: "$season_name"},
+			{Key: "_id", Value: nil},
+			{Key: "first_cock_date", Value: bson.D{{Key: "$min", Value: "$requested_at"}}},
 		}}},
+		{{Key: "$lookup", Value: bson.D{
+			{Key: "from", Value: "cocks"},
+			{Key: "let", Value: bson.D{{Key: "first_date", Value: "$first_cock_date"}}},
+			{Key: "pipeline", Value: bson.A{
+				// Берем только коки пользователя
+				bson.D{{Key: "$match", Value: bson.D{{Key: "user_id", Value: userId}}}},
+				// Вычисляем номер сезона для каждого кока
+				bson.D{{Key: "$project", Value: bson.D{
+					{Key: "requested_at", Value: 1},
+					// Извлекаем год и месяц из requested_at (в московском часовом поясе)
+					{Key: "year", Value: bson.D{
+						{Key: "$year", Value: bson.D{
+							{Key: "date", Value: "$requested_at"},
+							{Key: "timezone", Value: "Europe/Moscow"},
+						}},
+					}},
+					{Key: "month", Value: bson.D{
+						{Key: "$month", Value: bson.D{
+							{Key: "date", Value: "$requested_at"},
+							{Key: "timezone", Value: "Europe/Moscow"},
+						}},
+					}},
+					// Извлекаем год и месяц из first_date
+					{Key: "first_year", Value: bson.D{
+						{Key: "$year", Value: bson.D{
+							{Key: "date", Value: "$$first_date"},
+							{Key: "timezone", Value: "Europe/Moscow"},
+						}},
+					}},
+					{Key: "first_month", Value: bson.D{
+						{Key: "$month", Value: bson.D{
+							{Key: "date", Value: "$$first_date"},
+							{Key: "timezone", Value: "Europe/Moscow"},
+						}},
+					}},
+				}}},
+				// Вычисляем разницу в месяцах и номер сезона
+				bson.D{{Key: "$project", Value: bson.D{
+					{Key: "months_diff", Value: bson.D{
+						{Key: "$subtract", Value: bson.A{
+							// Месяцы от начала эпохи для requested_at
+							bson.D{{Key: "$add", Value: bson.A{
+								bson.D{{Key: "$multiply", Value: bson.A{"$year", 12}}},
+								"$month",
+							}}},
+							// Месяцы от начала эпохи для first_date
+							bson.D{{Key: "$add", Value: bson.A{
+								bson.D{{Key: "$multiply", Value: bson.A{"$first_year", 12}}},
+								"$first_month",
+							}}},
+						}},
+					}},
+				}}},
+				// Номер сезона = разница в месяцах / 3 (округленная вниз)
+				bson.D{{Key: "$project", Value: bson.D{
+					{Key: "season_number", Value: bson.D{
+						{Key: "$floor", Value: bson.D{
+							{Key: "$divide", Value: bson.A{"$months_diff", 3}},
+						}},
+					}},
+				}}},
+				// Группируем по номеру сезона
+				bson.D{{Key: "$group", Value: bson.D{
+					{Key: "_id", Value: "$season_number"},
+				}}},
+			}},
+			{Key: "as", Value: "seasons"},
+		}}},
+		{{Key: "$unwind", Value: "$seasons"}},
 		{{Key: "$count", Value: "count"}},
 	}
 }

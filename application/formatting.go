@@ -417,20 +417,51 @@ func (app *Application) GenerateCockRaceScoreboard(log *logging.Logger, userID i
 		}
 	}
 
+	// Формируем нижнюю строку с информацией о текущем сезоне
+	var footerLine string
+	var seasonNum int
+	var seasonWord string
+	
+	if currentSeason != nil {
+		now := datetime.NowTime()
+		startDateFormatted := EscapeMarkdownV2(currentSeason.StartDate.Format("02.01.2006"))
+		endDateFormatted := EscapeMarkdownV2(currentSeason.EndDate.Format("02.01.2006"))
+		timeRemaining := FormatTimeRemaining(currentSeason.EndDate, now)
+		
+		seasonNum = currentSeason.SeasonNum
+		seasonWord = PluralizeSeasonGenitive(seasonNum)
+		
+		footerLine = fmt.Sprintf(
+			"🚀 Текущий сезон коков: *%d*, проводится с *%s* до *%s*\\. Осталось: *%s*\\.",
+			seasonNum,
+			startDateFormatted,
+			endDateFormatted,
+			EscapeMarkdownV2(timeRemaining),
+		)
+	} else {
+		seasonNum = 1
+		seasonWord = PluralizeSeasonGenitive(seasonNum)
+		footerLine = fmt.Sprintf("🚀 Текущий сезон гонки коков стартовал *%s*", seasonStart)
+	}
+
 	if len(others) != 0 {
 		return fmt.Sprintf(
 			MsgCockRaceScoreboardTemplate,
 			totalParticipants,
 			strings.Join(winners, "\n"),
 			strings.Join(others, "\n"),
-			seasonStart,
+			footerLine,
+			seasonNum,
+			seasonWord,
 		)
 	} else {
 		return fmt.Sprintf(
 			MsgCockRaceScoreboardWinnersTemplate,
 			totalParticipants,
 			strings.Join(winners, "\n"),
-			seasonStart,
+			footerLine,
+			seasonNum,
+			seasonWord,
 		)
 	}
 }
@@ -838,6 +869,67 @@ func FormatGrowthSpeed(speed float64) string {
 	return p.Sprintf("%.1f", speed)
 }
 
+// PluralizeSeasonGenitive склоняет слово "сезон" в родительном падеже (кого/чего?)
+// 1 сезон, 2 сезона, 5 сезонов
+func PluralizeSeasonGenitive(n int) string {
+	if n%10 == 1 && n%100 != 11 {
+		return "сезона"
+	}
+	if n%10 >= 2 && n%10 <= 4 && (n%100 < 10 || n%100 >= 20) {
+		return "сезона"
+	}
+	return "сезонов"
+}
+
+// PluralizeDays склоняет слово "день"
+// 1 день, 2 дня, 5 дней
+func PluralizeDays(n int) string {
+	if n%10 == 1 && n%100 != 11 {
+		return "день"
+	}
+	if n%10 >= 2 && n%10 <= 4 && (n%100 < 10 || n%100 >= 20) {
+		return "дня"
+	}
+	return "дней"
+}
+
+// PluralizeMonths склоняет слово "месяц"
+// 1 месяц, 2 месяца, 5 месяцев
+func PluralizeMonths(n int) string {
+	if n%10 == 1 && n%100 != 11 {
+		return "месяц"
+	}
+	if n%10 >= 2 && n%10 <= 4 && (n%100 < 10 || n%100 >= 20) {
+		return "месяца"
+	}
+	return "месяцев"
+}
+
+// FormatTimeRemaining форматирует оставшееся время до конца периода
+// Возвращает строку типа "1 месяц 3 дня" или "14 дней"
+func FormatTimeRemaining(endDate time.Time, now time.Time) string {
+	duration := endDate.Sub(now)
+	daysRemaining := int(duration.Hours() / 24)
+	
+	if daysRemaining < 0 {
+		return "0 " + PluralizeDays(0)
+	}
+	
+	// Если больше месяца, показываем месяцы + дни
+	if daysRemaining > 30 {
+		months := daysRemaining / 30
+		days := daysRemaining % 30
+		
+		if days == 0 {
+			return fmt.Sprintf("%d %s", months, PluralizeMonths(months))
+		}
+		return fmt.Sprintf("%d %s %d %s", months, PluralizeMonths(months), days, PluralizeDays(days))
+	}
+	
+	// Если меньше месяца, показываем только дни
+	return fmt.Sprintf("%d %s", daysRemaining, PluralizeDays(daysRemaining))
+}
+
 // GenerateAchievementsText генерирует текст списка достижений с пагинацией
 func GenerateAchievementsText(
 	allAchievements []database.Achievement,
@@ -919,15 +1011,17 @@ func FormatAchievementLine(ach database.Achievement, userAch *database.DocumentU
 	escapedName := EscapeMarkdownV2(ach.Name)
 	escapedDesc := EscapeMarkdownV2(ach.Description)
 	
+	// Форматируем респекты
+	formattedRespects := EscapeMarkdownV2(FormatDickSize(ach.Respects))
+	respectsBadge := fmt.Sprintf("*\\(\\+%s 🫡\\)*", formattedRespects)
+	
 	if isCompleted {
 		// Выполненное достижение
-		return fmt.Sprintf("✅ %s *%s* \\- %s", ach.Emoji, escapedName, escapedDesc)
+		return fmt.Sprintf("✅ %s *%s* \\- %s %s", ach.Emoji, escapedName, escapedDesc, respectsBadge)
 	} else if userAch != nil && userAch.Progress > 0 && ach.MaxProgress > 0 {
-		// В процессе выполнения
-		return fmt.Sprintf("⏳ %s *%s* \\(%d/%d\\) \\- %s", 
-			ach.Emoji, escapedName, userAch.Progress, ach.MaxProgress, escapedDesc)
+		return fmt.Sprintf("🔄 %s *%s* \\(%d/%d\\) \\- %s %s", 
+			ach.Emoji, escapedName, userAch.Progress, ach.MaxProgress, escapedDesc, respectsBadge)
 	} else {
-		// Не выполнено
-		return fmt.Sprintf("❌ %s *%s* \\- %s", ach.Emoji, escapedName, escapedDesc)
+		return fmt.Sprintf("⭕️ %s *%s* \\- %s %s", ach.Emoji, escapedName, escapedDesc, respectsBadge)
 	}
 }
