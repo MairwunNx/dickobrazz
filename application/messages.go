@@ -328,15 +328,21 @@ func NewMsgCockSeasonWithWinnersTemplate(winners string, startDate, endDate stri
 	)
 }
 
-func NewMsgCockSeasonWinnerTemplate(medal, nickname, totalSize string, respects int) string {
-	formattedRespects := EscapeMarkdownV2(FormatDickSize(respects))
+func NewMsgCockSeasonWinnerTemplate(medal, nickname, totalSize string, respects int, showRespects bool) string {
 	winnersLine := fmt.Sprintf(
 		MsgCockSeasonWinnerTemplate,
 		medal,
 		EscapeMarkdownV2(nickname),
 		EscapeMarkdownV2(totalSize),
 	)
-	return fmt.Sprintf("%s *\\(\\+%s 🫡\\)*", winnersLine, formattedRespects)
+	
+	// Показываем респекты только если showRespects = true (для завершенных сезонов)
+	if showRespects {
+		formattedRespects := EscapeMarkdownV2(FormatDickSize(respects))
+		return fmt.Sprintf("%s *\\(\\+%s 🫡\\)*", winnersLine, formattedRespects)
+	}
+	
+	return winnersLine
 }
 
 func NewMsgCockSeasonTemplateFooter() string {
@@ -359,11 +365,13 @@ func NewMsgCockSeasonSinglePage(season CockSeason, getSeasonWinners func(CockSea
 		medal := GetMedalByPosition(winner.Place - 1)
 		normalizedNickname := NormalizeUsername(winner.Nickname, winner.UserID)
 		respects := CalculateCockRespect(winner.Place)
+		// Показываем респекты только для завершенных сезонов
 		line := NewMsgCockSeasonWinnerTemplate(
 			medal,
 			normalizedNickname,
 			FormatDickSize(int(winner.TotalSize)),
 			respects,
+			!season.IsActive, // showRespects = true только если сезон завершен
 		)
 		winnerLines = append(winnerLines, line)
 	}
@@ -403,11 +411,13 @@ func NewMsgCockSeasonsFullText(seasons []CockSeason, totalSeasonsCount int, getS
 			normalizedNickname := NormalizeUsername(winner.Nickname, winner.UserID)
 			// Вычисляем респекты для этого места
 			respects := CalculateCockRespect(winner.Place)
+			// Показываем респекты только для завершенных сезонов
 			line := NewMsgCockSeasonWinnerTemplate(
 				medal,
 				normalizedNickname,
 				FormatDickSize(int(winner.TotalSize)),
 				respects,
+				!season.IsActive, // showRespects = true только если сезон завершен
 			)
 			winnerLines = append(winnerLines, line)
 		}

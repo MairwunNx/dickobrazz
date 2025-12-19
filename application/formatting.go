@@ -429,7 +429,7 @@ func (app *Application) GenerateCockRaceScoreboard(log *logging.Logger, userID i
 		timeRemaining := FormatTimeRemaining(currentSeason.EndDate, now)
 		
 		seasonNum = currentSeason.SeasonNum
-		seasonWord = PluralizeSeasonGenitive(seasonNum)
+		seasonWord = PluralizeSeason(seasonNum)
 		
 		footerLine = fmt.Sprintf(
 			"🚀 Текущий сезон коков: *%d*, проводится с *%s* до *%s*\\. Осталось: *%s*\\.",
@@ -440,7 +440,7 @@ func (app *Application) GenerateCockRaceScoreboard(log *logging.Logger, userID i
 		)
 	} else {
 		seasonNum = 1
-		seasonWord = PluralizeSeasonGenitive(seasonNum)
+		seasonWord = PluralizeSeason(seasonNum)
 		footerLine = fmt.Sprintf("🚀 Текущий сезон гонки коков стартовал *%s*", seasonStart)
 	}
 
@@ -869,11 +869,11 @@ func FormatGrowthSpeed(speed float64) string {
 	return p.Sprintf("%.1f", speed)
 }
 
-// PluralizeSeasonGenitive склоняет слово "сезон" в родительном падеже (кого/чего?)
+// PluralizeSeason склоняет слово "сезон" в именительном падеже (что?)
 // 1 сезон, 2 сезона, 5 сезонов
-func PluralizeSeasonGenitive(n int) string {
+func PluralizeSeason(n int) string {
 	if n%10 == 1 && n%100 != 11 {
-		return "сезона"
+		return "сезон"
 	}
 	if n%10 >= 2 && n%10 <= 4 && (n%100 < 10 || n%100 >= 20) {
 		return "сезона"
@@ -1011,17 +1011,15 @@ func FormatAchievementLine(ach database.Achievement, userAch *database.DocumentU
 	escapedName := EscapeMarkdownV2(ach.Name)
 	escapedDesc := EscapeMarkdownV2(ach.Description)
 	
-	// Форматируем респекты
-	formattedRespects := EscapeMarkdownV2(FormatDickSize(ach.Respects))
-	respectsBadge := fmt.Sprintf("*\\(\\+%s 🫡\\)*", formattedRespects)
-	
 	if isCompleted {
 		// Выполненное достижение
-		return fmt.Sprintf("✅ %s *%s* \\- %s %s", ach.Emoji, escapedName, escapedDesc, respectsBadge)
+		return fmt.Sprintf("✅ %s *%s* \\- %s", ach.Emoji, escapedName, escapedDesc)
 	} else if userAch != nil && userAch.Progress > 0 && ach.MaxProgress > 0 {
-		return fmt.Sprintf("🔄 %s *%s* \\(%d/%d\\) \\- %s %s", 
-			ach.Emoji, escapedName, userAch.Progress, ach.MaxProgress, escapedDesc, respectsBadge)
+		// В процессе выполнения
+		return fmt.Sprintf("🔄 %s *%s* \\(%d/%d\\) \\- %s", 
+			ach.Emoji, escapedName, userAch.Progress, ach.MaxProgress, escapedDesc)
 	} else {
-		return fmt.Sprintf("⭕️ %s *%s* \\- %s %s", ach.Emoji, escapedName, escapedDesc, respectsBadge)
+		// Не выполнено
+		return fmt.Sprintf("⭕️ %s *%s* \\- %s", ach.Emoji, escapedName, escapedDesc)
 	}
 }
