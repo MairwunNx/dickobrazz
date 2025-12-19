@@ -629,9 +629,9 @@ func (app *Application) GetUserAchievements(log *logging.Logger, userID int64) m
 // GetUserAchievementRespects подсчитывает общее количество кок-респектов из достижений
 func (app *Application) GetUserAchievementRespects(log *logging.Logger, userID int64) int {
 	// Проверка только для тестового пользователя
-	if userID != 362695653 {
-		return 0
-	}
+	// if userID != 362695653 {
+	// 	return 0
+	// }
 	
 	userAchievements := app.GetUserAchievements(log, userID)
 	totalRespects := 0
@@ -651,9 +651,9 @@ func (app *Application) GetUserAchievementRespects(log *logging.Logger, userID i
 // CheckAndUpdateAchievements проверяет и обновляет достижения пользователя (только для mairwunnx)
 func (app *Application) CheckAndUpdateAchievements(log *logging.Logger, userID int64) {
 	// Проверка только для тестового пользователя
-	if userID != 362695653 {
-		return
-	}
+	// if userID != 362695653 {
+	// 	return
+	// }
 
 	// Получаем текущие достижения пользователя
 	userAchievements := app.GetUserAchievements(log, userID)

@@ -388,14 +388,14 @@ func (app *Application) InlineQueryCockAchievements(log *logging.Logger, query *
 	userID := query.From.ID
 	
 	// Проверка только для тестового пользователя
-	if userID != 362695653 {
-		text := "🔒 *Кок\\-ачивки временно доступны только для тестирования*\n\n_Скоро будут доступны для всех\\!_"
-		return InitializeInlineQueryWithThumb(
-			"Кок-ачивки",
-			text,
-			"https://files.mairwunnx.com/raw/public/dickobrazz%2FGemini_Generated_Image_qkh4tfqkh4tfqkh4.png",
-		)
-	}
+	// if userID != 362695653 {
+	// 	text := "🔒 *Кок\\-ачивки временно доступны только для тестирования*\n\n_Скоро будут доступны для всех\\!_"
+	// 	return InitializeInlineQueryWithThumb(
+	// 		"Кок-ачивки",
+	// 		text,
+	// 		"https://files.mairwunnx.com/raw/public/dickobrazz%2FGemini_Generated_Image_qkh4tfqkh4tfqkh4.png",
+	// 	)
+	// }
 	
 	// Проверяем и обновляем достижения (только для mairwunnx, раз в сутки)
 	app.CheckAndUpdateAchievements(log, userID)
@@ -590,14 +590,14 @@ func (app *Application) HandleCallbackQuery(log *logging.Logger, callback *tgbot
 		
 		// Проверяем, что callback от тестового пользователя
 		userID := callback.From.ID
-		if userID != 362695653 {
-			// Отвечаем на callback и выходим
-			callbackConfig := tgbotapi.NewCallback(callback.ID, "Ачивки доступны только для тестирования")
-			if _, err := app.bot.Request(callbackConfig); err != nil {
-				log.E("Failed to answer callback query", logging.InnerError, err)
-			}
-			return
-		}
+		// if userID != 362695653 {
+		// 	// Отвечаем на callback и выходим
+		// 	callbackConfig := tgbotapi.NewCallback(callback.ID, "Ачивки доступны только для тестирования")
+		// 	if _, err := app.bot.Request(callbackConfig); err != nil {
+		// 		log.E("Failed to answer callback query", logging.InnerError, err)
+		// 	}
+		// 	return
+		// }
 		
 		// Проверяем и обновляем достижения (раз в сутки)
 		app.CheckAndUpdateAchievements(log, userID)
