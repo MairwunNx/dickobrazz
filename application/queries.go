@@ -92,7 +92,7 @@ func (app *Application) InlineQueryCockSize(log *logging.Logger, query *tgbotapi
 	return InitializeInlineQueryWithThumb(
 		"Размер кока",
 		strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(text, ".", "\\."), "-", "\\-"), "!", "\\!"),
-		"https://files.mairwunnx.com/raw/public/dickobrazz%2FGemini_Generated_Image_z1bfjxz1bfjxz1bf.png",
+		"https://files.mairwunnx.com/raw/public/dickobrazz%2Fico_size.png",
 	)
 }
 
@@ -103,7 +103,7 @@ func (app *Application) InlineQueryCockLadder(log *logging.Logger, query *tgbota
 	return InitializeInlineQueryWithThumb(
 		"Ладдер коков",
 		text,
-		"https://files.mairwunnx.com/raw/public/dickobrazz%2FGemini_Generated_Image_1rh2rr1rh2rr1rh2.png",
+		"https://files.mairwunnx.com/raw/public/dickobrazz%2Fico_ladder.png",
 	)
 }
 
@@ -128,7 +128,7 @@ func (app *Application) InlineQueryCockRace(log *logging.Logger, query *tgbotapi
 	return InitializeInlineQueryWithThumb(
 		"Гонка коков",
 		text,
-		"https://files.mairwunnx.com/raw/public/dickobrazz%2FGemini_Generated_Image_sx0odzsx0odzsx0o.png",
+		"https://files.mairwunnx.com/raw/public/dickobrazz%2Fico_race.png",
 	)
 }
 
@@ -179,7 +179,7 @@ func (app *Application) InlineQueryCockDynamic(log *logging.Logger, query *tgbot
 		return InitializeInlineQueryWithThumb(
 			"Динамика кока",
 			text,
-			"https://files.mairwunnx.com/raw/public/dickobrazz%2FGemini_Generated_Image_8fkvy78fkvy78fkv.png",
+			"https://files.mairwunnx.com/raw/public/dickobrazz%2Fico_dynamic.png",
 		)
 	}
 
@@ -307,7 +307,7 @@ func (app *Application) InlineQueryCockDynamic(log *logging.Logger, query *tgbot
 	)
 
 	article := tgbotapi.NewInlineQueryResultArticleMarkdown(query.ID, "Динамика кока", text)
-	article.ThumbURL = "https://files.mairwunnx.com/raw/public/dickobrazz%2FGemini_Generated_Image_8fkvy78fkvy78fkv.png"
+	article.ThumbURL = "https://files.mairwunnx.com/raw/public/dickobrazz%2Fico_dynamic.png"
 	return article
 }
 
@@ -319,7 +319,7 @@ func (app *Application) InlineQueryCockSeason(log *logging.Logger, query *tgbota
 		return InitializeInlineQueryWithThumb(
 			"Сезоны коков",
 			text,
-			"https://files.mairwunnx.com/raw/public/dickobrazz%2FGemini_Generated_Image_jr5v5ijr5v5ijr5v.png",
+			"https://files.mairwunnx.com/raw/public/dickobrazz%2Fico_seasons.png",
 		)
 	}
 	
@@ -359,7 +359,7 @@ func (app *Application) InlineQueryCockSeason(log *logging.Logger, query *tgbota
 		text,
 	)
 	article.ReplyMarkup = &kb
-	article.ThumbURL = "https://files.mairwunnx.com/raw/public/dickobrazz%2FGemini_Generated_Image_jr5v5ijr5v5ijr5v.png"
+	article.ThumbURL = "https://files.mairwunnx.com/raw/public/dickobrazz%2Fico_seasons.png"
 	
 	return article
 }
@@ -380,7 +380,7 @@ func (app *Application) InlineQueryCockRuler(log *logging.Logger, query *tgbotap
 	return InitializeInlineQueryWithThumb(
 		"Линейка коков",
 		text,
-		"https://files.mairwunnx.com/raw/public/dickobrazz%2FGemini_Generated_Image_zt68kzt68kzt68kz.png",
+		"https://files.mairwunnx.com/raw/public/dickobrazz%2Fico_ruler.png",
 	)
 }
 
@@ -431,12 +431,12 @@ func (app *Application) InlineQueryCockAchievements(log *logging.Logger, query *
 		achievementsList,
 	)
 	
-	// Создаем кнопки пагинации
+	// Создаем кнопки пагинации (с userID владельца)
 	var buttons []tgbotapi.InlineKeyboardButton
 	
 	if page > 1 {
 		// Кнопка "предыдущая страница"
-		buttons = append(buttons, tgbotapi.NewInlineKeyboardButtonData("◀️", fmt.Sprintf("ach_page:%d", page-1)))
+		buttons = append(buttons, tgbotapi.NewInlineKeyboardButtonData("◀️", fmt.Sprintf("ach_page:%d:%d", userID, page-1)))
 	}
 	
 	// Кнопка "текущая страница / всего страниц"
@@ -444,7 +444,7 @@ func (app *Application) InlineQueryCockAchievements(log *logging.Logger, query *
 	
 	if page < totalPages {
 		// Кнопка "следующая страница"
-		buttons = append(buttons, tgbotapi.NewInlineKeyboardButtonData("▶️", fmt.Sprintf("ach_page:%d", page+1)))
+		buttons = append(buttons, tgbotapi.NewInlineKeyboardButtonData("▶️", fmt.Sprintf("ach_page:%d:%d", userID, page+1)))
 	}
 	
 	kb := tgbotapi.NewInlineKeyboardMarkup(
@@ -457,7 +457,7 @@ func (app *Application) InlineQueryCockAchievements(log *logging.Logger, query *
 		text,
 	)
 	article.ReplyMarkup = &kb
-	article.ThumbURL = "https://files.mairwunnx.com/raw/public/dickobrazz%2FGemini_Generated_Image_qkh4tfqkh4tfqkh4.png"
+	article.ThumbURL = "https://files.mairwunnx.com/raw/public/dickobrazz%2Fico_achievements.png"
 	
 	return article
 }
@@ -578,18 +578,34 @@ func (app *Application) HandleCallbackQuery(log *logging.Logger, callback *tgbot
 			log.E("CallbackQuery has neither Message nor InlineMessageID")
 		}
 	} else if strings.HasPrefix(data, "ach_page:") {
-		// Парсим номер страницы
-		pageStr := strings.TrimPrefix(data, "ach_page:")
+		// Парсим userID и номер страницы из формата "ach_page:userID:page"
+		parts := strings.Split(strings.TrimPrefix(data, "ach_page:"), ":")
+		if len(parts) != 2 {
+			log.E("Invalid ach_page callback data format", "data", data)
+			callbackConfig := tgbotapi.NewCallback(callback.ID, "Неверный формат данных")
+			if _, err := app.bot.Request(callbackConfig); err != nil {
+				log.E("Failed to answer callback query", logging.InnerError, err)
+			}
+			return
+		}
+		
+		userID, err := strconv.ParseInt(parts[0], 10, 64)
+		if err != nil {
+			log.E("Failed to parse userID from callback", logging.InnerError, err)
+			callbackConfig := tgbotapi.NewCallback(callback.ID, "Ошибка парсинга данных")
+			if _, err := app.bot.Request(callbackConfig); err != nil {
+				log.E("Failed to answer callback query", logging.InnerError, err)
+			}
+			return
+		}
+		
 		page := 1
-		if parsedPage, err := strconv.Atoi(pageStr); err != nil {
+		if parsedPage, err := strconv.Atoi(parts[1]); err != nil {
 			log.E("Failed to parse page number", logging.InnerError, err)
 			page = 1
 		} else {
 			page = parsedPage
 		}
-		
-		// Проверяем, что callback от тестового пользователя
-		userID := callback.From.ID
 		// if userID != 362695653 {
 		// 	// Отвечаем на callback и выходим
 		// 	callbackConfig := tgbotapi.NewCallback(callback.ID, "Ачивки доступны только для тестирования")
@@ -633,17 +649,17 @@ func (app *Application) HandleCallbackQuery(log *logging.Logger, callback *tgbot
 			achievementsList,
 		)
 		
-		// Создаем кнопки пагинации для новой страницы
+		// Создаем кнопки пагинации для новой страницы (с userID владельца)
 		var buttons []tgbotapi.InlineKeyboardButton
 		
 		if page > 1 {
-			buttons = append(buttons, tgbotapi.NewInlineKeyboardButtonData("◀️", fmt.Sprintf("ach_page:%d", page-1)))
+			buttons = append(buttons, tgbotapi.NewInlineKeyboardButtonData("◀️", fmt.Sprintf("ach_page:%d:%d", userID, page-1)))
 		}
 		
 		buttons = append(buttons, tgbotapi.NewInlineKeyboardButtonData(fmt.Sprintf("%d/%d", page, totalPages), "ach_noop"))
 		
 		if page < totalPages {
-			buttons = append(buttons, tgbotapi.NewInlineKeyboardButtonData("▶️", fmt.Sprintf("ach_page:%d", page+1)))
+			buttons = append(buttons, tgbotapi.NewInlineKeyboardButtonData("▶️", fmt.Sprintf("ach_page:%d:%d", userID, page+1)))
 		}
 		
 		kb := tgbotapi.NewInlineKeyboardMarkup(

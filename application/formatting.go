@@ -429,7 +429,7 @@ func (app *Application) GenerateCockRaceScoreboard(log *logging.Logger, userID i
 		timeRemaining := FormatTimeRemaining(currentSeason.EndDate, now)
 		
 		seasonNum = currentSeason.SeasonNum
-		seasonWord = PluralizeSeason(seasonNum)
+		seasonWord = PluralizeSeasonGenitive(seasonNum)
 		
 		footerLine = fmt.Sprintf(
 			"🚀 Текущий сезон коков: *%d*, проводится с *%s* до *%s*\\. Осталось: *%s*\\.",
@@ -440,7 +440,7 @@ func (app *Application) GenerateCockRaceScoreboard(log *logging.Logger, userID i
 		)
 	} else {
 		seasonNum = 1
-		seasonWord = PluralizeSeason(seasonNum)
+		seasonWord = PluralizeSeasonGenitive(seasonNum)
 		footerLine = fmt.Sprintf("🚀 Текущий сезон гонки коков стартовал *%s*", seasonStart)
 	}
 
@@ -879,6 +879,12 @@ func PluralizeSeason(n int) string {
 		return "сезона"
 	}
 	return "сезонов"
+}
+
+// PluralizeSeasonGenitive возвращает слово "сезон" в родительном падеже (какого?)
+// Для порядкового числительного всегда "сезона": 1 сезона, 2 сезона, 5 сезона, 11 сезона
+func PluralizeSeasonGenitive(n int) string {
+	return "сезона"
 }
 
 // PluralizeDays склоняет слово "день"

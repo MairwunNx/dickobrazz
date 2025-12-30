@@ -266,7 +266,10 @@ func PipelineDynamic(userId int64) mongo.Pipeline {
 			}},
 			{Key: "individual_record", Value: bson.A{
 				bson.D{{Key: "$match", Value: bson.D{{Key: "user_id", Value: userId}}}},
-				bson.D{{Key: "$sort", Value: bson.D{{Key: "size", Value: -1}}}},
+				bson.D{{Key: "$sort", Value: bson.D{
+					{Key: "size", Value: -1},
+					{Key: "requested_at", Value: -1},
+				}}},
 				bson.D{{Key: "$limit", Value: 1}},
 				bson.D{{Key: "$project", Value: bson.D{
 					{Key: "_id", Value: 0},
@@ -433,7 +436,7 @@ func PipelineUsersAroundPositionInLadder(position int) mongo.Pipeline {
 	if skip < 0 {
 		skip = 0
 	}
-	
+
 	return mongo.Pipeline{
 		{{Key: "$group", Value: bson.D{
 			{Key: "_id", Value: "$user_id"},
@@ -557,7 +560,7 @@ func PipelineUsersAroundPositionInSeason(position int, startDate, endDate time.T
 	if skip < 0 {
 		skip = 0
 	}
-	
+
 	return mongo.Pipeline{
 		{{Key: "$match", Value: bson.D{
 			{Key: "requested_at", Value: bson.D{
@@ -602,7 +605,7 @@ func PipelineCheckAchievements(userId int64) mongo.Pipeline {
 			{Key: "total_pulls", Value: bson.A{
 				bson.D{{Key: "$count", Value: "count"}},
 			}},
-			
+
 			// 2. Сумма размеров (накопленный размер)
 			{Key: "total_size", Value: bson.A{
 				bson.D{{Key: "$group", Value: bson.D{
@@ -610,7 +613,7 @@ func PipelineCheckAchievements(userId int64) mongo.Pipeline {
 					{Key: "total", Value: bson.D{{Key: "$sum", Value: "$size"}}},
 				}}},
 			}},
-			
+
 			// 3. Конкретные значения
 			{Key: "sniper_30cm", Value: bson.A{
 				bson.D{{Key: "$match", Value: bson.D{{Key: "size", Value: 30}}}},
@@ -627,14 +630,14 @@ func PipelineCheckAchievements(userId int64) mongo.Pipeline {
 				}}},
 				bson.D{{Key: "$count", Value: "count"}},
 			}},
-			
+
 			// 4. Последовательности (последние записи)
 			{Key: "recent_10", Value: bson.A{
 				bson.D{{Key: "$sort", Value: bson.D{{Key: "requested_at", Value: -1}}}},
 				bson.D{{Key: "$limit", Value: 10}},
 				bson.D{{Key: "$sort", Value: bson.D{{Key: "requested_at", Value: 1}}}},
 			}},
-			
+
 			// 5. Экстремумы (максимум и минимум)
 			{Key: "max_size", Value: bson.A{
 				bson.D{{Key: "$group", Value: bson.D{
@@ -648,7 +651,7 @@ func PipelineCheckAchievements(userId int64) mongo.Pipeline {
 					{Key: "min", Value: bson.D{{Key: "$min", Value: "$size"}}},
 				}}},
 			}},
-			
+
 			// 6. Временные (ранняя пташка - до 6:00 МСК)
 			{Key: "early_bird", Value: bson.A{
 				bson.D{{Key: "$project", Value: bson.D{
@@ -660,7 +663,7 @@ func PipelineCheckAchievements(userId int64) mongo.Pipeline {
 				bson.D{{Key: "$match", Value: bson.D{{Key: "hour", Value: bson.D{{Key: "$lt", Value: 6}}}}}},
 				bson.D{{Key: "$count", Value: "count"}},
 			}},
-			
+
 			// 7. Спидраннер (<30 сек после полуночи)
 			{Key: "speedrunner", Value: bson.A{
 				bson.D{{Key: "$project", Value: bson.D{
@@ -684,7 +687,7 @@ func PipelineCheckAchievements(userId int64) mongo.Pipeline {
 				}}},
 				bson.D{{Key: "$count", Value: "count"}},
 			}},
-			
+
 			// 8. Праздничные
 			{Key: "valentine", Value: bson.A{
 				bson.D{{Key: "$project", Value: bson.D{
@@ -732,7 +735,7 @@ func PipelineCheckAchievements(userId int64) mongo.Pipeline {
 				}}},
 				bson.D{{Key: "$count", Value: "count"}},
 			}},
-			
+
 			// 9. Динамика (молния - рост на 50+см)
 			{Key: "lightning", Value: bson.A{
 				bson.D{{Key: "$sort", Value: bson.D{{Key: "requested_at", Value: 1}}}},
@@ -753,13 +756,13 @@ func PipelineCheckAchievements(userId int64) mongo.Pipeline {
 				bson.D{{Key: "$match", Value: bson.D{{Key: "growth", Value: bson.D{{Key: "$gte", Value: 50}}}}}},
 				bson.D{{Key: "$count", Value: "count"}},
 			}},
-			
+
 			// 10. Последние 31 кок для сложных коллекций
 			{Key: "last_31", Value: bson.A{
 				bson.D{{Key: "$sort", Value: bson.D{{Key: "requested_at", Value: -1}}}},
 				bson.D{{Key: "$limit", Value: 31}},
 			}},
-			
+
 			// 11. Последние 3 кока для проверки специальных совпадений
 			{Key: "recent_3", Value: bson.A{
 				bson.D{{Key: "$sort", Value: bson.D{{Key: "requested_at", Value: -1}}}},
