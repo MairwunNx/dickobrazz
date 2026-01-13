@@ -18,6 +18,23 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
+// shouldShowDescription проверяет, нужно ли показывать описания для пользователя
+// Описания НЕ показываются если: userCocksCount > 32 И username != "mairwunnx"
+func (app *Application) shouldShowDescription(log *logging.Logger, userID int64, username string) bool {
+	if username == "mairwunnx" {
+		return true
+	}
+	
+	cocksCount := app.GetUserCocksCount(log, userID)
+	
+	// Если больше 32 коков, не показываем описания, очевидно юзер уже не новичок
+	if cocksCount > 32 {
+		return false
+	}
+	
+	return true
+}
+
 func (app *Application) HandleInlineQuery(log *logging.Logger, query *tgbotapi.InlineQuery) {
 	var traceQueryCreated = func(l *logging.Logger) { l.I("Inline query successfully created") }
 
@@ -99,7 +116,8 @@ func (app *Application) InlineQueryCockSize(log *logging.Logger, query *tgbotapi
 func (app *Application) InlineQueryCockLadder(log *logging.Logger, query *tgbotapi.InlineQuery) tgbotapi.InlineQueryResultArticle {
 	cocks := app.AggregateCockSizes(log)
 	totalParticipants := app.GetTotalCockersCount(log)
-	text := app.GenerateCockLadderScoreboard(log, query.From.ID, cocks, totalParticipants)
+	showDescription := app.shouldShowDescription(log, query.From.ID, query.From.UserName)
+	text := app.GenerateCockLadderScoreboard(log, query.From.ID, cocks, totalParticipants, showDescription)
 	return InitializeInlineQueryWithThumb(
 		"Ладдер коков",
 		text,
@@ -124,7 +142,8 @@ func (app *Application) InlineQueryCockRace(log *logging.Logger, query *tgbotapi
 		seasonStartDate = "хуй знает когда" // Заглушка для случая если нет активного сезона (чего в целом быть не может, я в это верю.)
 	}
 	
-	text := app.GenerateCockRaceScoreboard(log, query.From.ID, cocks, seasonStartDate, totalParticipants, currentSeason)
+	showDescription := app.shouldShowDescription(log, query.From.ID, query.From.UserName)
+	text := app.GenerateCockRaceScoreboard(log, query.From.ID, cocks, seasonStartDate, totalParticipants, currentSeason, showDescription)
 	return InitializeInlineQueryWithThumb(
 		"Гонка коков",
 		text,
@@ -331,7 +350,8 @@ func (app *Application) InlineQueryCockSeason(log *logging.Logger, query *tgbota
 		return app.GetSeasonWinners(log, season)
 	}
 	
-	text := NewMsgCockSeasonSinglePage(currentSeason, getSeasonWinners)
+	showDescription := app.shouldShowDescription(log, query.From.ID, query.From.UserName)
+	text := NewMsgCockSeasonSinglePage(currentSeason, getSeasonWinners, showDescription)
 	
 	// Создаем кнопки навигации
 	var buttons []tgbotapi.InlineKeyboardButton
@@ -376,7 +396,8 @@ func (app *Application) InlineQueryCockRuler(log *logging.Logger, query *tgbotap
 		cocks = cocks[:13]
 	}
 
-	text := app.GenerateCockRulerText(log, query.From.ID, cocks, totalParticipants)
+	showDescription := app.shouldShowDescription(log, query.From.ID, query.From.UserName)
+	text := app.GenerateCockRulerText(log, query.From.ID, cocks, totalParticipants, showDescription)
 	return InitializeInlineQueryWithThumb(
 		"Линейка коков",
 		text,
@@ -515,7 +536,8 @@ func (app *Application) HandleCallbackQuery(log *logging.Logger, callback *tgbot
 			return app.GetSeasonWinners(log, season)
 		}
 		
-		text := NewMsgCockSeasonSinglePage(*targetSeason, getSeasonWinners)
+		showDescription := app.shouldShowDescription(log, callback.From.ID, callback.From.UserName)
+		text := NewMsgCockSeasonSinglePage(*targetSeason, getSeasonWinners, showDescription)
 		
 		// Создаем кнопки навигации
 		var buttons []tgbotapi.InlineKeyboardButton

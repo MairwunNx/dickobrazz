@@ -9,6 +9,7 @@ import (
 	"os"
 	"time"
 
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -147,6 +148,19 @@ func (app *Application) GetUserAggregatedCock(log *logging.Logger, userID int64)
 
 	log.I("No cocks found for user")
 	return nil
+}
+
+// GetUserCocksCount возвращает количество коков пользователя за все время
+func (app *Application) GetUserCocksCount(log *logging.Logger, userID int64) int {
+	collection := database.CollectionCocks(app.db)
+	
+	count, err := collection.CountDocuments(app.ctx, bson.M{"user_id": userID})
+	if err != nil {
+		log.E("Failed to count user cocks", logging.InnerError, err)
+		return 0
+	}
+	
+	return int(count)
 }
 
 // GetTotalCockersCount возвращает общее количество уникальных участников за все время

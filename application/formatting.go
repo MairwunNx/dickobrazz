@@ -187,7 +187,7 @@ func GenerateCockSizeText(size int, emoji string) string {
 	return fmt.Sprintf(MsgCockSize, formattedSize, emoji)
 }
 
-func (app *Application) GenerateCockRulerText(log *logging.Logger, userID int64, cocks []UserCock, totalParticipants int) string {
+func (app *Application) GenerateCockRulerText(log *logging.Logger, userID int64, cocks []UserCock, totalParticipants int, showDescription bool) string {
 	var winners []string
 	var others []string
 	isUserInScoreboard := false
@@ -303,22 +303,30 @@ func (app *Application) GenerateCockRulerText(log *logging.Logger, userID int64,
 	}
 
 	if len(others) != 0 {
+		template := MsgCockRulerScoreboardTemplate
+		if !showDescription {
+			template = MsgCockRulerScoreboardTemplateNoDesc
+		}
 		return fmt.Sprintf(
-			MsgCockRulerScoreboardTemplate,
+			template,
 			totalParticipants,
 			strings.Join(winners, "\n"),
 			strings.Join(others, "\n"),
 		)
 	} else {
+		template := MsgCockRulerScoreboardWinnersTemplate
+		if !showDescription {
+			template = MsgCockRulerScoreboardWinnersTemplateNoDesc
+		}
 		return fmt.Sprintf(
-			MsgCockRulerScoreboardWinnersTemplate,
+			template,
 			totalParticipants,
 			strings.Join(winners, "\n"),
 		)
 	}
 }
 
-func (app *Application) GenerateCockRaceScoreboard(log *logging.Logger, userID int64, sizes []UserCockRace, seasonStart string, totalParticipants int, currentSeason *CockSeason) string {
+func (app *Application) GenerateCockRaceScoreboard(log *logging.Logger, userID int64, sizes []UserCockRace, seasonStart string, totalParticipants int, currentSeason *CockSeason, showDescription bool) string {
 	var winners []string
 	var others []string
 	isUserInScoreboard := false
@@ -445,8 +453,12 @@ func (app *Application) GenerateCockRaceScoreboard(log *logging.Logger, userID i
 	}
 
 	if len(others) != 0 {
+		template := MsgCockRaceScoreboardTemplate
+		if !showDescription {
+			template = MsgCockRaceScoreboardTemplateNoDesc
+		}
 		return fmt.Sprintf(
-			MsgCockRaceScoreboardTemplate,
+			template,
 			totalParticipants,
 			strings.Join(winners, "\n"),
 			strings.Join(others, "\n"),
@@ -455,8 +467,12 @@ func (app *Application) GenerateCockRaceScoreboard(log *logging.Logger, userID i
 			seasonWord,
 		)
 	} else {
+		template := MsgCockRaceScoreboardWinnersTemplate
+		if !showDescription {
+			template = MsgCockRaceScoreboardWinnersTemplateNoDesc
+		}
 		return fmt.Sprintf(
-			MsgCockRaceScoreboardWinnersTemplate,
+			template,
 			totalParticipants,
 			strings.Join(winners, "\n"),
 			footerLine,
@@ -466,7 +482,7 @@ func (app *Application) GenerateCockRaceScoreboard(log *logging.Logger, userID i
 	}
 }
 
-func (app *Application) GenerateCockLadderScoreboard(log *logging.Logger, userID int64, sizes []UserCockRace, totalParticipants int) string {
+func (app *Application) GenerateCockLadderScoreboard(log *logging.Logger, userID int64, sizes []UserCockRace, totalParticipants int, showDescription bool) string {
 	var winners []string
 	var others []string
 	isUserInScoreboard := false
@@ -558,15 +574,23 @@ func (app *Application) GenerateCockLadderScoreboard(log *logging.Logger, userID
 	}
 
 	if len(others) != 0 {
+		template := MsgCockLadderScoreboardTemplate
+		if !showDescription {
+			template = MsgCockLadderScoreboardTemplateNoDesc
+		}
 		return fmt.Sprintf(
-			MsgCockLadderScoreboardTemplate,
+			template,
 			totalParticipants,
 			strings.Join(winners, "\n"),
 			strings.Join(others, "\n"),
 		)
 	} else {
+		template := MsgCockLadderScoreboardWinnersTemplate
+		if !showDescription {
+			template = MsgCockLadderScoreboardWinnersTemplateNoDesc
+		}
 		return fmt.Sprintf(
-			MsgCockLadderScoreboardWinnersTemplate,
+			template,
 			totalParticipants,
 			strings.Join(winners, "\n"),
 		)
