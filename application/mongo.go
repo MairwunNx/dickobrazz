@@ -811,6 +811,12 @@ func (app *Application) CheckAndUpdateAchievements(log *logging.Logger, userID i
 		updateAchievement("half_hundred", count >= 1, int(count))
 	}
 
+	// Проверяем достижение "Максималист" (61см)
+	if len(data.Maximalist61cm) > 0 {
+		count := data.Maximalist61cm[0].Count
+		updateAchievement("maximalist", count >= 10, int(count))
+	}
+
 	// Проверяем "Коллекционер чисел"
 	if len(data.BeautifulNumbers) > 0 {
 		count := data.BeautifulNumbers[0].Count
@@ -839,6 +845,11 @@ func (app *Application) CheckAndUpdateAchievements(log *logging.Logger, userID i
 		updateAchievement("speedrunner", count >= 5, int(count))
 	}
 
+	if len(data.MidnightPuller) > 0 {
+		count := data.MidnightPuller[0].Count
+		updateAchievement("midnight_puller", count >= 50, int(count))
+	}
+
 	// Проверяем праздничные
 	if len(data.Valentine) > 0 {
 		count := data.Valentine[0].Count
@@ -848,6 +859,21 @@ func (app *Application) CheckAndUpdateAchievements(log *logging.Logger, userID i
 	if len(data.NewYearGift) > 0 {
 		count := data.NewYearGift[0].Count
 		updateAchievement("new_year_gift", count >= 1, int(count))
+	}
+
+	if len(data.MensSolidarity) > 0 {
+		count := data.MensSolidarity[0].Count
+		updateAchievement("mens_solidarity", count >= 1, int(count))
+	}
+
+	if len(data.Friday13th) > 0 {
+		count := data.Friday13th[0].Count
+		updateAchievement("friday_13th", count >= 1, int(count))
+	}
+
+	if len(data.LeapCock) > 0 {
+		count := data.LeapCock[0].Count
+		updateAchievement("leap_cock", count >= 1, int(count))
 	}
 
 	// Проверяем "Молния"
@@ -1022,6 +1048,19 @@ func (app *Application) CheckAndUpdateAchievements(log *logging.Logger, userID i
 			updateAchievement("contrast_shower", true, 0)
 		}
 		
+		// 3. Пифагор: три кока подряд образуют пифагорову тройку
+		a, b, c := recent[0].Size, recent[1].Size, recent[2].Size
+		// Проверяем все варианты перестановок (a²+b²=c², a²+c²=b², b²+c²=a²)
+		isPythagorean := (a*a+b*b == c*c) || (a*a+c*c == b*b) || (b*b+c*c == a*a)
+		if isPythagorean {
+			updateAchievement("pythagoras", true, 1)
+		}
+		
+		// 4. Leet speak (1337): 13см и 37см подряд
+		if (recent[1].Size == 13 && recent[2].Size == 37) {
+			updateAchievement("leet_speak", true, 1)
+		}
+		
 		// Проверяем последний кок на совпадения с временем
 		lastCock := recent[2]
 		moscowTime := lastCock.RequestedAt.In(datetime.NowLocation())
@@ -1030,17 +1069,17 @@ func (app *Application) CheckAndUpdateAchievements(log *logging.Logger, userID i
 		minute := moscowTime.Minute()
 		day := moscowTime.Day()
 		
-		// 3. Минутная точность: размер == минуты (например 24см в xx:24)
+		// 5. Минутная точность: размер == минуты (например 24см в xx:24)
 		if int32(minute) == lastCock.Size {
 			updateAchievement("minute_precision", true, 0)
 		}
 		
-		// 4. Часовая точность: размер == час (например 11см в 11:xx)
+		// 6. Часовая точность: размер == час (например 11см в 11:xx)
 		if int32(hour) == lastCock.Size {
 			updateAchievement("hour_precision", true, 0)
 		}
 		
-		// 5. День = Размер: размер == день месяца (например 15см 15 числа)
+		// 7. День = Размер: размер == день месяца (например 15см 15 числа)
 		if int32(day) == lastCock.Size {
 			updateAchievement("day_equals_size", true, 0)
 		}

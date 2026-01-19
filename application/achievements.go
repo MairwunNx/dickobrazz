@@ -100,6 +100,14 @@ var AllAchievements = []database.Achievement{
 		Respects:    222,
 		MaxProgress: 5,
 	},
+	{
+		ID:          "midnight_puller",
+		Emoji:       "🌙",
+		Name:        "Полуночник",
+		Description: "дернуть кок после 23:00 МСК пятьдесят раз",
+		Respects:    222,
+		MaxProgress: 50,
+	},
 	
 	// 228 респектов
 	{
@@ -228,6 +236,22 @@ var AllAchievements = []database.Achievement{
 		Respects:    777,
 		MaxProgress: 0,
 	},
+	{
+		ID:          "pythagoras",
+		Emoji:       "📐",
+		Name:        "Пифагор",
+		Description: "получить три кока подряд, образующих пифагорову тройку (3-4-5, 5-12-13, 8-15-17 и т.д.)",
+		Respects:    777,
+		MaxProgress: 1,
+	},
+	{
+		ID:          "leet_speak",
+		Emoji:       "💻",
+		Name:        "Leet speak",
+		Description: "получить 13см и 37см подряд",
+		Respects:    777,
+		MaxProgress: 1,
+	},
 	
 	// 800 респектов
 	{
@@ -273,6 +297,30 @@ var AllAchievements = []database.Achievement{
 		Emoji:       "🎄",
 		Name:        "Новогодний подарок",
 		Description: "получить кок 60см+ в Новый Год",
+		Respects:    999,
+		MaxProgress: 1,
+	},
+	{
+		ID:          "mens_solidarity",
+		Emoji:       "🤝",
+		Name:        "Мужская солидарность",
+		Description: "получить кок 19см в Международный мужской день (19 ноября)",
+		Respects:    999,
+		MaxProgress: 1,
+	},
+	{
+		ID:          "friday_13th",
+		Emoji:       "☠️",
+		Name:        "Пятница 13",
+		Description: "получить кок 0см в пятницу 13-го",
+		Respects:    999,
+		MaxProgress: 1,
+	},
+	{
+		ID:          "leap_cock",
+		Emoji:       "📅",
+		Name:        "Високосный кок",
+		Description: "получить любой кок 29 февраля",
 		Respects:    999,
 		MaxProgress: 1,
 	},
@@ -367,6 +415,14 @@ var AllAchievements = []database.Achievement{
 		Description: "нарастить 20000см суммарно",
 		Respects:    2000,
 		MaxProgress: 20000,
+	},
+	{
+		ID:          "maximalist",
+		Emoji:       "🔝",
+		Name:        "Максималист",
+		Description: "получить 61см десять раз",
+		Respects:    2000,
+		MaxProgress: 10,
 	},
 	
 	// 2222 респекта

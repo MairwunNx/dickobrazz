@@ -21,7 +21,7 @@ import (
 // shouldShowDescription проверяет, нужно ли показывать описания для пользователя
 // Описания НЕ показываются если: userCocksCount > 32 И username != "mairwunnx"
 func (app *Application) shouldShowDescription(log *logging.Logger, userID int64, username string) bool {
-	if username == "mairwunnx" {
+	if username == "mairwunnx0" {
 		return true
 	}
 	
@@ -225,6 +225,16 @@ func (app *Application) InlineQueryCockDynamic(log *logging.Logger, query *tgbot
 	individualIrk := result.IndividualIrk[0]
 	individualDominance := result.IndividualDominance[0]
 	
+	// Получаем дату первого кока пользователя
+	var userFirstCockDate time.Time
+	var userPullingPeriod string
+	if len(result.IndividualFirstCockDate) > 0 {
+		userFirstCockDate = result.IndividualFirstCockDate[0].FirstDate
+		userPullingPeriod = FormatUserPullingPeriod(userFirstCockDate, datetime.NowTime())
+	} else {
+		userPullingPeriod = "недавно"
+	}
+	
 	// Проверяем наличие данных для дневной динамики (может отсутствовать у новых пользователей)
 	var yesterdayCockChange int
 	var yesterdayCockChangePercent float64
@@ -254,6 +264,12 @@ func (app *Application) InlineQueryCockDynamic(log *logging.Logger, query *tgbot
 	overallRecord := result.Record[0]
 	
 	totalCocksCount := result.TotalCocksCount[0].TotalCount
+	
+	// Получаем скорость роста общей статистики
+	var overallGrowthSpeed float64
+	if len(result.OverallGrowthSpeed) > 0 {
+		overallGrowthSpeed = result.OverallGrowthSpeed[0].GrowthSpeed
+	}
 	
 	// Проверяем наличие данных по количеству коков пользователя
 	var userCocksCount int
@@ -323,6 +339,12 @@ func (app *Application) InlineQueryCockDynamic(log *logging.Logger, query *tgbot
 		
 		/* Средняя скорость прироста */
 		growthSpeed,
+		
+		/* Скорость роста общей статистики */
+		overallGrowthSpeed,
+		
+		/* Период дергания кока пользователем */
+		userPullingPeriod,
 	)
 
 	article := tgbotapi.NewInlineQueryResultArticleMarkdown(query.ID, "Динамика кока", text)

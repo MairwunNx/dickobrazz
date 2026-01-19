@@ -2,7 +2,7 @@
 *.md text eol=crlf
 *.json text eol=crlf
 *.yaml text eol=crlf
-*.yml text eol=crlf
+*.yml text eol=lf
 *.conf text eol=crlf
 Dockerfile linguist-language=Dockerfile
 Dockerfile.* linguist-language=Dockerfile

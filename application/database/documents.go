@@ -80,6 +80,14 @@ type DocumentCockDynamic struct {
 	IndividualGrowthSpeed []struct {
 		GrowthSpeed float64 `bson:"growth_speed"`
 	} `bson:"individual_growth_speed"`
+	
+	IndividualFirstCockDate []struct {
+		FirstDate time.Time `bson:"first_date"`
+	} `bson:"individual_first_cock_date"`
+	
+	OverallGrowthSpeed []struct {
+		GrowthSpeed float64 `bson:"growth_speed"`
+	} `bson:"overall_growth_speed"`
 }
 
 // DocumentUserAchievement представляет достижение пользователя в MongoDB
@@ -122,6 +130,10 @@ type DocumentAchievementCheck struct {
 		Count int32 `bson:"count"`
 	} `bson:"half_hundred_50cm"`
 
+	Maximalist61cm []struct {
+		Count int32 `bson:"count"`
+	} `bson:"maximalist_61cm"`
+
 	BeautifulNumbers []struct {
 		Count int32 `bson:"count"`
 	} `bson:"beautiful_numbers"`
@@ -150,6 +162,10 @@ type DocumentAchievementCheck struct {
 		Count int32 `bson:"count"`
 	} `bson:"speedrunner"`
 
+	MidnightPuller []struct {
+		Count int32 `bson:"count"`
+	} `bson:"midnight_puller"`
+
 	// Праздничные
 	Valentine []struct {
 		Count int32 `bson:"count"`
@@ -158,6 +174,18 @@ type DocumentAchievementCheck struct {
 	NewYearGift []struct {
 		Count int32 `bson:"count"`
 	} `bson:"new_year_gift"`
+
+	MensSolidarity []struct {
+		Count int32 `bson:"count"`
+	} `bson:"mens_solidarity"`
+
+	Friday13th []struct {
+		Count int32 `bson:"count"`
+	} `bson:"friday_13th"`
+
+	LeapCock []struct {
+		Count int32 `bson:"count"`
+	} `bson:"leap_cock"`
 
 	// Динамика
 	Lightning []struct {

@@ -935,6 +935,18 @@ func PluralizeMonths(n int) string {
 	return "месяцев"
 }
 
+// PluralizeYears склоняет слово "год"
+// 1 год, 2 года, 5 лет
+func PluralizeYears(n int) string {
+	if n%10 == 1 && n%100 != 11 {
+		return "год"
+	}
+	if n%10 >= 2 && n%10 <= 4 && (n%100 < 10 || n%100 >= 20) {
+		return "года"
+	}
+	return "лет"
+}
+
 // FormatTimeRemaining форматирует оставшееся время до конца периода
 // Возвращает строку типа "1 месяц 3 дня" или "14 дней"
 func FormatTimeRemaining(endDate time.Time, now time.Time) string {
@@ -958,6 +970,61 @@ func FormatTimeRemaining(endDate time.Time, now time.Time) string {
 	
 	// Если меньше месяца, показываем только дни
 	return fmt.Sprintf("%d %s", daysRemaining, PluralizeDays(daysRemaining))
+}
+
+// FormatUserPullingPeriod форматирует период с первого кока пользователя
+// Формат: "2 года, 10 месяцев и 3 дня (с 27.02.2020)"
+func FormatUserPullingPeriod(firstCockDate time.Time, now time.Time) string {
+	years := now.Year() - firstCockDate.Year()
+	months := int(now.Month()) - int(firstCockDate.Month())
+	days := now.Day() - firstCockDate.Day()
+	
+	// Корректируем если дни отрицательные
+	if days < 0 {
+		months--
+		// Берем количество дней в предыдущем месяце
+		prevMonth := now.AddDate(0, -1, 0)
+		daysInPrevMonth := time.Date(prevMonth.Year(), prevMonth.Month()+1, 0, 0, 0, 0, 0, prevMonth.Location()).Day()
+		days += daysInPrevMonth
+	}
+	
+	// Корректируем если месяцы отрицательные
+	if months < 0 {
+		years--
+		months += 12
+	}
+	
+	// Форматируем дату первого кока
+	dateStr := firstCockDate.Format("02.01.2006")
+	
+	var parts []string
+	
+	// Добавляем годы если есть
+	if years > 0 {
+		parts = append(parts, fmt.Sprintf("%d %s", years, PluralizeYears(years)))
+	}
+	
+	// Добавляем месяцы если есть
+	if months > 0 {
+		parts = append(parts, fmt.Sprintf("%d %s", months, PluralizeMonths(months)))
+	}
+	
+	// Добавляем дни если есть (или если нет ничего больше)
+	if days > 0 || len(parts) == 0 {
+		parts = append(parts, fmt.Sprintf("%d %s", days, PluralizeDays(days)))
+	}
+	
+	// Собираем строку
+	var result string
+	if len(parts) == 1 {
+		result = parts[0]
+	} else if len(parts) == 2 {
+		result = parts[0] + ", " + parts[1]
+	} else if len(parts) == 3 {
+		result = parts[0] + ", " + parts[1] + " и " + parts[2]
+	}
+	
+	return fmt.Sprintf("%s (с %s)", result, dateStr)
 }
 
 // GenerateAchievementsText генерирует текст списка достижений с пагинацией
