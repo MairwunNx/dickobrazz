@@ -820,31 +820,27 @@ func IrkLabel(irk float64) string {
 	return labels[bucket]
 }
 
-// GrowthSpeedLabel возвращает описание скорости прироста (0-61см)
+// GrowthSpeedLabel возвращает описание скорости изменения
+// Скорость всегда положительная (абсолютное значение), показывает интенсивность изменения
 func GrowthSpeedLabel(speed float64) string {
-	absSpeed := speed
-	if absSpeed < 0 {
-		absSpeed = -absSpeed
-	}
-	
 	switch {
-	case absSpeed >= 50:
+	case speed >= 50:
 		return "космическая"
-	case absSpeed >= 40:
+	case speed >= 40:
 		return "экстремальная"
-	case absSpeed >= 30:
+	case speed >= 30:
 		return "очень быстрая"
-	case absSpeed >= 20:
+	case speed >= 20:
 		return "быстрая"
-	case absSpeed >= 15:
+	case speed >= 15:
 		return "умеренная"
-	case absSpeed >= 10:
+	case speed >= 10:
 		return "средняя"
-	case absSpeed >= 5:
+	case speed >= 5:
 		return "медленная"
-	case absSpeed >= 2:
+	case speed >= 2:
 		return "очень медленная"
-	case absSpeed >= 0.5:
+	case speed >= 0.5:
 		return "черепашья"
 	default:
 		return "стоячая"
@@ -852,29 +848,24 @@ func GrowthSpeedLabel(speed float64) string {
 }
 
 func GrowthSpeedEmoji(speed float64) string {
-	absSpeed := speed
-	if absSpeed < 0 {
-		absSpeed = -absSpeed
-	}
-	
 	switch {
-	case absSpeed >= 50:
+	case speed >= 50:
 		return "👑🌌🚀💫"
-	case absSpeed >= 40:
+	case speed >= 40:
 		return "🚀🔥⚡"
-	case absSpeed >= 30:
+	case speed >= 30:
 		return "⚡💨🏎️"
-	case absSpeed >= 20:
+	case speed >= 20:
 		return "🏃💨"
-	case absSpeed >= 15:
+	case speed >= 15:
 		return "🚶‍♂️⏱️"
-	case absSpeed >= 10:
+	case speed >= 10:
 		return "🚶"
-	case absSpeed >= 5:
+	case speed >= 5:
 		return "🐢⏳"
-	case absSpeed >= 2:
+	case speed >= 2:
 		return "🐌🕰️"
-	case absSpeed >= 0.5:
+	case speed >= 0.5:
 		return "🐢🌿"
 	default:
 		return "🗿⛔"
@@ -888,6 +879,7 @@ func GrowthSpeedDisplay(speed float64) string {
 }
 
 // FormatGrowthSpeed форматирует скорость роста кока (в см/день) с 1 знаком после запятой
+// Скорость всегда положительная (абсолютное значение), как на спидометре
 func FormatGrowthSpeed(speed float64) string {
 	p := message.NewPrinter(language.Russian)
 	return p.Sprintf("%.1f", speed)

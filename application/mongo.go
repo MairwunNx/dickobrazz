@@ -847,7 +847,7 @@ func (app *Application) CheckAndUpdateAchievements(log *logging.Logger, userID i
 
 	if len(data.MidnightPuller) > 0 {
 		count := data.MidnightPuller[0].Count
-		updateAchievement("midnight_puller", count >= 50, int(count))
+		updateAchievement("midnight_puller", count >= 10, int(count))
 	}
 
 	// Проверяем праздничные

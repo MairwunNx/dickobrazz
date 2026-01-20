@@ -284,10 +284,9 @@ func PipelineDynamic(userId int64) mongo.Pipeline {
 				}}},
 			}},
 			{Key: "overall_growth_speed", Value: bson.A{
-				// Группируем по пользователю и дню
+				// Группируем по дню и считаем сумму всех коков за каждый день
 				bson.D{{Key: "$group", Value: bson.D{
 					{Key: "_id", Value: bson.D{
-						{Key: "user_id", Value: "$user_id"},
 						{Key: "year", Value: bson.D{
 							{Key: "$year", Value: bson.D{
 								{Key: "date", Value: "$requested_at"},
@@ -307,43 +306,35 @@ func PipelineDynamic(userId int64) mongo.Pipeline {
 							}},
 						}},
 					}},
-					{Key: "last_cock_of_day", Value: bson.D{{Key: "$last", Value: "$size"}}},
-					{Key: "day_timestamp", Value: bson.D{{Key: "$last", Value: "$requested_at"}}},
+					{Key: "daily_total", Value: bson.D{{Key: "$sum", Value: "$size"}}},
+					{Key: "day_timestamp", Value: bson.D{{Key: "$first", Value: "$requested_at"}}},
 				}}},
-				// Сортируем по дате
+				// Сортируем по дате (от новых к старым)
 				bson.D{{Key: "$sort", Value: bson.D{{Key: "day_timestamp", Value: -1}}}},
-				// Группируем по пользователю и берем последние 5 дней
-				bson.D{{Key: "$group", Value: bson.D{
-					{Key: "_id", Value: "$_id.user_id"},
-					{Key: "last_5_days", Value: bson.D{{Key: "$push", Value: bson.D{
-						{Key: "size", Value: "$last_cock_of_day"},
-						{Key: "timestamp", Value: "$day_timestamp"},
-					}}}},
-				}}},
-				bson.D{{Key: "$project", Value: bson.D{
-					{Key: "_id", Value: nil},
-					{Key: "last_5_days", Value: bson.D{{Key: "$slice", Value: bson.A{"$last_5_days", 5}}}},
-				}}},
-				// Разворачиваем для расчета роста
-				bson.D{{Key: "$unwind", Value: "$last_5_days"}},
-				// Группируем все вместе и сортируем по timestamp
-				bson.D{{Key: "$sort", Value: bson.D{{Key: "last_5_days.timestamp", Value: 1}}}},
+				// Берем последние 5 дней
+				bson.D{{Key: "$limit", Value: 5}},
+				// Группируем все дни вместе
 				bson.D{{Key: "$group", Value: bson.D{
 					{Key: "_id", Value: nil},
-					{Key: "sizes", Value: bson.D{{Key: "$push", Value: "$last_5_days.size"}}},
+					{Key: "daily_totals", Value: bson.D{{Key: "$push", Value: "$daily_total"}}},
+					{Key: "count", Value: bson.D{{Key: "$sum", Value: 1}}},
 				}}},
-				// Вычисляем среднюю абсолютную разницу между соседними днями
+				// Вычисляем скорость роста общего кока
 				bson.D{{Key: "$project", Value: bson.D{
 					{Key: "_id", Value: nil},
 					{Key: "growth_speed", Value: bson.D{{Key: "$round", Value: bson.A{
-						bson.D{{Key: "$avg", Value: bson.D{{Key: "$map", Value: bson.D{
-							{Key: "input", Value: bson.D{{Key: "$range", Value: bson.A{1, bson.D{{Key: "$size", Value: "$sizes"}}}}}},
-							{Key: "as", Value: "idx"},
-							{Key: "in", Value: bson.D{{Key: "$abs", Value: bson.D{{Key: "$subtract", Value: bson.A{
-								bson.D{{Key: "$arrayElemAt", Value: bson.A{"$sizes", "$$idx"}}},
-								bson.D{{Key: "$arrayElemAt", Value: bson.A{"$sizes", bson.D{{Key: "$subtract", Value: bson.A{"$$idx", 1}}}}}},
-							}}}}}},
-						}}}}},
+						bson.D{{Key: "$cond", Value: bson.A{
+							bson.D{{Key: "$gte", Value: bson.A{"$count", 2}}},
+							// Скорость = (последний день - первый день) / (количество дней - 1)
+							bson.D{{Key: "$divide", Value: bson.A{
+								bson.D{{Key: "$subtract", Value: bson.A{
+									bson.D{{Key: "$arrayElemAt", Value: bson.A{"$daily_totals", 0}}},  // Последний день (самый новый)
+									bson.D{{Key: "$arrayElemAt", Value: bson.A{"$daily_totals", -1}}}, // Первый день (самый старый)
+								}}},
+								bson.D{{Key: "$subtract", Value: bson.A{"$count", 1}}},
+							}}},
+							0,
+						}}},
 						1,
 					}}}},
 				}}},
@@ -466,29 +457,59 @@ func PipelineDynamic(userId int64) mongo.Pipeline {
 			}},
 			{Key: "individual_growth_speed", Value: bson.A{
 				bson.D{{Key: "$match", Value: bson.D{{Key: "user_id", Value: userId}}}},
-				bson.D{{Key: "$sort", Value: bson.D{{Key: "requested_at", Value: -1}}}},
-				bson.D{{Key: "$limit", Value: 5}},
-				bson.D{{Key: "$setWindowFields", Value: bson.D{
-					{Key: "partitionBy", Value: "$user_id"},
-					{Key: "sortBy", Value: bson.D{{Key: "requested_at", Value: -1}}},
-					{Key: "output", Value: bson.D{
-						{Key: "prev_size", Value: bson.D{{Key: "$shift", Value: bson.D{
-							{Key: "output", Value: "$size"},
-							{Key: "by", Value: 1},
-						}}}},
+				// Группируем коки пользователя по дням
+				bson.D{{Key: "$group", Value: bson.D{
+					{Key: "_id", Value: bson.D{
+						{Key: "year", Value: bson.D{
+							{Key: "$year", Value: bson.D{
+								{Key: "date", Value: "$requested_at"},
+								{Key: "timezone", Value: "Europe/Moscow"},
+							}},
+						}},
+						{Key: "month", Value: bson.D{
+							{Key: "$month", Value: bson.D{
+								{Key: "date", Value: "$requested_at"},
+								{Key: "timezone", Value: "Europe/Moscow"},
+							}},
+						}},
+						{Key: "day", Value: bson.D{
+							{Key: "$dayOfMonth", Value: bson.D{
+								{Key: "date", Value: "$requested_at"},
+								{Key: "timezone", Value: "Europe/Moscow"},
+							}},
+						}},
 					}},
+					{Key: "last_cock_of_day", Value: bson.D{{Key: "$last", Value: "$size"}}},
+					{Key: "day_timestamp", Value: bson.D{{Key: "$last", Value: "$requested_at"}}},
 				}}},
-				bson.D{{Key: "$match", Value: bson.D{{Key: "prev_size", Value: bson.D{{Key: "$ne", Value: nil}}}}}},
-				bson.D{{Key: "$project", Value: bson.D{
-					{Key: "growth", Value: bson.D{{Key: "$abs", Value: bson.D{{Key: "$subtract", Value: bson.A{"$size", "$prev_size"}}}}}},
-				}}},
+				// Сортируем по дате
+				bson.D{{Key: "$sort", Value: bson.D{{Key: "day_timestamp", Value: -1}}}},
+				// Берем последние 5 дней
+				bson.D{{Key: "$limit", Value: 5}},
+				// Группируем все дни вместе
 				bson.D{{Key: "$group", Value: bson.D{
 					{Key: "_id", Value: nil},
-					{Key: "avg_growth_speed", Value: bson.D{{Key: "$avg", Value: "$growth"}}},
+					{Key: "daily_sizes", Value: bson.D{{Key: "$push", Value: "$last_cock_of_day"}}},
+					{Key: "count", Value: bson.D{{Key: "$sum", Value: 1}}},
 				}}},
+				// Вычисляем скорость роста
 				bson.D{{Key: "$project", Value: bson.D{
 					{Key: "_id", Value: nil},
-					{Key: "growth_speed", Value: bson.D{{Key: "$round", Value: bson.A{"$avg_growth_speed", 1}}}},
+					{Key: "growth_speed", Value: bson.D{{Key: "$round", Value: bson.A{
+						bson.D{{Key: "$cond", Value: bson.A{
+							bson.D{{Key: "$gte", Value: bson.A{"$count", 2}}},
+							// Скорость = abs((последний день - первый день) / (количество дней - 1))
+							bson.D{{Key: "$abs", Value: bson.D{{Key: "$divide", Value: bson.A{
+								bson.D{{Key: "$subtract", Value: bson.A{
+									bson.D{{Key: "$arrayElemAt", Value: bson.A{"$daily_sizes", 0}}},  // Последний день (самый новый)
+									bson.D{{Key: "$arrayElemAt", Value: bson.A{"$daily_sizes", -1}}}, // Первый день (самый старый)
+								}}},
+								bson.D{{Key: "$subtract", Value: bson.A{"$count", 1}}},
+							}}}}},
+							0,
+						}}},
+						1,
+					}}}},
 				}}},
 			}},
 			{Key: "individual_first_cock_date", Value: bson.A{
@@ -813,7 +834,7 @@ func PipelineCheckAchievements(userId int64) mongo.Pipeline {
 				bson.D{{Key: "$count", Value: "count"}},
 			}},
 
-			// 7.1. Полуночник (после 23:00 МСК)
+			// 7.1. На волоске от смерти (после 23:00 МСК)
 			{Key: "midnight_puller", Value: bson.A{
 				bson.D{{Key: "$project", Value: bson.D{
 					{Key: "hour", Value: bson.D{{Key: "$hour", Value: bson.D{
