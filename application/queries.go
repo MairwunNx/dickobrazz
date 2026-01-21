@@ -19,6 +19,18 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
+// Описания для inline query items (до 512 символов)
+const (
+	DescCockSize        = "Узнай свой размер на сегодня (от 0 до 61 см). Обновляется каждый день в полночь по МСК."
+	DescCockRuler       = "Daily рейтинг чистого рандома. Размеры генерируются случайно каждый день и сбрасываются в полночь."
+	DescCockLadder      = "Вечный путь к славе. Здесь суммируется каждый кок за всю историю. Ладдер никогда не обнуляется."
+	DescCockRace        = "Сезонное соревнование длиной 3 месяца. Измеряй кок ежедневно, результаты суммируются автоматически."
+	DescCockDynamic     = "Статистика и аналитика твоих коков: средние значения, динамика, рекорды и сравнение с другими."
+	DescCockSeason      = "3-месячная битва за звание лучшего кокера. Измеряй каждый день, суммируй результаты и борись за топ-3."
+	DescCockAchievements = "Выполняй достижения и получай кок-респекты™, которые скоро можно будет обменять на мерч!"
+	DescSystemInfo      = "Системная информация о боте: версия, аптайм, использование памяти, версии баз данных."
+)
+
 // shouldShowDescription проверяет, нужно ли показывать описания для пользователя
 // Описания НЕ показываются если: userCocksCount > 32 И username != "mairwunnx"
 func (app *Application) shouldShowDescription(log *logging.Logger, userID int64, username string) bool {
@@ -187,9 +199,10 @@ func (app *Application) InlineQueryCockSize(log *logging.Logger, query *tgbotapi
 
 	text = text + "\n\n" + "_" + subtext + "_"
 
-	return InitializeInlineQueryWithThumb(
+	return InitializeInlineQueryWithThumbAndDesc(
 		"Размер кока",
 		strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(text, ".", "\\."), "-", "\\-"), "!", "\\!"),
+		DescCockSize,
 		"https://files.mairwunnx.com/raw/public/dickobrazz%2Fico_size.png",
 	)
 }
@@ -199,9 +212,10 @@ func (app *Application) InlineQueryCockLadder(log *logging.Logger, query *tgbota
 	totalParticipants := app.GetTotalCockersCount(log)
 	showDescription := app.shouldShowDescription(log, query.From.ID, query.From.UserName)
 	text := app.GenerateCockLadderScoreboard(log, query.From.ID, cocks, totalParticipants, showDescription)
-	return InitializeInlineQueryWithThumb(
+	return InitializeInlineQueryWithThumbAndDesc(
 		"Ладдер коков",
 		text,
+		DescCockLadder,
 		"https://files.mairwunnx.com/raw/public/dickobrazz%2Fico_ladder.png",
 	)
 }
@@ -225,9 +239,10 @@ func (app *Application) InlineQueryCockRace(log *logging.Logger, query *tgbotapi
 	
 	showDescription := app.shouldShowDescription(log, query.From.ID, query.From.UserName)
 	text := app.GenerateCockRaceScoreboard(log, query.From.ID, cocks, seasonStartDate, totalParticipants, currentSeason, showDescription)
-	return InitializeInlineQueryWithThumb(
+	return InitializeInlineQueryWithThumbAndDesc(
 		"Гонка коков",
 		text,
+		DescCockRace,
 		"https://files.mairwunnx.com/raw/public/dickobrazz%2Fico_race.png",
 	)
 }
@@ -276,9 +291,10 @@ func (app *Application) InlineQueryCockDynamic(log *logging.Logger, query *tgbot
 	if len(result.IndividualCockTotal) == 0 || len(result.Overall) == 0 {
 		log.E("User has no cock data yet")
 		text := "🤔 *Недостаточно данных для динамики*\n\n_Сначала дёрни кок хотя бы раз\\!_"
-		return InitializeInlineQueryWithThumb(
+		return InitializeInlineQueryWithThumbAndDesc(
 			"Динамика кока",
 			text,
+			DescCockDynamic,
 			"https://files.mairwunnx.com/raw/public/dickobrazz%2Fico_dynamic.png",
 		)
 	}
@@ -430,6 +446,7 @@ func (app *Application) InlineQueryCockDynamic(log *logging.Logger, query *tgbot
 
 	article := tgbotapi.NewInlineQueryResultArticleMarkdown(query.ID, "Динамика кока", text)
 	article.ThumbURL = "https://files.mairwunnx.com/raw/public/dickobrazz%2Fico_dynamic.png"
+	article.Description = DescCockDynamic
 	return article
 }
 
@@ -438,9 +455,10 @@ func (app *Application) InlineQueryCockSeason(log *logging.Logger, query *tgbota
 	
 	if len(allSeasons) == 0 {
 		text := NewMsgCockSeasonNoSeasonsTemplate()
-		return InitializeInlineQueryWithThumb(
+		return InitializeInlineQueryWithThumbAndDesc(
 			"Сезоны коков",
 			text,
+			DescCockSeason,
 			"https://files.mairwunnx.com/raw/public/dickobrazz%2Fico_seasons.png",
 		)
 	}
@@ -483,6 +501,7 @@ func (app *Application) InlineQueryCockSeason(log *logging.Logger, query *tgbota
 	)
 	article.ReplyMarkup = &kb
 	article.ThumbURL = "https://files.mairwunnx.com/raw/public/dickobrazz%2Fico_seasons.png"
+	article.Description = DescCockSeason
 	
 	return article
 }
@@ -501,9 +520,10 @@ func (app *Application) InlineQueryCockRuler(log *logging.Logger, query *tgbotap
 
 	showDescription := app.shouldShowDescription(log, query.From.ID, query.From.UserName)
 	text := app.GenerateCockRulerText(log, query.From.ID, cocks, totalParticipants, showDescription)
-	return InitializeInlineQueryWithThumb(
+	return InitializeInlineQueryWithThumbAndDesc(
 		"Линейка коков",
 		text,
+		DescCockRuler,
 		"https://files.mairwunnx.com/raw/public/dickobrazz%2Fico_ruler.png",
 	)
 }
@@ -514,9 +534,10 @@ func (app *Application) InlineQueryCockAchievements(log *logging.Logger, query *
 	// Проверка только для тестового пользователя
 	// if userID != 362695653 {
 	// 	text := "🔒 *Кок\\-ачивки временно доступны только для тестирования*\n\n_Скоро будут доступны для всех\\!_"
-	// 	return InitializeInlineQueryWithThumb(
+	// 	return InitializeInlineQueryWithThumbAndDesc(
 	// 		"Кок-ачивки",
 	// 		text,
+	// 		DescCockAchievements,
 	// 		"https://files.mairwunnx.com/raw/public/dickobrazz%2FGemini_Generated_Image_qkh4tfqkh4tfqkh4.png",
 	// 	)
 	// }
@@ -582,6 +603,7 @@ func (app *Application) InlineQueryCockAchievements(log *logging.Logger, query *
 	)
 	article.ReplyMarkup = &kb
 	article.ThumbURL = "https://files.mairwunnx.com/raw/public/dickobrazz%2Fico_achievements.png"
+	article.Description = DescCockAchievements
 	
 	return article
 }
@@ -596,14 +618,22 @@ func InitializeInlineQueryWithThumb(title, message, thumbURL string) tgbotapi.In
 	return article
 }
 
+func InitializeInlineQueryWithThumbAndDesc(title, message, description, thumbURL string) tgbotapi.InlineQueryResultArticle {
+	article := tgbotapi.NewInlineQueryResultArticleMarkdownV2(uuid.NewString(), title, message)
+	article.ThumbURL = thumbURL
+	article.Description = description
+	return article
+}
+
 func (app *Application) InlineQuerySystemInfo(log *logging.Logger, query *tgbotapi.InlineQuery) tgbotapi.InlineQueryResultArticle {
 	info := app.GetSystemInfo(log, query.From.ID, query.From.UserName)
 	
 	text := NewMsgSystemInfoTemplate(info)
 	
-	return InitializeInlineQueryWithThumb(
+	return InitializeInlineQueryWithThumbAndDesc(
 		"Системные данные",
 		text,
+		DescSystemInfo,
 		"https://files.mairwunnx.com/raw/public/dickobrazz%2Fico_system.png",
 	)
 }
