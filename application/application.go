@@ -7,6 +7,7 @@ import (
 	"os/signal"
 	"sync"
 	"syscall"
+	"time"
 
 	"github.com/go-redis/cache/v9"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -25,6 +26,7 @@ type Application struct {
 	cache       *cache.Cache
 	healthcheck *HealthcheckServer
 	wg          sync.WaitGroup
+	startTime   time.Time
 }
 
 func NewApplication() *Application {
@@ -36,7 +38,17 @@ func NewApplication() *Application {
 	db := InitializeMongoConnection(ctx, log)
 	client, redisCache := InitializeRedisConnection(log)
 
-	app := &Application{ctx: ctx, cancel: cancel, log: log, bot: bot, rnd: rnd, db: db, redis: client, cache: redisCache}
+	app := &Application{
+		ctx:         ctx,
+		cancel:      cancel,
+		log:         log,
+		bot:         bot,
+		rnd:         rnd,
+		db:          db,
+		redis:       client,
+		cache:       redisCache,
+		startTime:   time.Now(),
+	}
 	app.healthcheck = InitializeHealthcheckServer(log, &app.wg)
 
 	return app

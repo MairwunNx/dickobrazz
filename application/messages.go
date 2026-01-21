@@ -460,6 +460,31 @@ func NewMsgCockSeasonNoSeasonsTemplate() string {
 	return MsgCockSeasonNoSeasonsTemplate
 }
 
+func NewMsgSystemInfoTemplate(info *SystemInfo) string {
+	return fmt.Sprintf(
+		MsgSystemInfoTemplate,
+		// Сервис
+		EscapeMarkdownV2(info.Uptime),
+		EscapeMarkdownV2(info.Version),
+		EscapeMarkdownV2(info.BuildRev),
+		EscapeMarkdownV2(info.BuildAt),
+		// Окружение
+		EscapeMarkdownV2(info.OS),
+		EscapeMarkdownV2(info.Arch),
+		EscapeMarkdownV2(info.GoVersion),
+		info.MemoryUsed,
+		info.MemoryTotal,
+		EscapeMarkdownV2(fmt.Sprintf("%.1f", info.MemoryPercent)),
+		// Базы данных
+		EscapeMarkdownV2(info.MongoVersion),
+		EscapeMarkdownV2(info.RedisVersion),
+		// Запрос
+		EscapeMarkdownV2(info.Username),
+		info.UserID,
+		info.BotID,
+	)
+}
+
 // NewMsgCockSeasonSinglePage генерирует текст для одной страницы сезона (постраничная навигация)
 func NewMsgCockSeasonSinglePage(season CockSeason, getSeasonWinners func(CockSeason) []SeasonWinner, showDescription bool) string {
 	startDate := EscapeMarkdownV2(season.StartDate.Format("02.01.2006"))
@@ -513,3 +538,24 @@ const MsgCockAchievementsTemplateOtherPages = `🏆 *Кок\-ачивки*
 Выполнено: *%d/%d* _\(%d%%\)_ • 🌟 Респекты: *%d*
 
 %s`
+
+// MsgSystemInfoTemplate - шаблон для системных данных
+const MsgSystemInfoTemplate = `🔧 *Системные данные*
+
+⚙️ *Сервис:*
+Аптайм: *%s*
+Версия: *%s*
+Сборка: *%s* \(*%s*\)
+
+💻 *Окружение:*
+Система: *%s/%s*
+Go Runtime: *%s*
+Память: *%dМБ / %dМБ* \(%s%%\)
+
+🗄️ *Базы данных:*
+MongoDB: *%s*
+Redis: *%s*
+
+👤 *Запрос:*
+Пользователь: *@%s* \(*%d*\)
+Бот ID: *%d*`

@@ -11,6 +11,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -38,33 +39,113 @@ func (app *Application) shouldShowDescription(log *logging.Logger, userID int64,
 func (app *Application) HandleInlineQuery(log *logging.Logger, query *tgbotapi.InlineQuery) {
 	var traceQueryCreated = func(l *logging.Logger) { l.I("Inline query successfully created") }
 
-	queries := []any{
-		timings.ReportExecutionForResult(log.With(logging.QueryType, "CockSize"),
-			func() tgbotapi.InlineQueryResultArticle { return app.InlineQueryCockSize(log, query) }, traceQueryCreated,
-		),
-		timings.ReportExecutionForResult(log.With(logging.QueryType, "CockRace"),
+	// Синхронное выполнение CockSize (первым, так как может создавать данные)
+	cockSizeResult := timings.ReportExecutionForResult(log.With(logging.QueryType, "CockSize"),
+		func() tgbotapi.InlineQueryResultArticle { return app.InlineQueryCockSize(log, query) }, traceQueryCreated,
+	)
+
+	type queryResult struct {
+		index  int
+		result tgbotapi.InlineQueryResultArticle
+	}
+
+	// Определяем количество параллельных запросов
+	parallelQueriesCount := 6 // CockRace, CockRuler, CockLadder, CockDynamic, CockSeason, CockAchievements
+	if query.From.UserName == "mairwunnx" {
+		parallelQueriesCount = 7 // + SystemInfo
+	}
+
+	resultsChan := make(chan queryResult, parallelQueriesCount)
+	var wg sync.WaitGroup
+
+	// Запускаем параллельные запросы
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		result := timings.ReportExecutionForResult(log.With(logging.QueryType, "CockRace"),
 			func() tgbotapi.InlineQueryResultArticle { return app.InlineQueryCockRace(log, query) }, traceQueryCreated,
-		),
-		timings.ReportExecutionForResult(log.With(logging.QueryType, "CockRuler"),
+		)
+		resultsChan <- queryResult{index: 1, result: result}
+	}()
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		result := timings.ReportExecutionForResult(log.With(logging.QueryType, "CockRuler"),
 			func() tgbotapi.InlineQueryResultArticle { return app.InlineQueryCockRuler(log, query) }, traceQueryCreated,
-		),
-		timings.ReportExecutionForResult(log.With(logging.QueryType, "CockLadder"),
+		)
+		resultsChan <- queryResult{index: 2, result: result}
+	}()
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		result := timings.ReportExecutionForResult(log.With(logging.QueryType, "CockLadder"),
 			func() tgbotapi.InlineQueryResultArticle { return app.InlineQueryCockLadder(log, query) }, traceQueryCreated,
-		),
-		timings.ReportExecutionForResult(log.With(logging.QueryType, "CockDynamic"),
+		)
+		resultsChan <- queryResult{index: 3, result: result}
+	}()
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		result := timings.ReportExecutionForResult(log.With(logging.QueryType, "CockDynamic"),
 			func() tgbotapi.InlineQueryResultArticle { return app.InlineQueryCockDynamic(log, query) }, traceQueryCreated,
-		),
-		timings.ReportExecutionForResult(log.With(logging.QueryType, "CockSeason"),
+		)
+		resultsChan <- queryResult{index: 4, result: result}
+	}()
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		result := timings.ReportExecutionForResult(log.With(logging.QueryType, "CockSeason"),
 			func() tgbotapi.InlineQueryResultArticle { return app.InlineQueryCockSeason(log, query) }, traceQueryCreated,
-		),
-		timings.ReportExecutionForResult(log.With(logging.QueryType, "CockAchievements"),
-			func() tgbotapi.InlineQueryResultArticle { 
+		)
+		resultsChan <- queryResult{index: 5, result: result}
+	}()
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		result := timings.ReportExecutionForResult(log.With(logging.QueryType, "CockAchievements"),
+			func() tgbotapi.InlineQueryResultArticle {
 				// Парсим номер страницы из query (если есть)
 				page := 1
 				// По умолчанию страница 1, можно расширить парсинг в будущем
-				return app.InlineQueryCockAchievements(log, query, page) 
+				return app.InlineQueryCockAchievements(log, query, page)
 			}, traceQueryCreated,
-		),
+		)
+		resultsChan <- queryResult{index: 6, result: result}
+	}()
+
+	// Опциональный SystemInfo для mairwunnx
+	if query.From.UserName == "mairwunnx" {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			result := timings.ReportExecutionForResult(log.With(logging.QueryType, "SystemInfo"),
+				func() tgbotapi.InlineQueryResultArticle { return app.InlineQuerySystemInfo(log, query) }, traceQueryCreated,
+			)
+			resultsChan <- queryResult{index: 7, result: result}
+		}()
+	}
+
+	go func() {
+		wg.Wait()
+		close(resultsChan)
+	}()
+
+	// Собираем результаты в правильном порядке
+	parallelResults := make([]tgbotapi.InlineQueryResultArticle, parallelQueriesCount)
+	for result := range resultsChan {
+		parallelResults[result.index-1] = result.result
+	}
+
+	// Формируем финальный массив запросов: CockSize + параллельные результаты
+	queries := make([]any, 0, parallelQueriesCount+1)
+	queries = append(queries, cockSizeResult)
+	for _, result := range parallelResults {
+		queries = append(queries, result)
 	}
 
 	inlines := tgbotapi.InlineConfig{InlineQueryID: query.ID, IsPersonal: true, CacheTime: 60, Results: queries}
@@ -513,6 +594,18 @@ func InitializeInlineQueryWithThumb(title, message, thumbURL string) tgbotapi.In
 	article := tgbotapi.NewInlineQueryResultArticleMarkdownV2(uuid.NewString(), title, message)
 	article.ThumbURL = thumbURL
 	return article
+}
+
+func (app *Application) InlineQuerySystemInfo(log *logging.Logger, query *tgbotapi.InlineQuery) tgbotapi.InlineQueryResultArticle {
+	info := app.GetSystemInfo(log, query.From.ID, query.From.UserName)
+	
+	text := NewMsgSystemInfoTemplate(info)
+	
+	return InitializeInlineQueryWithThumb(
+		"Системные данные",
+		text,
+		"https://files.mairwunnx.com/raw/public/dickobrazz%2Fico_system.png",
+	)
 }
 
 func (app *Application) HandleCallbackQuery(log *logging.Logger, callback *tgbotapi.CallbackQuery) {
