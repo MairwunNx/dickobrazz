@@ -12,7 +12,7 @@ services:
     container_name: dickobrazz-dev
     cpus: '0.25'
     depends_on: [ dickobrazz-redis, dickobrazz-mongo ]
-    env_file: [ .devcontainer/devcontainer.env ]
+    env_file: [ devcontainer.env ]
     environment:
       DD_DB_HOST: dickobrazz-mongo
       MONGODB_URI: ${MONGODB_URI}
@@ -41,7 +41,7 @@ services:
     command: ["--wiredTigerCacheSizeGB", "0.25"]
     container_name: dickobrazz-mongo
     cpus: '0.5'
-    env_file: [ .devcontainer/devcontainer.env ]
+    env_file: [ devcontainer.env ]
     environment:
       MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
@@ -74,7 +74,7 @@ services:
       --requirepass ${REDIS_PASSWORD}
     container_name: dickobrazz-redis
     cpus: '0.5'
-    env_file: [ .devcontainer/devcontainer.env ]
+    env_file: [ devcontainer.env ]
     environment:
       REDIS_PASSWORD: ${REDIS_PASSWORD}
       TZ: ${TZ}
