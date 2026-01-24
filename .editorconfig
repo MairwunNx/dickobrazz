@@ -16,8 +16,9 @@ ij_smart_tabs = false
 ij_visual_guides =
 ij_wrap_on_typing = false
 
-[{*.yml}]
+[{*.yaml,*.yml}]
 end_of_line = lf
+indent_size = 2
 
 [{*.go,*.go2}]
 ij_go_GROUP_CURRENT_PROJECT_IMPORTS = false
