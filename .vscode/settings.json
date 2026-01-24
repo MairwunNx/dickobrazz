@@ -3,5 +3,8 @@
   "editor.insertSpaces": true,
   "editor.formatOnSave": true,
   "editor.formatOnPaste": true,
-  "editor.detectIndentation": true
+  "editor.detectIndentation": false,
+  "files.eol": "\n",
+  "files.insertFinalNewline": false,
+  "files.trimTrailingWhitespace": true
 }
