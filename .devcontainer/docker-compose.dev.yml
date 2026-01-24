@@ -52,20 +52,20 @@ services:
     volumes:
       - dickobrazz-mongo-data:/data/db
   dickobrazz-redis:
-    command: >
-      redis-server --port 6379
-      --loglevel warning
-      --save 20 1
-      --requirepass ${REDIS_PASSWORD}
+    command:
+      - redis-server
+      - --port
+      - "6379"
+      - --loglevel
+      - warning
+      - --save
+      - "20"
+      - "1"
+      - --requirepass
+      - the_strongest_password
     container_name: dickobrazz-redis
     cpus: '0.5'
     env_file: [ devcontainer.env ]
-    healthcheck:
-      interval: 10s
-      retries: 3
-      start_period: 10s
-      test: ["CMD", "sh", "-c", "redis-cli -a ${REDIS_PASSWORD} --no-auth-warning ping"]
-      timeout: 5s
     image: redis:8.4-alpine
     logging:
       driver: local
