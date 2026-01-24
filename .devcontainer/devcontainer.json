@@ -43,5 +43,10 @@
   },
   "postCreateCommand": "go mod download",
   "postStartCommand": "go version && echo 'CGO_ENABLED='$CGO_ENABLED",
+  "runServices": [
+    "dickobrazz-redis",
+    "dickobrazz-mongo",
+    "dickobrazz"
+  ],
   "shutdownAction": "stopCompose"
 }
