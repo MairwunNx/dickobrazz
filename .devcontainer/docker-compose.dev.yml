@@ -10,7 +10,6 @@ services:
     cap_add: [ "SYS_PTRACE" ]
     command: ["sleep", "infinity"]
     container_name: dickobrazz-dev
-    cpus: '0.25'
     depends_on: [ dickobrazz-redis, dickobrazz-mongo ]
     env_file: [ devcontainer.env ]
     environment:
@@ -20,8 +19,6 @@ services:
       options:
         max-file: '3'
         max-size: 10m
-    mem_limit: 256m
-    mem_reservation: 64m
     networks: [ base ]
     restart: unless-stopped
     security_opt: [ "seccomp:unconfined" ]
