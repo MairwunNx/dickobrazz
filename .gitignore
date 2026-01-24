@@ -123,3 +123,8 @@ dickobrazz.zip
 
 *.ttf
 .jar
+
+# Air - Live reload for Go
+tmp/
+build-errors.log
+.devcontainer/devcontainer.env
