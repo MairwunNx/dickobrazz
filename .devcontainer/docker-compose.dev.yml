@@ -15,16 +15,6 @@ services:
     env_file: [ devcontainer.env ]
     environment:
       DD_DB_HOST: dickobrazz-mongo
-      MONGODB_URI: ${MONGODB_URI}
-      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
-      RANDOMORG_TOKEN: ${RANDOMORG_TOKEN}
-      REDIS_ADDRESS: ${REDIS_ADDRESS}
-      REDIS_PASSWORD: ${REDIS_PASSWORD}
-      TELEGRAM_ENV: ${TELEGRAM_ENV}
-      TELEGRAM_TOKEN: ${TELEGRAM_TOKEN}
-      TZ: ${TZ}
     logging:
       driver: local
       options:
@@ -42,11 +32,6 @@ services:
     container_name: dickobrazz-mongo
     cpus: '0.5'
     env_file: [ devcontainer.env ]
-    environment:
-      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
-      TZ: ${TZ}
     healthcheck:
       interval: 15s
       retries: 12
@@ -75,9 +60,6 @@ services:
     container_name: dickobrazz-redis
     cpus: '0.5'
     env_file: [ devcontainer.env ]
-    environment:
-      REDIS_PASSWORD: ${REDIS_PASSWORD}
-      TZ: ${TZ}
     healthcheck:
       interval: 10s
       retries: 3
