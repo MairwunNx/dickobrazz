@@ -4,8 +4,8 @@
 [![Docker](https://img.shields.io/badge/Docker-Available-2496ED?style=flat&logo=docker&logoColor=white)](https://github.com/MairwunNx/dickobrazz/pkgs/container/dickobrazz)
 [![GitHub Release](https://img.shields.io/github/v/release/mairwunnx/dickobrazz?style=flat&logo=github&color=blue)](https://github.com/mairwunnx/dickobrazz/releases)
 [![Go Version](https://img.shields.io/badge/Go-1.25-00ADD8?style=flat&logo=go&logoColor=white)](https://go.dev/)
-[![MongoDB](https://img.shields.io/badge/MongoDB-8.0.15-47A248?style=flat&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
-[![Redis](https://img.shields.io/badge/Redis-8.2-DC382D?style=flat&logo=redis&logoColor=white)](https://redis.io/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-8.2.3-47A248?style=flat&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
+[![Redis](https://img.shields.io/badge/Redis-8.4-DC382D?style=flat&logo=redis&logoColor=white)](https://redis.io/)
 
 **语言**: 🇨🇳 中文 | [🇷🇺 Русский](README.MD) | [🇺🇸 English](README.EN.MD)
 
@@ -22,23 +22,31 @@
 - **尺寸测量** — 生成0到61*厘米的尺寸，配有季节性表情符号。
 - **每日限制** — 每天一次测量，莫斯科时间午夜重置。
 - **季节性表情** — 根据季节变化的不同表情符号。
-- **GSK** — 与全球系统集成。（全球系统，不仅限于 telegram）
+- **GSK** — 与全球系统集成（不仅限于 telegram）。
+- **区域对比** — 将尺寸与俄罗斯地区编号进行对比。
 
 > * - 这是一个变成功能的错误。原计划最高60，但结果是61 :)。
 
 ### 游戏化和竞赛
 
-- **排行榜** — 当日前13名最佳尺寸。
-- **竞赛** — 季节性比赛，累计尺寸总和。
-- **季节系统** — 每3个月一个新赛季，产生获胜者。
-- **尊重值™** — 参与赛季的积分系统。
+- **排行榜** — 当日前13名最佳尺寸（每日排名）。
+- **永久天梯** — 基于总累计尺寸的永久排名。
+- **竞赛** — 季节性比赛（3个月），累计尺寸总和。
+- **季节系统** — 每3个月一个新赛季，产生获胜者并颁发奖励。
+- **尊重值™** — 赛季胜利和成就完成获得的积分系统。
+- **成就系统** — 完成成就可获得尊重值奖励。
 
 ### 高级分析
 
-- **IRC（尺寸指数）** — 相对于所有用户的个人排名（类似《南方公园》中的 T.M.I）。
-- **动态统计** — 增长统计、记录、优势百分比。
-- **详细统计** — 中位数、平均值、尺寸分布。
-- **资产** — 变化动态和日增长。
+- **IRC（尺寸指数）** — 相对于所有用户的个人排名及位置描述（类似《南方公园》中的 T.M.I.）。
+- **详细统计** — 总累计尺寸、5天平均尺寸、中位数、记录。
+- **资产** — 每日动态变化和最近5次测量的动态（百分比和绝对值）。
+- **运气系数** — 用户获得尺寸的幸运程度（基于最近5次）。
+- **波动性** — 尺寸稳定性（低=稳定，高=波动）。
+- **增长速度** — 最近5天的平均增长速度（厘米/天）。
+- **主导百分比** — 用户对系统整体统计的贡献份额。
+- **参与时长** — 用户参与测量的时长。
+- **尺寸分布** — 系统中大尺寸（>30厘米）和小尺寸（≤30厘米）的百分比。
 
 ### 技术可靠性
 
@@ -52,12 +60,13 @@ Dickobrazz 通过 Telegram 的 **内联查询** 工作。只需在任何聊天�
 
 ### 可用的内联命令
 
-- **尺寸测量** — 获取今日尺寸
-- **排行榜** — 当日玩家排行榜  
-- **竞赛** — 当前赛季排名
-- **全球排行榜** — 全球玩家累计尺寸排行榜
-- **动态统计** — 详细个人统计
-- **赛季历史** — 赛季历史和获胜者
+- **尺寸测量** — 获取今日尺寸并进行区域对比
+- **排行榜** — 当日前13名玩家排行榜（每日排名）
+- **永久天梯** — 总累计尺寸的永久排名
+- **竞赛** — 当前赛季排名（3个月）
+- **动态统计** — 详细个人统计和分析
+- **赛季历史** — 赛季历史和获胜者导航
+- **成就系统** — 成就和进度分页显示
 
 ### 工作原理
 

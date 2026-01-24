@@ -4,8 +4,8 @@
 [![Docker](https://img.shields.io/badge/Docker-Available-2496ED?style=flat&logo=docker&logoColor=white)](https://github.com/MairwunNx/dickobrazz/pkgs/container/dickobrazz)
 [![GitHub Release](https://img.shields.io/github/v/release/mairwunnx/dickobrazz?style=flat&logo=github&color=blue)](https://github.com/mairwunnx/dickobrazz/releases)
 [![Go Version](https://img.shields.io/badge/Go-1.25-00ADD8?style=flat&logo=go&logoColor=white)](https://go.dev/)
-[![MongoDB](https://img.shields.io/badge/MongoDB-8.0.15-47A248?style=flat&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
-[![Redis](https://img.shields.io/badge/Redis-8.2-DC382D?style=flat&logo=redis&logoColor=white)](https://redis.io/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-8.2.3-47A248?style=flat&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
+[![Redis](https://img.shields.io/badge/Redis-8.4-DC382D?style=flat&logo=redis&logoColor=white)](https://redis.io/)
 
 **Language**: [🇷🇺 Russian](README.MD) | 🇺🇸 English | [🇨🇳 中文](README.CN.MD)
 
@@ -22,23 +22,31 @@
 - **Cock Size** — generates sizes from 0 to 61* cm with corresponding seasonal emojis.
 - **Daily Limits** — one size per day, resets at midnight Moscow time.
 - **Seasonal Emojis** — different emojis depending on the season.
-- **GSC** — integration with Global System of Cocks. (Global cock system extending beyond telegram)
+- **GSC** — integration with Global System of Cocks (extending beyond telegram).
+- **Regional Mapping** — compares size with Russian region numbers.
 
 > * - a bug that became a feature. It was planned up to 60 inclusive, but turned out to be 61 :).
 
 ### Gamification and Competitions
 
-- **Cock Ruler** — top-13 best sizes for the current day.
-- **Cock Race** — seasonal competition with size summation.
-- **Season System** — every 3 months a new season with winners.
-- **Cock-Respect™** — point system for season participation.
+- **Cock Ruler** — top-13 best sizes for the current day (daily ranking).
+- **Cock Ladder** — eternal ranking by total accumulated size over all time.
+- **Cock Race** — seasonal competition (3 months) with size summation.
+- **Season System** — every 3 months a new season with winners and rewards.
+- **Cock-Respect™** — point system for season victories and achievement completion.
+- **Cock Achievements** — achievement system with respect rewards.
 
 ### Advanced Analytics
 
-- **CRI (Cock Rating Index)** — personal rating relative to all users (Analog of T.M.I from South Park).
-- **Cock Dynamics** — growth statistics, records, dominance percentage.
-- **Detailed Statistics** — median, averages, size distribution.
-- **Cock Assets** — change dynamics and daily growth.
+- **CRI (Cock Rating Index)** — personal rating relative to all users with position description (analog of T.M.I. from South Park).
+- **Detailed Statistics** — total accumulated cock, 5-day average cock, median, records.
+- **Cock Assets** — daily change dynamics and last 5 cocks dynamics (percentage and absolute value).
+- **Luck Coefficient** — how lucky the user is with sizes (based on last 5 cocks).
+- **Cock Volatility** — size stability (low = stable, high = fluctuating).
+- **Growth Speed** — average growth rate (cm/day) over the last 5 days.
+- **Dominance Percentage** — user's contribution share to overall system statistics.
+- **Pulling Period** — how long the user has been participating in measurements.
+- **Cock Distribution** — percentage of big (>30 cm) and small (≤30 cm) cocks in the system.
 
 ### Technical Reliability
 
@@ -52,12 +60,13 @@ Dickobrazz works through **inline queries** in Telegram. Simply type `@dickobraz
 
 ### Available inline commands
 
-- **Cock Size** — get your size for today
-- **Cock Ruler** — top players for the day  
-- **Cock Race** — current season ranking
-- **Cock Ladder** — global ranking of participants by total size of cock over all time
-- **Cock Dynamics** — detailed personal statistics
-- **Cock Seasons** — season history and winners
+- **Cock Size** — get your size for today with regional mapping
+- **Cock Ruler** — top-13 players for the current day (daily ranking)
+- **Cock Ladder** — eternal ranking by total accumulated size over all time
+- **Cock Race** — current season ranking (3 months)
+- **Cock Dynamics** — detailed personal statistics and analytics
+- **Cock Seasons** — season history and winners with navigation
+- **Cock Achievements** — achievements and progress with pagination
 
 ### How it works
 
