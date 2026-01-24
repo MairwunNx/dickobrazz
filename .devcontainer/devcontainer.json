@@ -51,9 +51,5 @@
     "dickobrazz-mongo",
     "dickobrazz"
   ],
-  "shutdownAction": "stopCompose",
-  "runArgs": [
-    "--env-file",
-    "devcontainer.env"
-  ]
+  "shutdownAction": "stopCompose"
 }
