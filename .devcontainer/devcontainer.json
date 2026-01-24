@@ -5,10 +5,7 @@
   ],
   "service": "dickobrazz",
   "workspaceFolder": "/workspace",
-  "features": {
-    "ghcr.io/devcontainers/features/common-utils:2": {},
-    "ghcr.io/devcontainers/features/docker-from-docker:1": {}
-  },
+  "remoteUser": "devuser",
   "forwardPorts": [
     6379,
     27017
