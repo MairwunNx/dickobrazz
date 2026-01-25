@@ -14,16 +14,12 @@ services:
     env_file: [ devcontainer.env ]
     environment:
       DD_DB_HOST: dickobrazz-mongo
-    logging:
-      driver: local
-      options:
-        max-file: '3'
-        max-size: 10m
     networks: [ base ]
-    restart: unless-stopped
     security_opt: [ "seccomp:unconfined" ]
     volumes:
       - ..:/workspace:cached
+      - go-modules:/go/pkg/mod
+      - go-build-cache:/home
   dickobrazz-mongo:
     command: ["--wiredTigerCacheSizeGB", "0.25"]
     container_name: dickobrazz-mongo

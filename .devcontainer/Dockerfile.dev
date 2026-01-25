@@ -1,29 +1,30 @@
-FROM golang:1.25.4-alpine3.21
+FROM golang:1.24-bookworm
 
 WORKDIR /workspace
 
-RUN apk --no-cache add \
+RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
+    && apt-get -y install --no-install-recommends \
     git \
-    build-base \
-    pkgconfig \
+    build-essential \
+    pkg-config \
     ca-certificates \
-    tzdata \
     curl \
     wget \
     bash \
-    && update-ca-certificates
+    && apt-get clean -y && rm -rf /var/lib/apt/lists/*
 
 ENV CGO_ENABLED=1 \
     GOMODCACHE=/go/pkg/mod \
     GOCACHE=/home/devuser/.cache/go-build
 
-RUN adduser -D -s /bin/bash -G root devuser \
+RUN groupadd --gid 1000 devuser \
+    && useradd --uid 1000 --gid devuser --shell /bin/bash --create-home devuser \
     && mkdir -p /go/bin /go/pkg/mod /home/devuser/.cache/go-build \
-    && chown -R devuser:root /go /home/devuser/.cache
+    && chown -R devuser:devuser /go /home/devuser/.cache
 
 USER devuser
 
 RUN go install github.com/air-verse/air@latest && \
-    curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b /go/bin v1.64.8
+    curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b /go/bin v1.64.6
 
 CMD ["sleep", "infinity"]
