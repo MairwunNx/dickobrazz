@@ -19,18 +19,6 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-// Описания для inline query items (короткие, до 80 символов для полного отображения)
-const (
-	DescCockSize         = "📏 Узнай свой размер на сегодня (0-61 см)"
-	DescCockRuler        = "👑 Daily топ-13 по размеру кока за сегодня"
-	DescCockLadder       = "🪜 Вечный рейтинг суммарных размеров за всё время"
-	DescCockRace         = "🏁 Сезонная гонка длиной 3 месяца"
-	DescCockDynamic      = "📈 Статистика, динамика, рекорды и сравнение"
-	DescCockSeason       = "📅 История сезонов и победители"
-	DescCockAchievements = "🏅 Достижения и кок-респекты™"
-	DescSystemInfo       = "⚙️ Версия, аптайм, память, базы данных"
-)
-
 // shouldShowDescription проверяет, нужно ли показывать описания для пользователя
 // Описания НЕ показываются если: userCocksCount > 32 И username != "mairwunnx"
 func (app *Application) shouldShowDescription(log *logging.Logger, userID int64, username string) bool {
@@ -48,12 +36,16 @@ func (app *Application) shouldShowDescription(log *logging.Logger, userID int64,
 	return true
 }
 
-func (app *Application) HandleInlineQuery(log *logging.Logger, query *tgbotapi.InlineQuery) {
+func (app *Application) HandleInlineQuery(log *logging.Logger, update *tgbotapi.Update) {
+	query := update.InlineQuery
+	if query == nil {
+		return
+	}
 	var traceQueryCreated = func(l *logging.Logger) { l.I("Inline query successfully created") }
 
 	// Синхронное выполнение CockSize (первым, так как может создавать данные)
 	cockSizeResult := timings.ReportExecutionForResult(log.With(logging.QueryType, "CockSize"),
-		func() tgbotapi.InlineQueryResultArticle { return app.InlineQueryCockSize(log, query) }, traceQueryCreated,
+		func() tgbotapi.InlineQueryResultArticle { return app.InlineQueryCockSize(log, update) }, traceQueryCreated,
 	)
 
 	type queryResult struct {
@@ -75,7 +67,7 @@ func (app *Application) HandleInlineQuery(log *logging.Logger, query *tgbotapi.I
 	go func() {
 		defer wg.Done()
 		result := timings.ReportExecutionForResult(log.With(logging.QueryType, "CockRace"),
-			func() tgbotapi.InlineQueryResultArticle { return app.InlineQueryCockRace(log, query) }, traceQueryCreated,
+			func() tgbotapi.InlineQueryResultArticle { return app.InlineQueryCockRace(log, update) }, traceQueryCreated,
 		)
 		resultsChan <- queryResult{index: 1, result: result}
 	}()
@@ -84,7 +76,7 @@ func (app *Application) HandleInlineQuery(log *logging.Logger, query *tgbotapi.I
 	go func() {
 		defer wg.Done()
 		result := timings.ReportExecutionForResult(log.With(logging.QueryType, "CockRuler"),
-			func() tgbotapi.InlineQueryResultArticle { return app.InlineQueryCockRuler(log, query) }, traceQueryCreated,
+			func() tgbotapi.InlineQueryResultArticle { return app.InlineQueryCockRuler(log, update) }, traceQueryCreated,
 		)
 		resultsChan <- queryResult{index: 2, result: result}
 	}()
@@ -93,7 +85,7 @@ func (app *Application) HandleInlineQuery(log *logging.Logger, query *tgbotapi.I
 	go func() {
 		defer wg.Done()
 		result := timings.ReportExecutionForResult(log.With(logging.QueryType, "CockLadder"),
-			func() tgbotapi.InlineQueryResultArticle { return app.InlineQueryCockLadder(log, query) }, traceQueryCreated,
+			func() tgbotapi.InlineQueryResultArticle { return app.InlineQueryCockLadder(log, update) }, traceQueryCreated,
 		)
 		resultsChan <- queryResult{index: 3, result: result}
 	}()
@@ -102,7 +94,7 @@ func (app *Application) HandleInlineQuery(log *logging.Logger, query *tgbotapi.I
 	go func() {
 		defer wg.Done()
 		result := timings.ReportExecutionForResult(log.With(logging.QueryType, "CockDynamic"),
-			func() tgbotapi.InlineQueryResultArticle { return app.InlineQueryCockDynamic(log, query) }, traceQueryCreated,
+			func() tgbotapi.InlineQueryResultArticle { return app.InlineQueryCockDynamic(log, update) }, traceQueryCreated,
 		)
 		resultsChan <- queryResult{index: 4, result: result}
 	}()
@@ -111,7 +103,7 @@ func (app *Application) HandleInlineQuery(log *logging.Logger, query *tgbotapi.I
 	go func() {
 		defer wg.Done()
 		result := timings.ReportExecutionForResult(log.With(logging.QueryType, "CockSeason"),
-			func() tgbotapi.InlineQueryResultArticle { return app.InlineQueryCockSeason(log, query) }, traceQueryCreated,
+			func() tgbotapi.InlineQueryResultArticle { return app.InlineQueryCockSeason(log, update) }, traceQueryCreated,
 		)
 		resultsChan <- queryResult{index: 5, result: result}
 	}()
@@ -124,7 +116,7 @@ func (app *Application) HandleInlineQuery(log *logging.Logger, query *tgbotapi.I
 				// Парсим номер страницы из query (если есть)
 				page := 1
 				// По умолчанию страница 1, можно расширить парсинг в будущем
-				return app.InlineQueryCockAchievements(log, query, page)
+				return app.InlineQueryCockAchievements(log, update, page)
 			}, traceQueryCreated,
 		)
 		resultsChan <- queryResult{index: 6, result: result}
@@ -136,7 +128,7 @@ func (app *Application) HandleInlineQuery(log *logging.Logger, query *tgbotapi.I
 		go func() {
 			defer wg.Done()
 			result := timings.ReportExecutionForResult(log.With(logging.QueryType, "SystemInfo"),
-				func() tgbotapi.InlineQueryResultArticle { return app.InlineQuerySystemInfo(log, query) }, traceQueryCreated,
+				func() tgbotapi.InlineQueryResultArticle { return app.InlineQuerySystemInfo(log, update) }, traceQueryCreated,
 			)
 			resultsChan <- queryResult{index: 7, result: result}
 		}()
@@ -170,7 +162,12 @@ func (app *Application) HandleInlineQuery(log *logging.Logger, query *tgbotapi.I
 	}
 }
 
-func (app *Application) InlineQueryCockSize(log *logging.Logger, query *tgbotapi.InlineQuery) tgbotapi.InlineQueryResultArticle {
+func (app *Application) InlineQueryCockSize(log *logging.Logger, update *tgbotapi.Update) tgbotapi.InlineQueryResultArticle {
+	query := update.InlineQuery
+	if query == nil {
+		return tgbotapi.InlineQueryResultArticle{}
+	}
+	localizer, _ := app.localization.LocalizerByUpdate(update)
 	var size int
 
 	if cached := app.GetCockSizeFromCache(log, query.From.ID); cached != nil {
@@ -179,7 +176,7 @@ func (app *Application) InlineQueryCockSize(log *logging.Logger, query *tgbotapi
 		size = app.rnd.IntN(log, 60)
 
 		// Нормализуем username (генерируем анонимное имя если пустой)
-		normalizedUsername := NormalizeUsername(query.From.UserName, query.From.ID)
+		normalizedUsername := NormalizeUsername(app.localization, localizer, query.From.UserName, query.From.ID)
 
 		cock := &Cock{
 			ID:          uuid.NewString(),
@@ -194,33 +191,44 @@ func (app *Application) InlineQueryCockSize(log *logging.Logger, query *tgbotapi
 	}
 
 	emoji := EmojiFromSize(size)
-	text := GenerateCockSizeText(size, emoji)
+	text := GenerateCockSizeText(app.localization, localizer, size, emoji)
 	subtext := geo.GetRegionBySize(size)
+	subtext = app.localization.Localize(localizer, subtext, nil)
 
 	text = text + "\n\n" + "_" + subtext + "_"
 
 	return InitializeInlineQueryWithThumbAndDesc(
-		"Размер кока",
+		app.localization.Localize(localizer, InlineTitleCockSize, nil),
 		strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(text, ".", "\\."), "-", "\\-"), "!", "\\!"),
-		DescCockSize,
+		app.localization.Localize(localizer, DescCockSize, nil),
 		"https://files.mairwunnx.com/raw/public/dickobrazz%2Fico_size.png",
 	)
 }
 
-func (app *Application) InlineQueryCockLadder(log *logging.Logger, query *tgbotapi.InlineQuery) tgbotapi.InlineQueryResultArticle {
+func (app *Application) InlineQueryCockLadder(log *logging.Logger, update *tgbotapi.Update) tgbotapi.InlineQueryResultArticle {
+	query := update.InlineQuery
+	if query == nil {
+		return tgbotapi.InlineQueryResultArticle{}
+	}
+	localizer, _ := app.localization.LocalizerByUpdate(update)
 	cocks := app.AggregateCockSizes(log)
 	totalParticipants := app.GetTotalCockersCount(log)
 	showDescription := app.shouldShowDescription(log, query.From.ID, query.From.UserName)
-	text := app.GenerateCockLadderScoreboard(log, query.From.ID, cocks, totalParticipants, showDescription)
+	text := app.GenerateCockLadderScoreboard(log, localizer, query.From.ID, cocks, totalParticipants, showDescription)
 	return InitializeInlineQueryWithThumbAndDesc(
-		"Ладдер коков",
+		app.localization.Localize(localizer, InlineTitleCockLadder, nil),
 		text,
-		DescCockLadder,
+		app.localization.Localize(localizer, DescCockLadder, nil),
 		"https://files.mairwunnx.com/raw/public/dickobrazz%2Fico_ladder.png",
 	)
 }
 
-func (app *Application) InlineQueryCockRace(log *logging.Logger, query *tgbotapi.InlineQuery) tgbotapi.InlineQueryResultArticle {
+func (app *Application) InlineQueryCockRace(log *logging.Logger, update *tgbotapi.Update) tgbotapi.InlineQueryResultArticle {
+	query := update.InlineQuery
+	if query == nil {
+		return tgbotapi.InlineQueryResultArticle{}
+	}
+	localizer, _ := app.localization.LocalizerByUpdate(update)
 	currentSeason := app.GetCurrentSeason(log)
 
 	var cocks []UserCockRace
@@ -234,20 +242,25 @@ func (app *Application) InlineQueryCockRace(log *logging.Logger, query *tgbotapi
 	} else {
 		cocks = app.AggregateCockSizes(log)
 		totalParticipants = app.GetTotalCockersCount(log)
-		seasonStartDate = "хуй знает когда" // Заглушка для случая если нет активного сезона (чего в целом быть не может, я в это верю.)
+		seasonStartDate = app.localization.Localize(localizer, MsgSeasonUnknownStartDate, nil)
 	}
 
 	showDescription := app.shouldShowDescription(log, query.From.ID, query.From.UserName)
-	text := app.GenerateCockRaceScoreboard(log, query.From.ID, cocks, seasonStartDate, totalParticipants, currentSeason, showDescription)
+	text := app.GenerateCockRaceScoreboard(log, localizer, query.From.ID, cocks, seasonStartDate, totalParticipants, currentSeason, showDescription)
 	return InitializeInlineQueryWithThumbAndDesc(
-		"Гонка коков",
+		app.localization.Localize(localizer, InlineTitleCockRace, nil),
 		text,
-		DescCockRace,
+		app.localization.Localize(localizer, DescCockRace, nil),
 		"https://files.mairwunnx.com/raw/public/dickobrazz%2Fico_race.png",
 	)
 }
 
-func (app *Application) InlineQueryCockDynamic(log *logging.Logger, query *tgbotapi.InlineQuery) tgbotapi.InlineQueryResultArticle {
+func (app *Application) InlineQueryCockDynamic(log *logging.Logger, update *tgbotapi.Update) tgbotapi.InlineQueryResultArticle {
+	query := update.InlineQuery
+	if query == nil {
+		return tgbotapi.InlineQueryResultArticle{}
+	}
+	localizer, _ := app.localization.LocalizerByUpdate(update)
 	collection := timings.ReportExecutionForResult(log,
 		func() *mongo.Collection { return database.CollectionCocks(app.db) },
 		func(l *logging.Logger) { l.I("Collection successfully fetched") },
@@ -290,11 +303,11 @@ func (app *Application) InlineQueryCockDynamic(log *logging.Logger, query *tgbot
 	// Проверяем, что у пользователя есть данные
 	if len(result.IndividualCockTotal) == 0 || len(result.Overall) == 0 {
 		log.E("User has no cock data yet")
-		text := "🤔 *Недостаточно данных для динамики*\n\n_Сначала дёрни кок хотя бы раз\\!_"
+		text := app.localization.Localize(localizer, MsgCockDynamicNoData, nil)
 		return InitializeInlineQueryWithThumbAndDesc(
-			"Динамика кока",
+			app.localization.Localize(localizer, InlineTitleCockDynamic, nil),
 			text,
-			DescCockDynamic,
+			app.localization.Localize(localizer, DescCockDynamic, nil),
 			"https://files.mairwunnx.com/raw/public/dickobrazz%2Fico_dynamic.png",
 		)
 	}
@@ -327,9 +340,9 @@ func (app *Application) InlineQueryCockDynamic(log *logging.Logger, query *tgbot
 	var userPullingPeriod string
 	if len(result.IndividualFirstCockDate) > 0 {
 		userFirstCockDate = result.IndividualFirstCockDate[0].FirstDate
-		userPullingPeriod = FormatUserPullingPeriod(userFirstCockDate, datetime.NowTime())
+		userPullingPeriod = FormatUserPullingPeriod(app.localization, localizer, userFirstCockDate, datetime.NowTime())
 	} else {
-		userPullingPeriod = "недавно"
+		userPullingPeriod = app.localization.Localize(localizer, MsgUserPullingRecently, nil)
 	}
 
 	// Проверяем наличие данных для дневной динамики (может отсутствовать у новых пользователей)
@@ -392,6 +405,8 @@ func (app *Application) InlineQueryCockDynamic(log *logging.Logger, query *tgbot
 	userCockRespect := app.GetUserCockRespect(log, query.From.ID)
 
 	text := NewMsgCockDynamicsTemplate(
+		app.localization,
+		localizer,
 		/* Общая динамика коков */
 		overall.Size,
 		overallCockers,
@@ -444,21 +459,26 @@ func (app *Application) InlineQueryCockDynamic(log *logging.Logger, query *tgbot
 		userPullingPeriod,
 	)
 
-	article := tgbotapi.NewInlineQueryResultArticleMarkdown(query.ID, "Динамика кока", text)
+	article := tgbotapi.NewInlineQueryResultArticleMarkdown(query.ID, app.localization.Localize(localizer, InlineTitleCockDynamic, nil), text)
 	article.ThumbURL = "https://files.mairwunnx.com/raw/public/dickobrazz%2Fico_dynamic.png"
-	article.Description = DescCockDynamic
+	article.Description = app.localization.Localize(localizer, DescCockDynamic, nil)
 	return article
 }
 
-func (app *Application) InlineQueryCockSeason(log *logging.Logger, query *tgbotapi.InlineQuery) tgbotapi.InlineQueryResultArticle {
+func (app *Application) InlineQueryCockSeason(log *logging.Logger, update *tgbotapi.Update) tgbotapi.InlineQueryResultArticle {
+	query := update.InlineQuery
+	if query == nil {
+		return tgbotapi.InlineQueryResultArticle{}
+	}
+	localizer, _ := app.localization.LocalizerByUpdate(update)
 	allSeasons := app.GetAllSeasonsForStats(log)
 
 	if len(allSeasons) == 0 {
-		text := NewMsgCockSeasonNoSeasonsTemplate()
+		text := NewMsgCockSeasonNoSeasonsTemplate(app.localization, localizer)
 		return InitializeInlineQueryWithThumbAndDesc(
-			"Сезоны коков",
+			app.localization.Localize(localizer, InlineTitleCockSeason, nil),
 			text,
-			DescCockSeason,
+			app.localization.Localize(localizer, DescCockSeason, nil),
 			"https://files.mairwunnx.com/raw/public/dickobrazz%2Fico_seasons.png",
 		)
 	}
@@ -472,7 +492,7 @@ func (app *Application) InlineQueryCockSeason(log *logging.Logger, query *tgbota
 	}
 
 	showDescription := app.shouldShowDescription(log, query.From.ID, query.From.UserName)
-	text := NewMsgCockSeasonSinglePage(currentSeason, getSeasonWinners, showDescription)
+	text := NewMsgCockSeasonSinglePage(app.localization, localizer, currentSeason, getSeasonWinners, showDescription)
 
 	// Создаем кнопки навигации
 	var buttons []tgbotapi.InlineKeyboardButton
@@ -481,7 +501,10 @@ func (app *Application) InlineQueryCockSeason(log *logging.Logger, query *tgbota
 	if currentSeasonIdx > 0 {
 		prevSeason := allSeasons[currentSeasonIdx-1]
 		buttons = append(buttons, tgbotapi.NewInlineKeyboardButtonData(
-			fmt.Sprintf("◀️ Сезон %d", prevSeason.SeasonNum),
+			app.localization.Localize(localizer, MsgSeasonButton, map[string]any{
+				"Arrow":     "◀️",
+				"SeasonNum": prevSeason.SeasonNum,
+			}),
 			fmt.Sprintf("season_page:%d", prevSeason.SeasonNum),
 		))
 	}
@@ -492,7 +515,7 @@ func (app *Application) InlineQueryCockSeason(log *logging.Logger, query *tgbota
 
 	article := tgbotapi.NewInlineQueryResultArticleMarkdownV2(
 		uuid.NewString(),
-		"Сезоны коков",
+		app.localization.Localize(localizer, InlineTitleCockSeason, nil),
 		text,
 	)
 
@@ -503,12 +526,17 @@ func (app *Application) InlineQueryCockSeason(log *logging.Logger, query *tgbota
 		article.ReplyMarkup = &kb
 	}
 	article.ThumbURL = "https://files.mairwunnx.com/raw/public/dickobrazz%2Fico_seasons.png"
-	article.Description = DescCockSeason
+	article.Description = app.localization.Localize(localizer, DescCockSeason, nil)
 
 	return article
 }
 
-func (app *Application) InlineQueryCockRuler(log *logging.Logger, query *tgbotapi.InlineQuery) tgbotapi.InlineQueryResultArticle {
+func (app *Application) InlineQueryCockRuler(log *logging.Logger, update *tgbotapi.Update) tgbotapi.InlineQueryResultArticle {
+	query := update.InlineQuery
+	if query == nil {
+		return tgbotapi.InlineQueryResultArticle{}
+	}
+	localizer, _ := app.localization.LocalizerByUpdate(update)
 	cocks := app.GetCockSizesFromCache(log)
 	totalParticipants := len(cocks)
 
@@ -521,16 +549,21 @@ func (app *Application) InlineQueryCockRuler(log *logging.Logger, query *tgbotap
 	}
 
 	showDescription := app.shouldShowDescription(log, query.From.ID, query.From.UserName)
-	text := app.GenerateCockRulerText(log, query.From.ID, cocks, totalParticipants, showDescription)
+	text := app.GenerateCockRulerText(log, localizer, query.From.ID, cocks, totalParticipants, showDescription)
 	return InitializeInlineQueryWithThumbAndDesc(
-		"Линейка коков",
+		app.localization.Localize(localizer, InlineTitleCockRuler, nil),
 		text,
-		DescCockRuler,
+		app.localization.Localize(localizer, DescCockRuler, nil),
 		"https://files.mairwunnx.com/raw/public/dickobrazz%2Fico_ruler.png",
 	)
 }
 
-func (app *Application) InlineQueryCockAchievements(log *logging.Logger, query *tgbotapi.InlineQuery, page int) tgbotapi.InlineQueryResultArticle {
+func (app *Application) InlineQueryCockAchievements(log *logging.Logger, update *tgbotapi.Update, page int) tgbotapi.InlineQueryResultArticle {
+	query := update.InlineQuery
+	if query == nil {
+		return tgbotapi.InlineQueryResultArticle{}
+	}
+	localizer, _ := app.localization.LocalizerByUpdate(update)
 	userID := query.From.ID
 
 	// Проверка только для тестового пользователя
@@ -552,6 +585,8 @@ func (app *Application) InlineQueryCockAchievements(log *logging.Logger, query *
 
 	// Генерируем текст с пагинацией (10 ачивок на страницу)
 	achievementsList, completedCount, totalRespects, percentComplete := GenerateAchievementsText(
+		app.localization,
+		localizer,
 		AllAchievements,
 		userAchievements,
 		page,
@@ -562,21 +597,20 @@ func (app *Application) InlineQueryCockAchievements(log *logging.Logger, query *
 	totalPages := (totalAchievements + 9) / 10
 
 	// Выбираем шаблон в зависимости от страницы
-	var template string
+	var templateID string
 	if page == 1 {
-		template = MsgCockAchievementsTemplate
+		templateID = MsgCockAchievementsTemplate
 	} else {
-		template = MsgCockAchievementsTemplateOtherPages
+		templateID = MsgCockAchievementsTemplateOtherPages
 	}
 
-	text := fmt.Sprintf(
-		template,
-		completedCount,
-		totalAchievements,
-		percentComplete,
-		totalRespects,
-		achievementsList,
-	)
+	text := app.localization.Localize(localizer, templateID, map[string]any{
+		"Completed":    completedCount,
+		"Total":        totalAchievements,
+		"Percent":      percentComplete,
+		"Respects":     totalRespects,
+		"Achievements": achievementsList,
+	})
 
 	// Создаем кнопки пагинации (с userID владельца)
 	var buttons []tgbotapi.InlineKeyboardButton
@@ -600,12 +634,12 @@ func (app *Application) InlineQueryCockAchievements(log *logging.Logger, query *
 
 	article := tgbotapi.NewInlineQueryResultArticleMarkdownV2(
 		uuid.NewString(),
-		"Кок-ачивки",
+		app.localization.Localize(localizer, InlineTitleCockAchievements, nil),
 		text,
 	)
 	article.ReplyMarkup = &kb
 	article.ThumbURL = "https://files.mairwunnx.com/raw/public/dickobrazz%2Fico_achievements.png"
-	article.Description = DescCockAchievements
+	article.Description = app.localization.Localize(localizer, DescCockAchievements, nil)
 
 	return article
 }
@@ -627,20 +661,30 @@ func InitializeInlineQueryWithThumbAndDesc(title, message, description, thumbURL
 	return article
 }
 
-func (app *Application) InlineQuerySystemInfo(log *logging.Logger, query *tgbotapi.InlineQuery) tgbotapi.InlineQueryResultArticle {
-	info := app.GetSystemInfo(log, query.From.ID, query.From.UserName)
+func (app *Application) InlineQuerySystemInfo(log *logging.Logger, update *tgbotapi.Update) tgbotapi.InlineQueryResultArticle {
+	query := update.InlineQuery
+	if query == nil {
+		return tgbotapi.InlineQueryResultArticle{}
+	}
+	localizer, _ := app.localization.LocalizerByUpdate(update)
+	info := app.GetSystemInfo(log, localizer, query.From.ID, query.From.UserName)
 
-	text := NewMsgSystemInfoTemplate(info)
+	text := NewMsgSystemInfoTemplate(app.localization, localizer, info)
 
 	return InitializeInlineQueryWithThumbAndDesc(
-		"Системные данные",
+		app.localization.Localize(localizer, InlineTitleSystemInfo, nil),
 		text,
-		DescSystemInfo,
+		app.localization.Localize(localizer, DescSystemInfo, nil),
 		"https://files.mairwunnx.com/raw/public/dickobrazz%2Fico_system.png",
 	)
 }
 
-func (app *Application) HandleCallbackQuery(log *logging.Logger, callback *tgbotapi.CallbackQuery) {
+func (app *Application) HandleCallbackQuery(log *logging.Logger, update *tgbotapi.Update) {
+	callback := update.CallbackQuery
+	if callback == nil {
+		return
+	}
+	localizer, _ := app.localization.LocalizerByUpdate(update)
 	// Парсим callback data
 	data := callback.Data
 
@@ -651,7 +695,6 @@ func (app *Application) HandleCallbackQuery(log *logging.Logger, callback *tgbot
 		seasonNum := 1
 		if parsedSeasonNum, err := strconv.Atoi(seasonNumStr); err != nil {
 			log.E("Failed to parse season number", logging.InnerError, err)
-			seasonNum = 1
 		} else {
 			seasonNum = parsedSeasonNum
 		}
@@ -672,7 +715,7 @@ func (app *Application) HandleCallbackQuery(log *logging.Logger, callback *tgbot
 
 		if targetSeason == nil {
 			log.E("Season not found", "season_num", seasonNum)
-			callbackConfig := tgbotapi.NewCallback(callback.ID, "Сезон не найден")
+			callbackConfig := tgbotapi.NewCallback(callback.ID, app.localization.Localize(localizer, MsgSeasonNotFound, nil))
 			if _, err := app.bot.Request(callbackConfig); err != nil {
 				log.E("Failed to answer callback query", logging.InnerError, err)
 			}
@@ -684,7 +727,7 @@ func (app *Application) HandleCallbackQuery(log *logging.Logger, callback *tgbot
 		}
 
 		showDescription := app.shouldShowDescription(log, callback.From.ID, callback.From.UserName)
-		text := NewMsgCockSeasonSinglePage(*targetSeason, getSeasonWinners, showDescription)
+		text := NewMsgCockSeasonSinglePage(app.localization, localizer, *targetSeason, getSeasonWinners, showDescription)
 
 		// Создаем кнопки навигации
 		var buttons []tgbotapi.InlineKeyboardButton
@@ -693,7 +736,10 @@ func (app *Application) HandleCallbackQuery(log *logging.Logger, callback *tgbot
 		if targetIdx > 0 {
 			prevSeason := allSeasons[targetIdx-1]
 			buttons = append(buttons, tgbotapi.NewInlineKeyboardButtonData(
-				fmt.Sprintf("◀️ Сезон %d", prevSeason.SeasonNum),
+				app.localization.Localize(localizer, MsgSeasonButton, map[string]any{
+					"Arrow":     "◀️",
+					"SeasonNum": prevSeason.SeasonNum,
+				}),
 				fmt.Sprintf("season_page:%d", prevSeason.SeasonNum),
 			))
 		}
@@ -702,7 +748,10 @@ func (app *Application) HandleCallbackQuery(log *logging.Logger, callback *tgbot
 		if targetIdx < len(allSeasons)-1 {
 			nextSeason := allSeasons[targetIdx+1]
 			buttons = append(buttons, tgbotapi.NewInlineKeyboardButtonData(
-				fmt.Sprintf("▶️ Сезон %d", nextSeason.SeasonNum),
+				app.localization.Localize(localizer, MsgSeasonButton, map[string]any{
+					"Arrow":     "▶️",
+					"SeasonNum": nextSeason.SeasonNum,
+				}),
 				fmt.Sprintf("season_page:%d", nextSeason.SeasonNum),
 			))
 		}
@@ -761,7 +810,7 @@ func (app *Application) HandleCallbackQuery(log *logging.Logger, callback *tgbot
 		parts := strings.Split(strings.TrimPrefix(data, "ach_page:"), ":")
 		if len(parts) != 2 {
 			log.E("Invalid ach_page callback data format", "data", data)
-			callbackConfig := tgbotapi.NewCallback(callback.ID, "Неверный формат данных")
+			callbackConfig := tgbotapi.NewCallback(callback.ID, app.localization.Localize(localizer, MsgCallbackInvalidFormat, nil))
 			if _, err := app.bot.Request(callbackConfig); err != nil {
 				log.E("Failed to answer callback query", logging.InnerError, err)
 			}
@@ -771,7 +820,7 @@ func (app *Application) HandleCallbackQuery(log *logging.Logger, callback *tgbot
 		userID, err := strconv.ParseInt(parts[0], 10, 64)
 		if err != nil {
 			log.E("Failed to parse userID from callback", logging.InnerError, err)
-			callbackConfig := tgbotapi.NewCallback(callback.ID, "Ошибка парсинга данных")
+			callbackConfig := tgbotapi.NewCallback(callback.ID, app.localization.Localize(localizer, MsgCallbackParseError, nil))
 			if _, err := app.bot.Request(callbackConfig); err != nil {
 				log.E("Failed to answer callback query", logging.InnerError, err)
 			}
@@ -781,7 +830,6 @@ func (app *Application) HandleCallbackQuery(log *logging.Logger, callback *tgbot
 		page := 1
 		if parsedPage, err := strconv.Atoi(parts[1]); err != nil {
 			log.E("Failed to parse page number", logging.InnerError, err)
-			page = 1
 		} else {
 			page = parsedPage
 		}
@@ -802,6 +850,8 @@ func (app *Application) HandleCallbackQuery(log *logging.Logger, callback *tgbot
 
 		// Генерируем текст для запрошенной страницы
 		achievementsList, completedCount, totalRespects, percentComplete := GenerateAchievementsText(
+			app.localization,
+			localizer,
 			AllAchievements,
 			userAchievements,
 			page,
@@ -812,21 +862,20 @@ func (app *Application) HandleCallbackQuery(log *logging.Logger, callback *tgbot
 		totalPages := (totalAchievements + 9) / 10
 
 		// Выбираем шаблон в зависимости от страницы
-		var template string
+		var templateID string
 		if page == 1 {
-			template = MsgCockAchievementsTemplate
+			templateID = MsgCockAchievementsTemplate
 		} else {
-			template = MsgCockAchievementsTemplateOtherPages
+			templateID = MsgCockAchievementsTemplateOtherPages
 		}
 
-		text := fmt.Sprintf(
-			template,
-			completedCount,
-			totalAchievements,
-			percentComplete,
-			totalRespects,
-			achievementsList,
-		)
+		text := app.localization.Localize(localizer, templateID, map[string]any{
+			"Completed":    completedCount,
+			"Total":        totalAchievements,
+			"Percent":      percentComplete,
+			"Respects":     totalRespects,
+			"Achievements": achievementsList,
+		})
 
 		// Создаем кнопки пагинации для новой страницы (с userID владельца)
 		var buttons []tgbotapi.InlineKeyboardButton
