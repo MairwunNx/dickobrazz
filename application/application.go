@@ -66,8 +66,13 @@ func (app *Application) Shutdown() {
 	app.wg.Wait()
 
 	if err := app.db.Disconnect(app.ctx); err != nil {
-		app.log.E("Failed to disconnect MongoDB", err)
+		app.log.E("Failed to disconnect MongoDB", logging.InnerError, err)
 	}
+
+	if err := app.redis.Close(); err != nil {
+		app.log.E("Failed to close Redis connection", logging.InnerError, err)
+	}
+
 	app.log.I("Gracefully shutting down... Bye!")
 }
 

@@ -64,8 +64,11 @@ func (app *Application) GetSystemInfo(log *logging.Logger, userID int64, usernam
 }
 
 func (app *Application) GetMongoVersion(log *logging.Logger) string {
+	ctx, cancel := context.WithTimeout(app.ctx, 5*time.Second)
+	defer cancel()
+
 	var result bson.M
-	err := app.db.Database("admin").RunCommand(context.Background(), bson.D{{Key: "buildInfo", Value: 1}}).Decode(&result)
+	err := app.db.Database("admin").RunCommand(ctx, bson.D{{Key: "buildInfo", Value: 1}}).Decode(&result)
 	if err != nil {
 		log.E("Failed to get MongoDB version", logging.InnerError, err)
 		return "неизвестно"
@@ -79,7 +82,10 @@ func (app *Application) GetMongoVersion(log *logging.Logger) string {
 }
 
 func (app *Application) GetRedisVersion(log *logging.Logger) string {
-	info, err := app.redis.Info(context.Background(), "server").Result()
+	ctx, cancel := context.WithTimeout(app.ctx, 5*time.Second)
+	defer cancel()
+
+	info, err := app.redis.Info(ctx, "server").Result()
 	if err != nil {
 		log.E("Failed to get Redis version", logging.InnerError, err)
 		return "неизвестно"

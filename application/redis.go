@@ -33,7 +33,10 @@ func InitializeRedisConnection(log *logging.Logger) (*redis.Client, *cache.Cache
 
 	client := redis.NewClient(&redis.Options{Addr: address, Password: password, DB: 0})
 
-	if _, err := client.Ping(context.Background()).Result(); err != nil {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	if _, err := client.Ping(ctx).Result(); err != nil {
 		log.F("Failed to connect to Redis", logging.InnerError, err)
 	}
 
@@ -84,7 +87,8 @@ func (app *Application) GetCockSizesFromCache(log *logging.Logger) []UserCock {
 
 		err := app.cache.Get(app.ctx, key, &cock)
 		if err != nil {
-			return nil
+			log.E("Failed to get cock from cache", logging.InnerError, err)
+			continue
 		}
 
 		userID, _ := strconv.ParseInt(strings.TrimPrefix(key, "cock_size:"), 10, 64)
@@ -94,7 +98,7 @@ func (app *Application) GetCockSizesFromCache(log *logging.Logger) []UserCock {
 
 	if err := iter.Err(); err != nil {
 		log.E("Failed to iterate over cock keys in Redis", logging.InnerError, err)
-		panic(err)
+		return []UserCock{}
 	}
 
 	log.I("Successfully fetched all cock sizes from Redis")
