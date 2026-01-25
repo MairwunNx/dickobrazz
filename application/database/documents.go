@@ -80,11 +80,11 @@ type DocumentCockDynamic struct {
 	IndividualGrowthSpeed []struct {
 		GrowthSpeed float64 `bson:"growth_speed"`
 	} `bson:"individual_growth_speed"`
-	
+
 	IndividualFirstCockDate []struct {
 		FirstDate time.Time `bson:"first_date"`
 	} `bson:"individual_first_cock_date"`
-	
+
 	OverallGrowthSpeed []struct {
 		GrowthSpeed float64 `bson:"growth_speed"`
 	} `bson:"overall_growth_speed"`

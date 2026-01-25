@@ -1044,7 +1044,7 @@ func (app *Application) CheckAndUpdateAchievements(log *logging.Logger, userID i
 		}
 
 		// 4. Leet speak (1337): 13см и 37см подряд
-		if (recent[1].Size == 13 && recent[2].Size == 37) {
+		if recent[1].Size == 13 && recent[2].Size == 37 {
 			updateAchievement("leet_speak", true, 1)
 		}
 

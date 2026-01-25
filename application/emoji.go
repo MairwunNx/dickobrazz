@@ -237,9 +237,9 @@ func EmojiFromSize(size int) string {
 	}
 
 	season := GetCurrentSeason()
-	
+
 	var emojiSet []EmojiRange
-	
+
 	switch season {
 	case Winter:
 		emojiSet = WinterEmojiRanges
@@ -319,7 +319,7 @@ func GetHolidayEmojiSet() []EmojiRange {
 func GetCurrentSeason() Season {
 	now := datetime.NowTime()
 	month := now.Month()
-	
+
 	switch month {
 	case time.December, time.January, time.February:
 		return Winter
@@ -338,33 +338,34 @@ func GetCurrentSeason() Season {
 // для заданного года в указанной временной зоне.
 // Алгоритм: Пасха вычисляется в юлианском календаре (Meeus Julian algorithm),
 // затем переводится в григорианскую дату через разницу календарей:
-//   Δ = y/100 - y/400 - 2  (в сутках; верно для дат после 1600-03-01)
+//
+//	Δ = y/100 - y/400 - 2  (в сутках; верно для дат после 1600-03-01)
 func OrthodoxEaster(year int, loc *time.Location) time.Time {
-  // Шаг 1: Пасха в юлианском календаре (число марта/апреля по ЮК)
-  a := year % 4
-  b := year % 7
-  c := year % 19
-  d := (19*c + 15) % 30
-  e := (2*a + 4*b - d + 34) % 7
+	// Шаг 1: Пасха в юлианском календаре (число марта/апреля по ЮК)
+	a := year % 4
+	b := year % 7
+	c := year % 19
+	d := (19*c + 15) % 30
+	e := (2*a + 4*b - d + 34) % 7
 
-  // Юлианская дата Пасхи: 22 марта + d + e (если >31 — это апрель)
-  julianDay := 22 + d + e
-  var month time.Month
-  var day int
-  if julianDay > 31 {
-    month = time.April
-    day = julianDay - 31
-  } else {
-    month = time.March
-    day = julianDay
-  }
+	// Юлианская дата Пасхи: 22 марта + d + e (если >31 — это апрель)
+	julianDay := 22 + d + e
+	var month time.Month
+	var day int
+	if julianDay > 31 {
+		month = time.April
+		day = julianDay - 31
+	} else {
+		month = time.March
+		day = julianDay
+	}
 
-  // Шаг 2: разница ЮК→ГК для данного года (суток)
-  // Для 1900–2099 это 13, для 2100–2199 — 14 и т.д.
-  delta := year/100 - year/400 - 2
+	// Шаг 2: разница ЮК→ГК для данного года (суток)
+	// Для 1900–2099 это 13, для 2100–2199 — 14 и т.д.
+	delta := year/100 - year/400 - 2
 
-  // Шаг 3: создаём "юлианскую" дату в Go (как григорианскую)
-  // и прибавляем разницу календарей — получаем григорианскую Пасху.
-  julianAsGregorian := time.Date(year, month, day, 0, 0, 0, 0, loc)
-  return julianAsGregorian.AddDate(0, 0, delta)
+	// Шаг 3: создаём "юлианскую" дату в Go (как григорианскую)
+	// и прибавляем разницу календарей — получаем григорианскую Пасху.
+	julianAsGregorian := time.Date(year, month, day, 0, 0, 0, 0, loc)
+	return julianAsGregorian.AddDate(0, 0, delta)
 }
