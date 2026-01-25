@@ -3,6 +3,7 @@ package application
 import (
 	"dickobrazz/application/database"
 	"dickobrazz/application/datetime"
+	"dickobrazz/application/localization"
 	"dickobrazz/application/logging"
 	"fmt"
 	"strconv"
@@ -14,23 +15,25 @@ import (
 	"math/rand"
 	"sort"
 
+	"github.com/nicksnyder/go-i18n/v2/i18n"
 	"golang.org/x/text/language"
 	"golang.org/x/text/message"
 )
 
 // GenerateAnonymousName генерирует анонимное имя для пользователя без username
 // Использует PRNG с seed из userID для генерации стабильного номера (0-9999)
-func GenerateAnonymousName(userID int64) string {
+func GenerateAnonymousName(localizationManager *localization.LocalizationManager, localizer *i18n.Localizer, userID int64) string {
 	// Создаем отдельный генератор с seed из userID для стабильности
 	rng := rand.New(rand.NewSource(userID))
 	number := rng.Intn(10000)
-	return fmt.Sprintf("Anonym%04d", number)
+	numberStr := fmt.Sprintf("%04d", number)
+	return localizationManager.Localize(localizer, AnonymousNameTemplate, map[string]any{"Number": numberStr})
 }
 
 // NormalizeUsername возвращает username пользователя или генерирует анонимное имя
-func NormalizeUsername(username string, userID int64) string {
+func NormalizeUsername(localizationManager *localization.LocalizationManager, localizer *i18n.Localizer, username string, userID int64) string {
 	if username == "" {
-		return GenerateAnonymousName(userID)
+		return GenerateAnonymousName(localizationManager, localizer, userID)
 	}
 	return username
 }
@@ -173,7 +176,7 @@ func fancyMathOrDefault(n int) string {
 func FormatCockSizeForDate(size int) string {
 	displaySize := size
 	now := datetime.NowTime()
-	
+
 	// 1 апреля - День смеха: отрицательный размер
 	if now.Month() == time.April && now.Day() == 1 {
 		displaySize = -size
@@ -197,30 +200,43 @@ func FormatCockSizeForDate(size int) string {
 	return strconv.Itoa(displaySize)
 }
 
-func GenerateCockSizeText(size int, emoji string) string {
+func GenerateCockSizeText(localizationManager *localization.LocalizationManager, localizer *i18n.Localizer, size int, emoji string) string {
 	formattedSize := FormatCockSizeForDate(size)
-	return fmt.Sprintf(MsgCockSize, formattedSize, emoji)
+	return localizationManager.Localize(localizer, MsgCockSize, map[string]any{
+		"Size":  formattedSize,
+		"Emoji": emoji,
+	})
 }
 
-func (app *Application) GenerateCockRulerText(log *logging.Logger, userID int64, cocks []UserCock, totalParticipants int, showDescription bool) string {
+func (app *Application) GenerateCockRulerText(log *logging.Logger, localizer *i18n.Localizer, userID int64, cocks []UserCock, totalParticipants int, showDescription bool) string {
 	var winners []string
 	var others []string
 	isUserInScoreboard := false
 
 	for index, cock := range cocks {
 		isCurrentUser := cock.UserId == userID
-		emoji := GetPlaceEmoji(index + 1, isCurrentUser)
+		emoji := GetPlaceEmoji(index+1, isCurrentUser)
 		formattedSize := FormatCockSizeForDate(cock.Size)
 
 		// Нормализуем username (генерируем анонимное имя если пустой)
-		normalizedUsername := NormalizeUsername(cock.UserName, cock.UserId)
+		normalizedUsername := NormalizeUsername(app.localization, localizer, cock.UserName, cock.UserId)
 
 		var line string
 		if isCurrentUser {
 			isUserInScoreboard = true
-			line = fmt.Sprintf(MsgCockRulerScoreboardSelected, emoji, EscapeMarkdownV2(normalizedUsername), formattedSize, EmojiFromSize(cock.Size))
+			line = app.localization.Localize(localizer, MsgCockRulerScoreboardSelected, map[string]any{
+				"PlaceEmoji": emoji,
+				"Username":   EscapeMarkdownV2(normalizedUsername),
+				"Size":       formattedSize,
+				"SizeEmoji":  EmojiFromSize(cock.Size),
+			})
 		} else {
-			line = fmt.Sprintf(MsgCockRulerScoreboardDefault, emoji, EscapeMarkdownV2(normalizedUsername), formattedSize, EmojiFromSize(cock.Size))
+			line = app.localization.Localize(localizer, MsgCockRulerScoreboardDefault, map[string]any{
+				"PlaceEmoji": emoji,
+				"Username":   EscapeMarkdownV2(normalizedUsername),
+				"Size":       formattedSize,
+				"SizeEmoji":  EmojiFromSize(cock.Size),
+			})
 		}
 
 		if index < 3 {
@@ -237,7 +253,7 @@ func (app *Application) GenerateCockRulerText(log *logging.Logger, userID int64,
 			sort.Slice(allCocks, func(i, j int) bool {
 				return allCocks[i].Size > allCocks[j].Size
 			})
-			
+
 			// Находим позицию пользователя
 			userPosition := 0
 			for idx, cock := range allCocks {
@@ -246,74 +262,87 @@ func (app *Application) GenerateCockRulerText(log *logging.Logger, userID int64,
 					break
 				}
 			}
-			
+
 			// Определяем диапазон для показа (обрабатываем edge cases)
 			var startIdx, endIdx int
 			totalCount := len(allCocks)
-			
+
 			if userPosition == 14 {
 				// Сразу после топ-13 - показываем только текущего и следующего
-				startIdx = userPosition - 1  // индекс 13 (14-е место)
+				startIdx = userPosition - 1 // индекс 13 (14-е место)
 				endIdx = startIdx + 2
 				if endIdx > totalCount {
 					endIdx = totalCount
 				}
-			} else if userPosition >= totalCount - 1 {
+			} else if userPosition >= totalCount-1 {
 				// Последние 2 места - показываем предыдущего и текущего
 				startIdx = userPosition - 2
 				if startIdx < 13 {
-					startIdx = 13  // не залезаем в топ-13
+					startIdx = 13 // не залезаем в топ-13
 				}
 				endIdx = totalCount
 			} else {
 				// Обычный случай - показываем предыдущего, текущего, следующего
 				startIdx = userPosition - 2
 				if startIdx < 13 {
-					startIdx = 13  // не залезаем в топ-13
+					startIdx = 13 // не залезаем в топ-13
 				}
 				endIdx = startIdx + 3
 				if endIdx > totalCount {
 					endIdx = totalCount
 				}
 			}
-			
+
 			neighbors := allCocks[startIdx:endIdx]
-			
+
 			// Формируем строки для соседей
 			var contextLines []string
-			showTopDots := startIdx > 13  // Показываем точки сверху если есть пропуск после топ-13
-			showBottomDots := endIdx < totalCount  // Показываем точки снизу если есть что-то дальше
-			
+			showTopDots := startIdx > 13          // Показываем точки сверху если есть пропуск после топ-13
+			showBottomDots := endIdx < totalCount // Показываем точки снизу если есть что-то дальше
+
 			for idx, neighbor := range neighbors {
 				pos := startIdx + idx + 1
 				isCurrentInContext := neighbor.UserId == userID
-				normalizedNick := NormalizeUsername(neighbor.UserName, neighbor.UserId)
+				normalizedNick := NormalizeUsername(app.localization, localizer, neighbor.UserName, neighbor.UserId)
 				formattedSize := FormatCockSizeForDate(neighbor.Size)
 				emoji := EmojiFromSize(neighbor.Size)
 				posEmoji := GetPlaceEmojiForContext(pos, isCurrentInContext)
-				
+
 				if isCurrentInContext {
-					contextLines = append(contextLines, fmt.Sprintf("%s *@%s %sсм %s*", posEmoji, EscapeMarkdownV2(normalizedNick), EscapeMarkdownV2(formattedSize), emoji))
+					contextLines = append(contextLines, app.localization.Localize(localizer, MsgCockRulerContextSelected, map[string]any{
+						"PlaceEmoji": posEmoji,
+						"Username":   EscapeMarkdownV2(normalizedNick),
+						"Size":       EscapeMarkdownV2(formattedSize),
+						"SizeEmoji":  emoji,
+					}))
 				} else {
-					contextLines = append(contextLines, fmt.Sprintf("%s @%s *%sсм* %s", posEmoji, EscapeMarkdownV2(normalizedNick), EscapeMarkdownV2(formattedSize), emoji))
+					contextLines = append(contextLines, app.localization.Localize(localizer, MsgCockRulerContextDefault, map[string]any{
+						"PlaceEmoji": posEmoji,
+						"Username":   EscapeMarkdownV2(normalizedNick),
+						"Size":       EscapeMarkdownV2(formattedSize),
+						"SizeEmoji":  emoji,
+					}))
 				}
 			}
-			
+
 			// Добавляем контекст с соседями
 			var contextBlock string
 			if showTopDots && showBottomDots {
-				contextBlock = "\n" + CommonDots + "\n" + strings.Join(contextLines, "\n") + "\n" + CommonDots
+				dots := app.localization.Localize(localizer, CommonDots, nil)
+				contextBlock = "\n" + dots + "\n" + strings.Join(contextLines, "\n") + "\n" + dots
 			} else if showTopDots {
-				contextBlock = "\n" + CommonDots + "\n" + strings.Join(contextLines, "\n")
+				dots := app.localization.Localize(localizer, CommonDots, nil)
+				contextBlock = "\n" + dots + "\n" + strings.Join(contextLines, "\n")
 			} else if showBottomDots {
-				contextBlock = "\n" + strings.Join(contextLines, "\n") + "\n" + CommonDots
+				dots := app.localization.Localize(localizer, CommonDots, nil)
+				contextBlock = "\n" + strings.Join(contextLines, "\n") + "\n" + dots
 			} else {
 				contextBlock = "\n" + strings.Join(contextLines, "\n")
 			}
-			
+
 			others = append(others, contextBlock)
 		} else {
-			others = append(others, MsgCockScoreboardNotFound)
+			others = append(others, app.localization.Localize(localizer, MsgCockScoreboardNotFound, nil))
 		}
 	}
 
@@ -322,46 +351,52 @@ func (app *Application) GenerateCockRulerText(log *logging.Logger, userID int64,
 		if !showDescription {
 			template = MsgCockRulerScoreboardTemplateNoDesc
 		}
-		return fmt.Sprintf(
-			template,
-			totalParticipants,
-			strings.Join(winners, "\n"),
-			strings.Join(others, "\n"),
-		)
+		return app.localization.Localize(localizer, template, map[string]any{
+			"Participants": totalParticipants,
+			"Winners":      strings.Join(winners, "\n"),
+			"Others":       strings.Join(others, "\n"),
+		})
 	} else {
 		template := MsgCockRulerScoreboardWinnersTemplate
 		if !showDescription {
 			template = MsgCockRulerScoreboardWinnersTemplateNoDesc
 		}
-		return fmt.Sprintf(
-			template,
-			totalParticipants,
-			strings.Join(winners, "\n"),
-		)
+		return app.localization.Localize(localizer, template, map[string]any{
+			"Participants": totalParticipants,
+			"Winners":      strings.Join(winners, "\n"),
+		})
 	}
 }
 
-func (app *Application) GenerateCockRaceScoreboard(log *logging.Logger, userID int64, sizes []UserCockRace, seasonStart string, totalParticipants int, currentSeason *CockSeason, showDescription bool) string {
+func (app *Application) GenerateCockRaceScoreboard(log *logging.Logger, localizer *i18n.Localizer, userID int64, sizes []UserCockRace, seasonStart string, totalParticipants int, currentSeason *CockSeason, showDescription bool) string {
 	var winners []string
 	var others []string
 	isUserInScoreboard := false
 
 	for index, user := range sizes {
 		isCurrentUser := user.UserID == userID
-		emoji := GetPlaceEmoji(index + 1, isCurrentUser)
+		emoji := GetPlaceEmoji(index+1, isCurrentUser)
 
 		if isCurrentUser {
 			isUserInScoreboard = true
 		}
 
 		// Нормализуем username (генерируем анонимное имя если пустой)
-		normalizedNickname := NormalizeUsername(user.Nickname, user.UserID)
+		normalizedNickname := NormalizeUsername(app.localization, localizer, user.Nickname, user.UserID)
 
 		var scoreboardLine string
 		if isCurrentUser {
-			scoreboardLine = fmt.Sprintf(MsgCockRaceScoreboardSelected, emoji, EscapeMarkdownV2(normalizedNickname), EscapeMarkdownV2(FormatDickSize(int(user.TotalSize))))
+			scoreboardLine = app.localization.Localize(localizer, MsgCockRaceScoreboardSelected, map[string]any{
+				"PlaceEmoji": emoji,
+				"Username":   EscapeMarkdownV2(normalizedNickname),
+				"Size":       EscapeMarkdownV2(FormatDickSize(int(user.TotalSize))),
+			})
 		} else {
-			scoreboardLine = fmt.Sprintf(MsgCockRaceScoreboardDefault, emoji, EscapeMarkdownV2(normalizedNickname), EscapeMarkdownV2(FormatDickSize(int(user.TotalSize))))
+			scoreboardLine = app.localization.Localize(localizer, MsgCockRaceScoreboardDefault, map[string]any{
+				"PlaceEmoji": emoji,
+				"Username":   EscapeMarkdownV2(normalizedNickname),
+				"Size":       EscapeMarkdownV2(FormatDickSize(int(user.TotalSize))),
+			})
 		}
 
 		if index < 3 {
@@ -376,7 +411,7 @@ func (app *Application) GenerateCockRaceScoreboard(log *logging.Logger, userID i
 			// Получаем позицию пользователя
 			var userPosition int
 			var neighbors []UserCockRace
-			
+
 			if currentSeason != nil {
 				userPosition = app.GetUserPositionInSeason(log, userID, *currentSeason)
 				neighbors = app.GetUsersAroundPositionInSeason(log, userPosition, *currentSeason)
@@ -384,16 +419,16 @@ func (app *Application) GenerateCockRaceScoreboard(log *logging.Logger, userID i
 				userPosition = app.GetUserPositionInLadder(log, userID)
 				neighbors = app.GetUsersAroundPositionInLadder(log, userPosition)
 			}
-			
+
 			// Формируем строки для соседей с учетом edge cases
 			var contextLines []string
 			var showTopDots, showBottomDots bool
-			
+
 			if userPosition == 14 {
 				// Сразу после топ-13 - показываем только текущего и следующего
 				showTopDots = false
 				showBottomDots = len(neighbors) == 2 && userPosition < totalParticipants
-			} else if userPosition >= totalParticipants - 1 {
+			} else if userPosition >= totalParticipants-1 {
 				// Последние 2 места
 				showTopDots = userPosition > 14
 				showBottomDots = false
@@ -402,41 +437,52 @@ func (app *Application) GenerateCockRaceScoreboard(log *logging.Logger, userID i
 				showTopDots = userPosition > 14
 				showBottomDots = userPosition < totalParticipants
 			}
-			
+
 			startPos := userPosition - len(neighbors) + 1
 			if userPosition == 14 {
 				startPos = 14
 			}
-			
+
 			for idx, neighbor := range neighbors {
 				pos := startPos + idx
 				isCurrentInContext := neighbor.UserID == userID
-				normalizedNick := NormalizeUsername(neighbor.Nickname, neighbor.UserID)
+				normalizedNick := NormalizeUsername(app.localization, localizer, neighbor.Nickname, neighbor.UserID)
 				formattedSize := EscapeMarkdownV2(FormatDickSize(int(neighbor.TotalSize)))
 				posEmoji := GetPlaceEmojiForContext(pos, isCurrentInContext)
-				
+
 				if isCurrentInContext {
-					contextLines = append(contextLines, fmt.Sprintf("%s *@%s %sсм*", posEmoji, EscapeMarkdownV2(normalizedNick), formattedSize))
+					contextLines = append(contextLines, app.localization.Localize(localizer, MsgCockRaceContextSelected, map[string]any{
+						"PlaceEmoji": posEmoji,
+						"Username":   EscapeMarkdownV2(normalizedNick),
+						"Size":       formattedSize,
+					}))
 				} else {
-					contextLines = append(contextLines, fmt.Sprintf("%s @%s *%sсм*", posEmoji, EscapeMarkdownV2(normalizedNick), formattedSize))
+					contextLines = append(contextLines, app.localization.Localize(localizer, MsgCockRaceContextDefault, map[string]any{
+						"PlaceEmoji": posEmoji,
+						"Username":   EscapeMarkdownV2(normalizedNick),
+						"Size":       formattedSize,
+					}))
 				}
 			}
-			
+
 			// Добавляем контекст с соседями
 			var contextBlock string
 			if showTopDots && showBottomDots {
-				contextBlock = "\n" + CommonDots + "\n" + strings.Join(contextLines, "\n") + "\n" + CommonDots
+				dots := app.localization.Localize(localizer, CommonDots, nil)
+				contextBlock = "\n" + dots + "\n" + strings.Join(contextLines, "\n") + "\n" + dots
 			} else if showTopDots {
-				contextBlock = "\n" + CommonDots + "\n" + strings.Join(contextLines, "\n")
+				dots := app.localization.Localize(localizer, CommonDots, nil)
+				contextBlock = "\n" + dots + "\n" + strings.Join(contextLines, "\n")
 			} else if showBottomDots {
-				contextBlock = "\n" + strings.Join(contextLines, "\n") + "\n" + CommonDots
+				dots := app.localization.Localize(localizer, CommonDots, nil)
+				contextBlock = "\n" + strings.Join(contextLines, "\n") + "\n" + dots
 			} else {
 				contextBlock = "\n" + strings.Join(contextLines, "\n")
 			}
-			
+
 			others = append(others, contextBlock)
 		} else {
-			others = append(others, MsgCockScoreboardNotFound)
+			others = append(others, app.localization.Localize(localizer, MsgCockScoreboardNotFound, nil))
 		}
 	}
 
@@ -444,27 +490,28 @@ func (app *Application) GenerateCockRaceScoreboard(log *logging.Logger, userID i
 	var footerLine string
 	var seasonNum int
 	var seasonWord string
-	
+
 	if currentSeason != nil {
 		now := datetime.NowTime()
 		startDateFormatted := EscapeMarkdownV2(currentSeason.StartDate.Format("02.01.2006"))
 		endDateFormatted := EscapeMarkdownV2(currentSeason.EndDate.Format("02.01.2006"))
-		timeRemaining := FormatTimeRemaining(currentSeason.EndDate, now)
-		
+		timeRemaining := FormatTimeRemaining(app.localization, localizer, currentSeason.EndDate, now)
+
 		seasonNum = currentSeason.SeasonNum
-		seasonWord = PluralizeSeasonGenitive(seasonNum)
-		
-		footerLine = fmt.Sprintf(
-			"🚀 Текущий сезон коков: *%d*, проводится с *%s* до *%s*\\. Осталось: *%s*\\.",
-			seasonNum,
-			startDateFormatted,
-			endDateFormatted,
-			EscapeMarkdownV2(timeRemaining),
-		)
+		seasonWord = app.localization.Localize(localizer, UnitSeasonGenitive, map[string]any{"Count": seasonNum})
+
+		footerLine = app.localization.Localize(localizer, MsgCockRaceFooterActiveSeason, map[string]any{
+			"SeasonNum": seasonNum,
+			"StartDate": startDateFormatted,
+			"EndDate":   endDateFormatted,
+			"Remaining": EscapeMarkdownV2(timeRemaining),
+		})
 	} else {
 		seasonNum = 1
-		seasonWord = PluralizeSeasonGenitive(seasonNum)
-		footerLine = fmt.Sprintf("🚀 Текущий сезон гонки коков стартовал *%s*", seasonStart)
+		seasonWord = app.localization.Localize(localizer, UnitSeasonGenitive, map[string]any{"Count": seasonNum})
+		footerLine = app.localization.Localize(localizer, MsgCockRaceFooterNoSeason, map[string]any{
+			"StartDate": seasonStart,
+		})
 	}
 
 	if len(others) != 0 {
@@ -472,52 +519,58 @@ func (app *Application) GenerateCockRaceScoreboard(log *logging.Logger, userID i
 		if !showDescription {
 			template = MsgCockRaceScoreboardTemplateNoDesc
 		}
-		return fmt.Sprintf(
-			template,
-			totalParticipants,
-			strings.Join(winners, "\n"),
-			strings.Join(others, "\n"),
-			footerLine,
-			seasonNum,
-			seasonWord,
-		)
+		return app.localization.Localize(localizer, template, map[string]any{
+			"Participants": totalParticipants,
+			"Winners":      strings.Join(winners, "\n"),
+			"Others":       strings.Join(others, "\n"),
+			"Footer":       footerLine,
+			"SeasonNum":    seasonNum,
+			"SeasonWord":   seasonWord,
+		})
 	} else {
 		template := MsgCockRaceScoreboardWinnersTemplate
 		if !showDescription {
 			template = MsgCockRaceScoreboardWinnersTemplateNoDesc
 		}
-		return fmt.Sprintf(
-			template,
-			totalParticipants,
-			strings.Join(winners, "\n"),
-			footerLine,
-			seasonNum,
-			seasonWord,
-		)
+		return app.localization.Localize(localizer, template, map[string]any{
+			"Participants": totalParticipants,
+			"Winners":      strings.Join(winners, "\n"),
+			"Footer":       footerLine,
+			"SeasonNum":    seasonNum,
+			"SeasonWord":   seasonWord,
+		})
 	}
 }
 
-func (app *Application) GenerateCockLadderScoreboard(log *logging.Logger, userID int64, sizes []UserCockRace, totalParticipants int, showDescription bool) string {
+func (app *Application) GenerateCockLadderScoreboard(log *logging.Logger, localizer *i18n.Localizer, userID int64, sizes []UserCockRace, totalParticipants int, showDescription bool) string {
 	var winners []string
 	var others []string
 	isUserInScoreboard := false
 
 	for index, user := range sizes {
 		isCurrentUser := user.UserID == userID
-		emoji := GetPlaceEmoji(index + 1, isCurrentUser)
+		emoji := GetPlaceEmoji(index+1, isCurrentUser)
 
 		if isCurrentUser {
 			isUserInScoreboard = true
 		}
 
 		// Нормализуем username (генерируем анонимное имя если пустой)
-		normalizedNickname := NormalizeUsername(user.Nickname, user.UserID)
+		normalizedNickname := NormalizeUsername(app.localization, localizer, user.Nickname, user.UserID)
 
 		var scoreboardLine string
 		if isCurrentUser {
-			scoreboardLine = fmt.Sprintf(MsgCockLadderScoreboardSelected, emoji, EscapeMarkdownV2(normalizedNickname), EscapeMarkdownV2(FormatDickSize(int(user.TotalSize))))
+			scoreboardLine = app.localization.Localize(localizer, MsgCockLadderScoreboardSelected, map[string]any{
+				"PlaceEmoji": emoji,
+				"Username":   EscapeMarkdownV2(normalizedNickname),
+				"Size":       EscapeMarkdownV2(FormatDickSize(int(user.TotalSize))),
+			})
 		} else {
-			scoreboardLine = fmt.Sprintf(MsgCockLadderScoreboardDefault, emoji, EscapeMarkdownV2(normalizedNickname), EscapeMarkdownV2(FormatDickSize(int(user.TotalSize))))
+			scoreboardLine = app.localization.Localize(localizer, MsgCockLadderScoreboardDefault, map[string]any{
+				"PlaceEmoji": emoji,
+				"Username":   EscapeMarkdownV2(normalizedNickname),
+				"Size":       EscapeMarkdownV2(FormatDickSize(int(user.TotalSize))),
+			})
 		}
 
 		if index < 3 {
@@ -532,16 +585,16 @@ func (app *Application) GenerateCockLadderScoreboard(log *logging.Logger, userID
 			// Получаем позицию пользователя в ладдере и соседей
 			userPosition := app.GetUserPositionInLadder(log, userID)
 			neighbors := app.GetUsersAroundPositionInLadder(log, userPosition)
-			
+
 			// Формируем строки для соседей с учетом edge cases
 			var contextLines []string
 			var showTopDots, showBottomDots bool
-			
+
 			if userPosition == 14 {
 				// Сразу после топ-13 - показываем только текущего и следующего
 				showTopDots = false
 				showBottomDots = len(neighbors) == 2 && userPosition < totalParticipants
-			} else if userPosition >= totalParticipants - 1 {
+			} else if userPosition >= totalParticipants-1 {
 				// Последние 2 места
 				showTopDots = userPosition > 14
 				showBottomDots = false
@@ -550,41 +603,52 @@ func (app *Application) GenerateCockLadderScoreboard(log *logging.Logger, userID
 				showTopDots = userPosition > 14
 				showBottomDots = userPosition < totalParticipants
 			}
-			
+
 			startPos := userPosition - len(neighbors) + 1
 			if userPosition == 14 {
 				startPos = 14
 			}
-			
+
 			for idx, neighbor := range neighbors {
 				pos := startPos + idx
 				isCurrentInContext := neighbor.UserID == userID
-				normalizedNick := NormalizeUsername(neighbor.Nickname, neighbor.UserID)
+				normalizedNick := NormalizeUsername(app.localization, localizer, neighbor.Nickname, neighbor.UserID)
 				formattedSize := EscapeMarkdownV2(FormatDickSize(int(neighbor.TotalSize)))
 				posEmoji := GetPlaceEmojiForContext(pos, isCurrentInContext)
-				
+
 				if isCurrentInContext {
-					contextLines = append(contextLines, fmt.Sprintf("%s *@%s %sсм*", posEmoji, EscapeMarkdownV2(normalizedNick), formattedSize))
+					contextLines = append(contextLines, app.localization.Localize(localizer, MsgCockLadderContextSelected, map[string]any{
+						"PlaceEmoji": posEmoji,
+						"Username":   EscapeMarkdownV2(normalizedNick),
+						"Size":       formattedSize,
+					}))
 				} else {
-					contextLines = append(contextLines, fmt.Sprintf("%s @%s *%sсм*", posEmoji, EscapeMarkdownV2(normalizedNick), formattedSize))
+					contextLines = append(contextLines, app.localization.Localize(localizer, MsgCockLadderContextDefault, map[string]any{
+						"PlaceEmoji": posEmoji,
+						"Username":   EscapeMarkdownV2(normalizedNick),
+						"Size":       formattedSize,
+					}))
 				}
 			}
-			
-			// Добавляем контекст с соседями  
+
+			// Добавляем контекст с соседями
 			var contextBlock string
 			if showTopDots && showBottomDots {
-				contextBlock = "\n" + CommonDots + "\n" + strings.Join(contextLines, "\n") + "\n" + CommonDots
+				dots := app.localization.Localize(localizer, CommonDots, nil)
+				contextBlock = "\n" + dots + "\n" + strings.Join(contextLines, "\n") + "\n" + dots
 			} else if showTopDots {
-				contextBlock = "\n" + CommonDots + "\n" + strings.Join(contextLines, "\n")
+				dots := app.localization.Localize(localizer, CommonDots, nil)
+				contextBlock = "\n" + dots + "\n" + strings.Join(contextLines, "\n")
 			} else if showBottomDots {
-				contextBlock = "\n" + strings.Join(contextLines, "\n") + "\n" + CommonDots
+				dots := app.localization.Localize(localizer, CommonDots, nil)
+				contextBlock = "\n" + strings.Join(contextLines, "\n") + "\n" + dots
 			} else {
 				contextBlock = "\n" + strings.Join(contextLines, "\n")
 			}
-			
+
 			others = append(others, contextBlock)
 		} else {
-			others = append(others, MsgCockScoreboardNotFound)
+			others = append(others, app.localization.Localize(localizer, MsgCockScoreboardNotFound, nil))
 		}
 	}
 
@@ -593,22 +657,20 @@ func (app *Application) GenerateCockLadderScoreboard(log *logging.Logger, userID
 		if !showDescription {
 			template = MsgCockLadderScoreboardTemplateNoDesc
 		}
-		return fmt.Sprintf(
-			template,
-			totalParticipants,
-			strings.Join(winners, "\n"),
-			strings.Join(others, "\n"),
-		)
+		return app.localization.Localize(localizer, template, map[string]any{
+			"Participants": totalParticipants,
+			"Winners":      strings.Join(winners, "\n"),
+			"Others":       strings.Join(others, "\n"),
+		})
 	} else {
 		template := MsgCockLadderScoreboardWinnersTemplate
 		if !showDescription {
 			template = MsgCockLadderScoreboardWinnersTemplateNoDesc
 		}
-		return fmt.Sprintf(
-			template,
-			totalParticipants,
-			strings.Join(winners, "\n"),
-		)
+		return app.localization.Localize(localizer, template, map[string]any{
+			"Participants": totalParticipants,
+			"Winners":      strings.Join(winners, "\n"),
+		})
 	}
 }
 
@@ -635,7 +697,7 @@ func GetPlaceEmoji(place int, isCurrentUser bool) string {
 		default:
 			emoji = "🥶"
 		}
-		
+
 		// Для мест 4+ добавляем номер места (точка экранирована для MarkdownV2)
 		// Номер жирный для текущего пользователя
 		if isCurrentUser {
@@ -690,13 +752,13 @@ func FormatVolatility(volatility float64) string {
 
 func LuckEmoji(luck float64) string {
 	switch {
-  case luck >= 1.98: // типа бог рандома :)
+	case luck >= 1.98: // типа бог рандома :)
 		return "👑🌌🌈🦄🍀🤩"
 	case luck >= 1.92:
 		return "🌌🌈🦄🍀🤩"
-  case luck >= 1.833:
+	case luck >= 1.833:
 		return "🌈🦄🍀🤩"
-  case luck >= 1.7:
+	case luck >= 1.7:
 		return "🍀🤩"
 	case luck >= 1.5:
 		return "🤩"
@@ -719,39 +781,39 @@ func LuckEmoji(luck float64) string {
 	}
 }
 
-func LuckLabel(luck float64) string {
+func LuckLabel(localizationManager *localization.LocalizationManager, localizer *i18n.Localizer, luck float64) string {
 	switch {
 	case luck >= 1.98: // типа бог рандома :)
-		return "бог рандома"
+		return localizationManager.Localize(localizer, LuckLabelGodRandom, nil)
 	case luck >= 1.92:
-		return "космическая удача"
+		return localizationManager.Localize(localizer, LuckLabelCosmicLuck, nil)
 	case luck >= 1.833:
-		return "сказочная удача"
+		return localizationManager.Localize(localizer, LuckLabelFairyLuck, nil)
 	case luck >= 1.7:
-		return "супер-удача"
+		return localizationManager.Localize(localizer, LuckLabelSuperLuck, nil)
 	case luck >= 1.5:
-		return "невероятная удача"
+		return localizationManager.Localize(localizer, LuckLabelIncredibleLuck, nil)
 	case luck >= 1.2:
-		return "очень везёт"
+		return localizationManager.Localize(localizer, LuckLabelVeryLucky, nil)
 	case luck >= 1.1:
-		return "везёт"
+		return localizationManager.Localize(localizer, LuckLabelLucky, nil)
 	case luck >= 0.9:
-		return "в балансе"
+		return localizationManager.Localize(localizer, LuckLabelBalanced, nil)
 	case luck >= 0.7:
-		return "не везёт"
+		return localizationManager.Localize(localizer, LuckLabelUnlucky, nil)
 	case luck >= 0.5:
-		return "плохо"
+		return localizationManager.Localize(localizer, LuckLabelBad, nil)
 	case luck >= 0.3:
-		return "мрак"
+		return localizationManager.Localize(localizer, LuckLabelGloom, nil)
 	case luck >= 0.2: // адовый тильт
-		return "адовый тильт"
+		return localizationManager.Localize(localizer, LuckLabelHellTilt, nil)
 	default:
-		return "горю в аду"
+		return localizationManager.Localize(localizer, LuckLabelBurningInHell, nil)
 	}
 }
 
-func LuckDisplay(luck float64) string {
-	return fmt.Sprintf("%s _(%s)_", LuckEmoji(luck), LuckLabel(luck))
+func LuckDisplay(localizationManager *localization.LocalizationManager, localizer *i18n.Localizer, luck float64) string {
+	return fmt.Sprintf("%s _(%s)_", LuckEmoji(luck), LuckLabel(localizationManager, localizer, luck))
 }
 
 func VolatilityEmoji(volatility float64) string {
@@ -773,27 +835,27 @@ func VolatilityEmoji(volatility float64) string {
 	}
 }
 
-func VolatilityLabel(volatility float64) string {
+func VolatilityLabel(localizationManager *localization.LocalizationManager, localizer *i18n.Localizer, volatility float64) string {
 	switch {
 	case volatility < 1:
-		return "каменный"
+		return localizationManager.Localize(localizer, VolatilityLabelStone, nil)
 	case volatility < 3:
-		return "стабильный"
+		return localizationManager.Localize(localizer, VolatilityLabelStable, nil)
 	case volatility < 6:
-		return "умеренный"
+		return localizationManager.Localize(localizer, VolatilityLabelModerate, nil)
 	case volatility < 10:
-		return "живой разброс"
+		return localizationManager.Localize(localizer, VolatilityLabelLivelySpread, nil)
 	case volatility < 15:
-		return "неровный"
+		return localizationManager.Localize(localizer, VolatilityLabelUneven, nil)
 	case volatility < 25:
-		return "хаотичный"
+		return localizationManager.Localize(localizer, VolatilityLabelChaotic, nil)
 	default:
-		return "полный рандом"
+		return localizationManager.Localize(localizer, VolatilityLabelRandom, nil)
 	}
 }
 
-func VolatilityDisplay(volatility float64) string {
-	return fmt.Sprintf("%s _(%s)_", VolatilityEmoji(volatility), VolatilityLabel(volatility))
+func VolatilityDisplay(localizationManager *localization.LocalizationManager, localizer *i18n.Localizer, volatility float64) string {
+	return fmt.Sprintf("%s _(%s)_", VolatilityEmoji(volatility), VolatilityLabel(localizationManager, localizer, volatility))
 }
 
 func clamp01(x float64) float64 {
@@ -810,7 +872,7 @@ func clamp01(x float64) float64 {
 }
 
 // IrkLabel возвращает краткое описание ИРК (0.0-1.0+)
-func IrkLabel(irk float64) string {
+func IrkLabel(localizationManager *localization.LocalizationManager, localizer *i18n.Localizer, irk float64) string {
 	irk = clamp01(irk)
 
 	bucket := int(math.Floor(irk * 10)) // 0..9
@@ -819,46 +881,46 @@ func IrkLabel(irk float64) string {
 	}
 
 	labels := [...]string{
-		"нулевой",       // 0.0..0.099
-		"минимальный",   // 0.1..0.199
-		"очень малый",   // 0.2..0.299
-		"малый",         // 0.3..0.399
-		"уменьшенный",   // 0.4..0.499
-		"средний",       // 0.5..0.599
-		"увеличенный",   // 0.6..0.699
-		"крупный",       // 0.7..0.799
-		"очень крупный", // 0.8..0.899
-		"максимальный",  // 0.9..0.999
-		"предельный",    // 1.0
+		IrkLabelZero,      // 0.0..0.099
+		IrkLabelMinimal,   // 0.1..0.199
+		IrkLabelVerySmall, // 0.2..0.299
+		IrkLabelSmall,     // 0.3..0.399
+		IrkLabelReduced,   // 0.4..0.499
+		IrkLabelAverage,   // 0.5..0.599
+		IrkLabelIncreased, // 0.6..0.699
+		IrkLabelLarge,     // 0.7..0.799
+		IrkLabelVeryLarge, // 0.8..0.899
+		IrkLabelMaximum,   // 0.9..0.999
+		IrkLabelUltimate,  // 1.0
 	}
 
-	return labels[bucket]
+	return localizationManager.Localize(localizer, labels[bucket], nil)
 }
 
 // GrowthSpeedLabel возвращает описание скорости изменения
 // Скорость всегда положительная (абсолютное значение), показывает интенсивность изменения
-func GrowthSpeedLabel(speed float64) string {
+func GrowthSpeedLabel(localizationManager *localization.LocalizationManager, localizer *i18n.Localizer, speed float64) string {
 	switch {
 	case speed >= 50:
-		return "космическая"
+		return localizationManager.Localize(localizer, GrowthSpeedLabelCosmic, nil)
 	case speed >= 40:
-		return "экстремальная"
+		return localizationManager.Localize(localizer, GrowthSpeedLabelExtreme, nil)
 	case speed >= 30:
-		return "очень быстрая"
+		return localizationManager.Localize(localizer, GrowthSpeedLabelVeryFast, nil)
 	case speed >= 20:
-		return "быстрая"
+		return localizationManager.Localize(localizer, GrowthSpeedLabelFast, nil)
 	case speed >= 15:
-		return "умеренная"
+		return localizationManager.Localize(localizer, GrowthSpeedLabelModerate, nil)
 	case speed >= 10:
-		return "средняя"
+		return localizationManager.Localize(localizer, GrowthSpeedLabelAverage, nil)
 	case speed >= 5:
-		return "медленная"
+		return localizationManager.Localize(localizer, GrowthSpeedLabelSlow, nil)
 	case speed >= 2:
-		return "очень медленная"
+		return localizationManager.Localize(localizer, GrowthSpeedLabelVerySlow, nil)
 	case speed >= 0.5:
-		return "черепашья"
+		return localizationManager.Localize(localizer, GrowthSpeedLabelTurtle, nil)
 	default:
-		return "стоячая"
+		return localizationManager.Localize(localizer, GrowthSpeedLabelStalled, nil)
 	}
 }
 
@@ -887,9 +949,9 @@ func GrowthSpeedEmoji(speed float64) string {
 	}
 }
 
-func GrowthSpeedDisplay(speed float64) string {
+func GrowthSpeedDisplay(localizationManager *localization.LocalizationManager, localizer *i18n.Localizer, speed float64) string {
 	emoji := GrowthSpeedEmoji(speed)
-	label := GrowthSpeedLabel(speed)
+	label := GrowthSpeedLabel(localizationManager, localizer, speed)
 	return fmt.Sprintf("%s _(%s)_", emoji, label)
 }
 
@@ -900,92 +962,40 @@ func FormatGrowthSpeed(speed float64) string {
 	return p.Sprintf("%.1f", speed)
 }
 
-// PluralizeSeason склоняет слово "сезон" в именительном падеже (что?)
-// 1 сезон, 2 сезона, 5 сезонов
-func PluralizeSeason(n int) string {
-	if n%10 == 1 && n%100 != 11 {
-		return "сезон"
-	}
-	if n%10 >= 2 && n%10 <= 4 && (n%100 < 10 || n%100 >= 20) {
-		return "сезона"
-	}
-	return "сезонов"
-}
-
-// PluralizeSeasonGenitive возвращает слово "сезон" в родительном падеже (какого?)
-// Для порядкового числительного всегда "сезона": 1 сезона, 2 сезона, 5 сезона, 11 сезона
-func PluralizeSeasonGenitive(n int) string {
-	return "сезона"
-}
-
-// PluralizeDays склоняет слово "день"
-// 1 день, 2 дня, 5 дней
-func PluralizeDays(n int) string {
-	if n%10 == 1 && n%100 != 11 {
-		return "день"
-	}
-	if n%10 >= 2 && n%10 <= 4 && (n%100 < 10 || n%100 >= 20) {
-		return "дня"
-	}
-	return "дней"
-}
-
-// PluralizeMonths склоняет слово "месяц"
-// 1 месяц, 2 месяца, 5 месяцев
-func PluralizeMonths(n int) string {
-	if n%10 == 1 && n%100 != 11 {
-		return "месяц"
-	}
-	if n%10 >= 2 && n%10 <= 4 && (n%100 < 10 || n%100 >= 20) {
-		return "месяца"
-	}
-	return "месяцев"
-}
-
-// PluralizeYears склоняет слово "год"
-// 1 год, 2 года, 5 лет
-func PluralizeYears(n int) string {
-	if n%10 == 1 && n%100 != 11 {
-		return "год"
-	}
-	if n%10 >= 2 && n%10 <= 4 && (n%100 < 10 || n%100 >= 20) {
-		return "года"
-	}
-	return "лет"
-}
-
 // FormatTimeRemaining форматирует оставшееся время до конца периода
 // Возвращает строку типа "1 месяц 3 дня" или "14 дней"
-func FormatTimeRemaining(endDate time.Time, now time.Time) string {
+func FormatTimeRemaining(localizationManager *localization.LocalizationManager, localizer *i18n.Localizer, endDate time.Time, now time.Time) string {
 	duration := endDate.Sub(now)
 	daysRemaining := int(duration.Hours() / 24)
-	
+
 	if daysRemaining < 0 {
-		return "0 " + PluralizeDays(0)
+		return localizationManager.Localize(localizer, UnitDay, map[string]any{"Count": 0})
 	}
-	
+
 	// Если больше месяца, показываем месяцы + дни
 	if daysRemaining > 30 {
 		months := daysRemaining / 30
 		days := daysRemaining % 30
-		
+
 		if days == 0 {
-			return fmt.Sprintf("%d %s", months, PluralizeMonths(months))
+			return localizationManager.Localize(localizer, UnitMonth, map[string]any{"Count": months})
 		}
-		return fmt.Sprintf("%d %s %d %s", months, PluralizeMonths(months), days, PluralizeDays(days))
+		monthsText := localizationManager.Localize(localizer, UnitMonth, map[string]any{"Count": months})
+		daysText := localizationManager.Localize(localizer, UnitDay, map[string]any{"Count": days})
+		return fmt.Sprintf("%s %s", monthsText, daysText)
 	}
-	
+
 	// Если меньше месяца, показываем только дни
-	return fmt.Sprintf("%d %s", daysRemaining, PluralizeDays(daysRemaining))
+	return localizationManager.Localize(localizer, UnitDay, map[string]any{"Count": daysRemaining})
 }
 
 // FormatUserPullingPeriod форматирует период с первого кока пользователя
 // Формат: "2 года, 10 месяцев и 3 дня (с 27.02.2020)"
-func FormatUserPullingPeriod(firstCockDate time.Time, now time.Time) string {
+func FormatUserPullingPeriod(localizationManager *localization.LocalizationManager, localizer *i18n.Localizer, firstCockDate time.Time, now time.Time) string {
 	years := now.Year() - firstCockDate.Year()
 	months := int(now.Month()) - int(firstCockDate.Month())
 	days := now.Day() - firstCockDate.Day()
-	
+
 	// Корректируем если дни отрицательные
 	if days < 0 {
 		months--
@@ -994,48 +1004,53 @@ func FormatUserPullingPeriod(firstCockDate time.Time, now time.Time) string {
 		daysInPrevMonth := time.Date(prevMonth.Year(), prevMonth.Month()+1, 0, 0, 0, 0, 0, prevMonth.Location()).Day()
 		days += daysInPrevMonth
 	}
-	
+
 	// Корректируем если месяцы отрицательные
 	if months < 0 {
 		years--
 		months += 12
 	}
-	
+
 	// Форматируем дату первого кока
 	dateStr := firstCockDate.Format("02.01.2006")
-	
+
 	var parts []string
-	
+
 	// Добавляем годы если есть
 	if years > 0 {
-		parts = append(parts, fmt.Sprintf("%d %s", years, PluralizeYears(years)))
+		parts = append(parts, localizationManager.Localize(localizer, UnitYear, map[string]any{"Count": years}))
 	}
-	
+
 	// Добавляем месяцы если есть
 	if months > 0 {
-		parts = append(parts, fmt.Sprintf("%d %s", months, PluralizeMonths(months)))
+		parts = append(parts, localizationManager.Localize(localizer, UnitMonth, map[string]any{"Count": months}))
 	}
-	
+
 	// Добавляем дни если есть (или если нет ничего больше)
 	if days > 0 || len(parts) == 0 {
-		parts = append(parts, fmt.Sprintf("%d %s", days, PluralizeDays(days)))
+		parts = append(parts, localizationManager.Localize(localizer, UnitDay, map[string]any{"Count": days}))
 	}
-	
+
 	// Собираем строку
 	var result string
 	if len(parts) == 1 {
 		result = parts[0]
 	} else if len(parts) == 2 {
-		result = parts[0] + ", " + parts[1]
+		result = parts[0] + localizationManager.Localize(localizer, MsgListSeparatorLast, nil) + parts[1]
 	} else if len(parts) == 3 {
-		result = parts[0] + ", " + parts[1] + " и " + parts[2]
+		result = parts[0] + localizationManager.Localize(localizer, MsgListSeparator, nil) + parts[1] + localizationManager.Localize(localizer, MsgListSeparatorLast, nil) + parts[2]
 	}
-	
-	return fmt.Sprintf("%s (с %s)", result, dateStr)
+
+	return localizationManager.Localize(localizer, MsgUserPullingSince, map[string]any{
+		"Period": result,
+		"Date":   dateStr,
+	})
 }
 
 // GenerateAchievementsText генерирует текст списка достижений с пагинацией
 func GenerateAchievementsText(
+	localizationManager *localization.LocalizationManager,
+	localizer *i18n.Localizer,
 	allAchievements []database.Achievement,
 	userAchievements map[string]*database.DocumentUserAchievement,
 	page int,
@@ -1055,7 +1070,7 @@ func GenerateAchievementsText(
 	for _, ach := range allAchievements {
 		userAch, exists := userAchievements[ach.ID]
 		isCompleted := exists && userAch.Completed
-		
+
 		achievementsWithStatus = append(achievementsWithStatus, AchievementWithStatus{
 			Achievement: ach,
 			UserAch:     userAch,
@@ -1095,7 +1110,7 @@ func GenerateAchievementsText(
 	var lines []string
 	for i := startIdx; i < endIdx; i++ {
 		achStatus := achievementsWithStatus[i]
-		line := FormatAchievementLine(achStatus.Achievement, achStatus.UserAch, achStatus.IsCompleted)
+		line := FormatAchievementLine(localizationManager, localizer, achStatus.Achievement, achStatus.UserAch, achStatus.IsCompleted)
 		lines = append(lines, line)
 	}
 
@@ -1111,19 +1126,32 @@ func GenerateAchievementsText(
 }
 
 // FormatAchievementLine форматирует одну строку достижения
-func FormatAchievementLine(ach database.Achievement, userAch *database.DocumentUserAchievement, isCompleted bool) string {
-	escapedName := EscapeMarkdownV2(ach.Name)
-	escapedDesc := EscapeMarkdownV2(ach.Description)
-	
+func FormatAchievementLine(localizationManager *localization.LocalizationManager, localizer *i18n.Localizer, ach database.Achievement, userAch *database.DocumentUserAchievement, isCompleted bool) string {
+	escapedName := EscapeMarkdownV2(localizationManager.Localize(localizer, ach.Name, nil))
+	escapedDesc := EscapeMarkdownV2(localizationManager.Localize(localizer, ach.Description, nil))
+
 	if isCompleted {
 		// Выполненное достижение
-		return fmt.Sprintf("✅ %s *%s* \\- %s", ach.Emoji, escapedName, escapedDesc)
+		return localizationManager.Localize(localizer, MsgAchievementCompleted, map[string]any{
+			"Emoji":       ach.Emoji,
+			"Name":        escapedName,
+			"Description": escapedDesc,
+		})
 	} else if userAch != nil && userAch.Progress > 0 && ach.MaxProgress > 0 {
 		// В процессе выполнения
-		return fmt.Sprintf("🔄 %s *%s* \\(%d/%d\\) \\- %s", 
-			ach.Emoji, escapedName, userAch.Progress, ach.MaxProgress, escapedDesc)
+		return localizationManager.Localize(localizer, MsgAchievementInProgress, map[string]any{
+			"Emoji":       ach.Emoji,
+			"Name":        escapedName,
+			"Progress":    userAch.Progress,
+			"Max":         ach.MaxProgress,
+			"Description": escapedDesc,
+		})
 	} else {
 		// Не выполнено
-		return fmt.Sprintf("⭕️ %s *%s* \\- %s", ach.Emoji, escapedName, escapedDesc)
+		return localizationManager.Localize(localizer, MsgAchievementNotCompleted, map[string]any{
+			"Emoji":       ach.Emoji,
+			"Name":        escapedName,
+			"Description": escapedDesc,
+		})
 	}
 }

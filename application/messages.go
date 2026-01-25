@@ -2,251 +2,166 @@ package application
 
 import (
 	"dickobrazz/application/datetime"
+	"dickobrazz/application/localization"
 	"fmt"
 	"strings"
 	"time"
+
+	"github.com/nicksnyder/go-i18n/v2/i18n"
 )
 
 const (
-	CommonDots = "\\.\\.\\."
-
-	MsgCockScoreboardNotFound = "\n🥀 *Тебе соболезнуем\\.\\.\\. потому что не смотрел на кок\\!*"
-
-	MsgCockSize                    = "Мой кок: *%sсм* %s"
-	MsgCockRulerScoreboardDefault  = "%s @%s *%sсм* %s"
-	MsgCockRulerScoreboardSelected = "%s *@%s %sсм* %s"
-	MsgCockRaceScoreboardDefault  = "%s @%s *%sсм*"
-	MsgCockRaceScoreboardSelected = "%s *@%s %sсм*"
-
-	MsgCockLadderScoreboardDefault  = "%s @%s *%sсм*"
-	MsgCockLadderScoreboardSelected = "%s *@%s %sсм*"
-
-	MsgCockRulerScoreboardTemplate = `*Линейка коков:*
-👥 Участников: *%d*
-
-🏆 Победители в номинации:
-
-%s
-
-🥀 Остальным соболезнуем:
-
-%s
-
->📖 О линейке коков:
->
->Линейка коков – это daily рейтинг чистого рандома\. Размеры генерируются случайно каждый день \(от 0 до 61 см\) и сбрасываются в полночь по МСК\. Никаких накоплений – только удача здесь и сейчас\!
->
->🎲 Сегодня ты топ, завтра ты дно – рандом решает, кому повезло\!||`
-
-	MsgCockRulerScoreboardWinnersTemplate = `*Линейка коков:*
-👥 Участников: *%d*
-
-🏆 Победители в номинации:
-
-%s
-
->📖 О линейке коков:
->
->Линейка коков – это daily рейтинг чистого рандома\. Размеры генерируются случайно каждый день \(от 0 до 61 см\) и сбрасываются в полночь по МСК\. Никаких накоплений – только удача здесь и сейчас\!
->
->🎲 Сегодня ты топ, завтра ты дно – рандом решает, кому повезло\!||`
-
-	// Версии без описаний для опытных пользователей
-	MsgCockRulerScoreboardTemplateNoDesc = `*Линейка коков:*
-👥 Участников: *%d*
-
-🏆 Победители в номинации:
-
-%s
-
-🥀 Остальным соболезнуем:
-
-%s`
-
-	MsgCockRulerScoreboardWinnersTemplateNoDesc = `*Линейка коков:*
-👥 Участников: *%d*
-
-🏆 Победители в номинации:
-
-%s`
-
-	MsgCockRaceScoreboardTemplate = `*Участники гонки коков %[5]d %[6]s:*
-👥 Участников в сезоне: *%[1]d*
-
-🏆 Победители в номинации:
-
-%[2]s
-
-🥀 Остальным соболезнуем:
-
-%[3]s
-
->📖 О гонке коков:
->
->Гонка коков – это сезонное соревнование длиной 3 месяца\. Измеряй свой кок ежедневно, все результаты суммируются автоматически\. Побеждают три участника с максимальным накопленным размером за весь сезон\.
->
->С началом нового сезона все коки сбрасываются, и гонка начинается заново для всех\.
->
->💡 Совет: Измеряй кок каждый день, чтобы максимизировать свои шансы на победу\!||
-
-%[4]s`
-
-	MsgCockRaceScoreboardWinnersTemplate = `*Участники гонки коков %[4]d %[5]s:*
-👥 Участников в сезоне: *%[1]d*
-
-🏆 Победители в номинации:
-
-%[2]s
-
->📖 О гонке коков:
->
->Гонка коков – это сезонное соревнование длиной 3 месяца\. Измеряй свой кок ежедневно, все результаты суммируются автоматически\. Побеждают три участника с максимальным накопленным размером за весь сезон\.
->
->С началом нового сезона все коки сбрасываются, и гонка начинается заново для всех\.
->
->💡 Совет: Измеряй кок каждый день, чтобы максимизировать свои шансы на победу\!||
-
-%[3]s`
-
-	// Версии без описаний для опытных пользователей
-	MsgCockRaceScoreboardTemplateNoDesc = `*Участники гонки коков %[5]d %[6]s:*
-👥 Участников в сезоне: *%[1]d*
-
-🏆 Победители в номинации:
-
-%[2]s
-
-🥀 Остальным соболезнуем:
-
-%[3]s
-
-%[4]s`
-
-	MsgCockRaceScoreboardWinnersTemplateNoDesc = `*Участники гонки коков %[4]d %[5]s:*
-👥 Участников в сезоне: *%[1]d*
-
-🏆 Победители в номинации:
-
-%[2]s
-
-%[3]s`
-
-	MsgCockLadderScoreboardTemplate = `*Ладдер коков:*
-👥 Всего участников: *%d*
-
-🏆 Лидеры кок–ладдера:
-
-%s
-
-🥀 Медленно, но верно поднимающиеся:
-
-%s
-
->📖 О ладдере коков:
->
->Ладдер коков – это твой вечный путь к славе\. Здесь суммируется каждый кок за всю историю твоего участия\. В отличие от дневной линейки и сезонной гонки, ладдер никогда не обнуляется\.
->
->🔥 Топ ладдера – это легенды, измеряющие коки с первого дня\. Стань одним из них\!||`
-
-	MsgCockLadderScoreboardWinnersTemplate = `*Ладдер коков:*
-👥 Всего участников: *%d*
-
-🏆 Лидеры кок–ладдера:
-
-%s
-
->📖 О ладдере коков:
->
->Ладдер коков – это твой вечный путь к славе\. Здесь суммируется каждый кок за всю историю твоего участия\. В отличие от дневной линейки и сезонной гонки, ладдер никогда не обнуляется\.
->
->🔥 Топ ладдера – это легенды, измеряющие коки с первого дня\. Стань одним из них\!||`
-
-	// Версии без описаний для опытных пользователей
-	MsgCockLadderScoreboardTemplateNoDesc = `*Ладдер коков:*
-👥 Всего участников: *%d*
-
-🏆 Лидеры кок–ладдера:
-
-%s
-
-🥀 Медленно, но верно поднимающиеся:
-
-%s`
-
-	MsgCockLadderScoreboardWinnersTemplateNoDesc = `*Ладдер коков:*
-👥 Всего участников: *%d*
-
-🏆 Лидеры кок–ладдера:
-
-%s`
-
-	MsgCockDynamicsTemplate = `
-📊 *Общая динамика коков*
-
-Общий посчитанный кок: *%[1]s см* 🤭
-Всего кокеров: *%[2]s* 🫡
-Всего дёрнуто коков: *%[26]s* ✊🏻
-
-День самого большого кока: *%[21]s*, нарастили аж *%[22]s см* 🍾
-
-Средний кок в системе _(5 дней)_: *%[3]s см* %[4]s
-Медиана кока в системе _(5 дней)_: *%[5]s см* %[6]s
-
-Соотношение коков _(5 дней)_: 💪 *%[19]s%%* 🤏 *%[20]s%%*
-Скорость роста кока _(5 дней)_: *%[36]s см/день*
-
-📊 *Персональная динамика кока*
-
-Дергает кок уже: *%[37]s*
-Общий посчитанный кок: *%[7]s см* 🤯
-Всего дёрнуто коков: *%[27]s* ✊🏻
-
-ИРК (Индекс Размера Кока): __*%[10]s*__ _(%[32]s)_
-В среднем размер кока _(5 коков)_: *%[8]s см* %[9]s
-Самый большой кок был: *%[11]s см* %[12]s (*%[13]s*)
-
-Коэффициент везения _(5 коков)_: *%[28]s* %[29]s
-Волатильность кока _(5 коков)_: *%[30]s* %[31]s
-
-Процент доминирования: *%[23]s%%* 👑
-Скорость роста кока _(5 дней)_: *%[34]s см/день* %[35]s
-
-🏆 *Сезонные достижения*
-
-Побед в сезонах: *%[24]s* 🎖️
-Кок-респект: *%[25]s* 🚀
-
-📈 *Кок-активы*
-
-%[14]s Дневная динамика: *%[15]s%%* (*%[16]s см*)
-%[33]s Динамика за 5 коков: *%[17]s%%* (*%[18]s см*)`
-
-	MsgCockSeasonTemplate = `*Сезон коков %[4]d* \(🟡 Текущий\)
-⏱️ Период: *%[2]s \- %[3]s*
-
-🔮 Претенденты сезона:
-
-%[1]s`
-
-	MsgCockSeasonWithWinnersTemplate = `*Сезон коков %[4]d* \(🟢 Завершён\)
-⏱️ Период: *%[2]s \- %[3]s*
-
-🎖 Победители сезона:
-
-%[1]s`
-
-	MsgCockSeasonTemplateFooter = `>📖 О сезонах коков:
->
->Сезоны коков – это 3\-месячная битва за звание лучшего кокера\. Измеряй каждый день, суммируй результаты и борись за топ\-3\. Победители получают легендарные кок\-респекты™, которые можно обменять на мерч\!
->
->🔥 История помнит только победителей – стань одним из них\!||`
-
-	MsgCockSeasonWinnerTemplate = "%[1]s *@%[2]s* с коком *%[3]s см*"
-	
-	MsgCockSeasonNoSeasonsTemplate = `*Сезоны коков*\n\nВ данный момент нет активных сезонов\. Следите за обновлениями\!`
+	CommonDots = "CommonDots"
+
+	MsgCockScoreboardNotFound = "MsgCockScoreboardNotFound"
+
+	MsgCockSize                    = "MsgCockSize"
+	MsgCockRulerScoreboardDefault  = "MsgCockRulerScoreboardDefault"
+	MsgCockRulerScoreboardSelected = "MsgCockRulerScoreboardSelected"
+	MsgCockRaceScoreboardDefault   = "MsgCockRaceScoreboardDefault"
+	MsgCockRaceScoreboardSelected  = "MsgCockRaceScoreboardSelected"
+
+	MsgCockRulerContextDefault   = "MsgCockRulerContextDefault"
+	MsgCockRulerContextSelected  = "MsgCockRulerContextSelected"
+	MsgCockRaceContextDefault    = "MsgCockRaceContextDefault"
+	MsgCockRaceContextSelected   = "MsgCockRaceContextSelected"
+	MsgCockLadderContextDefault  = "MsgCockLadderContextDefault"
+	MsgCockLadderContextSelected = "MsgCockLadderContextSelected"
+
+	MsgCockLadderScoreboardDefault  = "MsgCockLadderScoreboardDefault"
+	MsgCockLadderScoreboardSelected = "MsgCockLadderScoreboardSelected"
+
+	MsgCockRulerScoreboardTemplate              = "MsgCockRulerScoreboardTemplate"
+	MsgCockRulerScoreboardWinnersTemplate       = "MsgCockRulerScoreboardWinnersTemplate"
+	MsgCockRulerScoreboardTemplateNoDesc        = "MsgCockRulerScoreboardTemplateNoDesc"
+	MsgCockRulerScoreboardWinnersTemplateNoDesc = "MsgCockRulerScoreboardWinnersTemplateNoDesc"
+
+	MsgCockRaceScoreboardTemplate              = "MsgCockRaceScoreboardTemplate"
+	MsgCockRaceScoreboardWinnersTemplate       = "MsgCockRaceScoreboardWinnersTemplate"
+	MsgCockRaceScoreboardTemplateNoDesc        = "MsgCockRaceScoreboardTemplateNoDesc"
+	MsgCockRaceScoreboardWinnersTemplateNoDesc = "MsgCockRaceScoreboardWinnersTemplateNoDesc"
+
+	MsgCockLadderScoreboardTemplate              = "MsgCockLadderScoreboardTemplate"
+	MsgCockLadderScoreboardWinnersTemplate       = "MsgCockLadderScoreboardWinnersTemplate"
+	MsgCockLadderScoreboardTemplateNoDesc        = "MsgCockLadderScoreboardTemplateNoDesc"
+	MsgCockLadderScoreboardWinnersTemplateNoDesc = "MsgCockLadderScoreboardWinnersTemplateNoDesc"
+
+	MsgCockRaceFooterActiveSeason = "MsgCockRaceFooterActiveSeason"
+	MsgCockRaceFooterNoSeason     = "MsgCockRaceFooterNoSeason"
+
+	MsgCockDynamicsTemplate = "MsgCockDynamicsTemplate"
+
+	MsgCockSeasonTemplate            = "MsgCockSeasonTemplate"
+	MsgCockSeasonWithWinnersTemplate = "MsgCockSeasonWithWinnersTemplate"
+	MsgCockSeasonTemplateFooter      = "MsgCockSeasonTemplateFooter"
+	MsgCockSeasonWinnerTemplate      = "MsgCockSeasonWinnerTemplate"
+	MsgCockSeasonWinnerWithRespects  = "MsgCockSeasonWinnerWithRespects"
+	MsgCockSeasonNoSeasonsTemplate   = "MsgCockSeasonNoSeasonsTemplate"
+
+	MsgCockAchievementsTemplate           = "MsgCockAchievementsTemplate"
+	MsgCockAchievementsTemplateOtherPages = "MsgCockAchievementsTemplateOtherPages"
+
+	MsgSystemInfoTemplate = "MsgSystemInfoTemplate"
+
+	InlineTitleCockSize         = "InlineTitleCockSize"
+	InlineTitleCockRuler        = "InlineTitleCockRuler"
+	InlineTitleCockLadder       = "InlineTitleCockLadder"
+	InlineTitleCockRace         = "InlineTitleCockRace"
+	InlineTitleCockDynamic      = "InlineTitleCockDynamic"
+	InlineTitleCockSeason       = "InlineTitleCockSeason"
+	InlineTitleCockAchievements = "InlineTitleCockAchievements"
+	InlineTitleSystemInfo       = "InlineTitleSystemInfo"
+
+	DescCockSize         = "DescCockSize"
+	DescCockRuler        = "DescCockRuler"
+	DescCockLadder       = "DescCockLadder"
+	DescCockRace         = "DescCockRace"
+	DescCockDynamic      = "DescCockDynamic"
+	DescCockSeason       = "DescCockSeason"
+	DescCockAchievements = "DescCockAchievements"
+	DescSystemInfo       = "DescSystemInfo"
+
+	MsgCockDynamicNoData      = "MsgCockDynamicNoData"
+	MsgSeasonUnknownStartDate = "MsgSeasonUnknownStartDate"
+	MsgSeasonButton           = "MsgSeasonButton"
+	MsgSeasonNotFound         = "MsgSeasonNotFound"
+	MsgCallbackInvalidFormat  = "MsgCallbackInvalidFormat"
+	MsgCallbackParseError     = "MsgCallbackParseError"
+
+	MsgUserPullingRecently = "MsgUserPullingRecently"
+	MsgUserPullingSince    = "MsgUserPullingSince"
+	MsgListSeparator       = "MsgListSeparator"
+	MsgListSeparatorLast   = "MsgListSeparatorLast"
+
+	UnitDay            = "UnitDay"
+	UnitMonth          = "UnitMonth"
+	UnitYear           = "UnitYear"
+	UnitSeason         = "UnitSeason"
+	UnitSeasonGenitive = "UnitSeasonGenitive"
+	UnitHour           = "UnitHour"
+	UnitMinute         = "UnitMinute"
+
+	UptimeDayShort    = "UptimeDayShort"
+	UptimeHourShort   = "UptimeHourShort"
+	UptimeMinuteShort = "UptimeMinuteShort"
+
+	MsgUnknownValue = "MsgUnknownValue"
+
+	AnonymousNameTemplate = "AnonymousNameTemplate"
+
+	MsgAchievementCompleted    = "MsgAchievementCompleted"
+	MsgAchievementInProgress   = "MsgAchievementInProgress"
+	MsgAchievementNotCompleted = "MsgAchievementNotCompleted"
+
+	LuckLabelGodRandom      = "LuckLabelGodRandom"
+	LuckLabelCosmicLuck     = "LuckLabelCosmicLuck"
+	LuckLabelFairyLuck      = "LuckLabelFairyLuck"
+	LuckLabelSuperLuck      = "LuckLabelSuperLuck"
+	LuckLabelIncredibleLuck = "LuckLabelIncredibleLuck"
+	LuckLabelVeryLucky      = "LuckLabelVeryLucky"
+	LuckLabelLucky          = "LuckLabelLucky"
+	LuckLabelBalanced       = "LuckLabelBalanced"
+	LuckLabelUnlucky        = "LuckLabelUnlucky"
+	LuckLabelBad            = "LuckLabelBad"
+	LuckLabelGloom          = "LuckLabelGloom"
+	LuckLabelHellTilt       = "LuckLabelHellTilt"
+	LuckLabelBurningInHell  = "LuckLabelBurningInHell"
+
+	VolatilityLabelStone        = "VolatilityLabelStone"
+	VolatilityLabelStable       = "VolatilityLabelStable"
+	VolatilityLabelModerate     = "VolatilityLabelModerate"
+	VolatilityLabelLivelySpread = "VolatilityLabelLivelySpread"
+	VolatilityLabelUneven       = "VolatilityLabelUneven"
+	VolatilityLabelChaotic      = "VolatilityLabelChaotic"
+	VolatilityLabelRandom       = "VolatilityLabelRandom"
+
+	IrkLabelZero      = "IrkLabelZero"
+	IrkLabelMinimal   = "IrkLabelMinimal"
+	IrkLabelVerySmall = "IrkLabelVerySmall"
+	IrkLabelSmall     = "IrkLabelSmall"
+	IrkLabelReduced   = "IrkLabelReduced"
+	IrkLabelAverage   = "IrkLabelAverage"
+	IrkLabelIncreased = "IrkLabelIncreased"
+	IrkLabelLarge     = "IrkLabelLarge"
+	IrkLabelVeryLarge = "IrkLabelVeryLarge"
+	IrkLabelMaximum   = "IrkLabelMaximum"
+	IrkLabelUltimate  = "IrkLabelUltimate"
+
+	GrowthSpeedLabelCosmic   = "GrowthSpeedLabelCosmic"
+	GrowthSpeedLabelExtreme  = "GrowthSpeedLabelExtreme"
+	GrowthSpeedLabelVeryFast = "GrowthSpeedLabelVeryFast"
+	GrowthSpeedLabelFast     = "GrowthSpeedLabelFast"
+	GrowthSpeedLabelModerate = "GrowthSpeedLabelModerate"
+	GrowthSpeedLabelAverage  = "GrowthSpeedLabelAverage"
+	GrowthSpeedLabelSlow     = "GrowthSpeedLabelSlow"
+	GrowthSpeedLabelVerySlow = "GrowthSpeedLabelVerySlow"
+	GrowthSpeedLabelTurtle   = "GrowthSpeedLabelTurtle"
+	GrowthSpeedLabelStalled  = "GrowthSpeedLabelStalled"
 )
 
 func NewMsgCockDynamicsTemplate(
+	localizationManager *localization.LocalizationManager,
+	localizer *i18n.Localizer,
 	/* Общая динамика коков */
 
 	totalCock int,
@@ -297,17 +212,17 @@ func NewMsgCockDynamicsTemplate(
 
 	userLuckCoefficient float64,
 	userVolatility float64,
-	
+
 	/* Средняя скорость прироста */
-	
+
 	userGrowthSpeed float64,
-	
+
 	/* Скорость роста общей статистики */
-	
+
 	overallGrowthSpeed float64,
-	
+
 	/* Период дергания кока пользователем */
-	
+
 	userPullingPeriod string,
 ) string {
 	var userYesterdayChangePercentEmoji string
@@ -330,76 +245,74 @@ func NewMsgCockDynamicsTemplate(
 		userFiveCocksChangeSymbol = ""
 	}
 
-	return fmt.Sprintf(
-		MsgCockDynamicsTemplate,
-
+	return localizationManager.Localize(localizer, MsgCockDynamicsTemplate, map[string]any{
 		/* 1-2: Общая динамика коков */
-		EscapeMarkdownV2(FormatDickSize(totalCock)),           // %[1]s
-		EscapeMarkdownV2(FormatDickSize(totalUsers)),          // %[2]s
+		"TotalCock":  EscapeMarkdownV2(FormatDickSize(totalCock)),
+		"TotalUsers": EscapeMarkdownV2(FormatDickSize(totalUsers)),
 
 		/* 3-6: Средний и медианный кок */
-		EscapeMarkdownV2(FormatDickSize(totalAvgCock)),        // %[3]s
-		EmojiFromSize(totalAvgCock),                           // %[4]s
-		EscapeMarkdownV2(FormatDickSize(totalMedianCock)),     // %[5]s
-		EmojiFromSize(totalMedianCock),                        // %[6]s
+		"TotalAvgCock":     EscapeMarkdownV2(FormatDickSize(totalAvgCock)),
+		"TotalAvgEmoji":    EmojiFromSize(totalAvgCock),
+		"TotalMedianCock":  EscapeMarkdownV2(FormatDickSize(totalMedianCock)),
+		"TotalMedianEmoji": EmojiFromSize(totalMedianCock),
 
 		/* 7-13: Персональная динамика кока */
-		EscapeMarkdownV2(FormatDickSize(userTotalCock)),       // %[7]s
-		EscapeMarkdownV2(FormatDickSize(userAvgCock)),         // %[8]s
-		EmojiFromSize(userAvgCock),                            // %[9]s
-		EscapeMarkdownV2(FormatDickIkr(userIrk)),              // %[10]s
-		EscapeMarkdownV2(FormatDickSize(userMaxCock)),         // %[11]s
-		EmojiFromSize(userMaxCock),                            // %[12]s
-		userMaxCockDate.In(datetime.NowLocation()).Format("02.01.06"), // %[13]s
+		"UserTotalCock": EscapeMarkdownV2(FormatDickSize(userTotalCock)),
+		"UserAvgCock":   EscapeMarkdownV2(FormatDickSize(userAvgCock)),
+		"UserAvgEmoji":  EmojiFromSize(userAvgCock),
+		"UserIrk":       EscapeMarkdownV2(FormatDickIkr(userIrk)),
+		"UserMaxCock":   EscapeMarkdownV2(FormatDickSize(userMaxCock)),
+		"UserMaxEmoji":  EmojiFromSize(userMaxCock),
+		"UserMaxDate":   userMaxCockDate.In(datetime.NowLocation()).Format("02.01.06"),
 
 		/* 14-18: Кок-активы (дневная и 5 коков динамика) */
-		userYesterdayChangePercentEmoji,                       // %[14]s
-		fmt.Sprintf("%s%s", userYesterdayChangePercentSymbol, FormatDickPercent(userYesterdayChangePercent)), // %[15]s
-		fmt.Sprintf("%s%s", userYesterdayChangePercentSymbol, FormatDickSize(userYesterdayChangeCock)),       // %[16]s
-		fmt.Sprintf("%s%s", userFiveCocksChangeSymbol, FormatDickPercent(userFiveCocksChangePercent)),        // %[17]s
-		fmt.Sprintf("%s%s", userFiveCocksChangeSymbol, FormatDickSize(userFiveCocksChangeCock)),              // %[18]s
+		"UserYesterdayChangeEmoji":   userYesterdayChangePercentEmoji,
+		"UserYesterdayChangePercent": fmt.Sprintf("%s%s", userYesterdayChangePercentSymbol, FormatDickPercent(userYesterdayChangePercent)),
+		"UserYesterdayChangeSize":    fmt.Sprintf("%s%s", userYesterdayChangePercentSymbol, FormatDickSize(userYesterdayChangeCock)),
+		"UserFiveCocksChangePercent": fmt.Sprintf("%s%s", userFiveCocksChangeSymbol, FormatDickPercent(userFiveCocksChangePercent)),
+		"UserFiveCocksChangeSize":    fmt.Sprintf("%s%s", userFiveCocksChangeSymbol, FormatDickSize(userFiveCocksChangeCock)),
 
 		/* 19-20: Соотношение коков */
-		FormatDickPercent(totalBigCockRatio),                  // %[19]s
-		FormatDickPercent(totalSmallCockRatio),                // %[20]s
+		"TotalBigCockRatio":   FormatDickPercent(totalBigCockRatio),
+		"TotalSmallCockRatio": FormatDickPercent(totalSmallCockRatio),
 
 		/* 21-22: Самый большой кок */
-		totalMaxCockDate.In(datetime.NowLocation()).Format("02.01.06"), // %[21]s
-		FormatDickSize(totalMaxCock),                          // %[22]s
+		"TotalMaxCockDate": totalMaxCockDate.In(datetime.NowLocation()).Format("02.01.06"),
+		"TotalMaxCock":     FormatDickSize(totalMaxCock),
 
 		/* 23: % Доминирования */
-		FormatDickPercent(userDominancePercent),               // %[23]s
+		"UserDominancePercent": FormatDickPercent(userDominancePercent),
 
 		/* 24-25: Сезонные достижения */
-		FormatDickSize(userSeasonWins),                        // %[24]s
-		FormatDickSize(userCockRespect),                       // %[25]s
+		"UserSeasonWins":  FormatDickSize(userSeasonWins),
+		"UserCockRespect": FormatDickSize(userCockRespect),
 
 		/* 26-27: Всего дёрнуто коков */
-		EscapeMarkdownV2(FormatDickSize(totalCocksCount)),     // %[26]s
-		EscapeMarkdownV2(FormatDickSize(userCocksCount)),      // %[27]s
+		"TotalCocksCount": EscapeMarkdownV2(FormatDickSize(totalCocksCount)),
+		"UserCocksCount":  EscapeMarkdownV2(FormatDickSize(userCocksCount)),
 
 		/* 28-31: Коэффициент везения и волатильность */
-		EscapeMarkdownV2(FormatLuckCoefficient(userLuckCoefficient)), // %[28]s
-		LuckDisplay(userLuckCoefficient),                      // %[29]s
-		EscapeMarkdownV2(FormatVolatility(userVolatility)),    // %[30]s
-		VolatilityDisplay(userVolatility),                     // %[31]s
+		"UserLuckCoefficient":   EscapeMarkdownV2(FormatLuckCoefficient(userLuckCoefficient)),
+		"UserLuckDisplay":       LuckDisplay(localizationManager, localizer, userLuckCoefficient),
+		"UserVolatility":        EscapeMarkdownV2(FormatVolatility(userVolatility)),
+		"UserVolatilityDisplay": VolatilityDisplay(localizationManager, localizer, userVolatility),
 
 		/* 32: Описание ИРК */
-		IrkLabel(userIrk),                                     // %[32]s
+		"UserIrkLabel": IrkLabel(localizationManager, localizer, userIrk),
 
 		/* 33: Эмодзи динамики за 5 коков */
-		userFiveCocksChangeEmoji,                              // %[33]s
+		"UserFiveCocksEmoji": userFiveCocksChangeEmoji,
 
 		/* 34-35: Скорость прироста кока */
-		EscapeMarkdownV2(FormatGrowthSpeed(userGrowthSpeed)),   // %[34]s
-		GrowthSpeedDisplay(userGrowthSpeed),                    // %[35]s
-		
+		"UserGrowthSpeed":        EscapeMarkdownV2(FormatGrowthSpeed(userGrowthSpeed)),
+		"UserGrowthSpeedDisplay": GrowthSpeedDisplay(localizationManager, localizer, userGrowthSpeed),
+
 		/* 36: Скорость роста общей статистики */
-		EscapeMarkdownV2(FormatGrowthSpeed(overallGrowthSpeed)), // %[36]s
-		
+		"OverallGrowthSpeed": EscapeMarkdownV2(FormatGrowthSpeed(overallGrowthSpeed)),
+
 		/* 37: Период дергания кока */
-		userPullingPeriod,                    // %[37]s
-	)
+		"UserPullingPeriod": userPullingPeriod,
+	})
 }
 
 func GetMedalByPosition(position int) string {
@@ -415,90 +328,91 @@ func GetMedalByPosition(position int) string {
 	}
 }
 
-func NewMsgCockSeasonTemplate(pretenders string, startDate, endDate string, seasonNum int) string {
-	return fmt.Sprintf(
-		MsgCockSeasonTemplate,
-		pretenders,
-		startDate,
-		endDate,
-		seasonNum,
-	)
+func NewMsgCockSeasonTemplate(localizationManager *localization.LocalizationManager, localizer *i18n.Localizer, pretenders string, startDate, endDate string, seasonNum int) string {
+	return localizationManager.Localize(localizer, MsgCockSeasonTemplate, map[string]any{
+		"Pretenders": pretenders,
+		"StartDate":  startDate,
+		"EndDate":    endDate,
+		"SeasonNum":  seasonNum,
+	})
 }
 
-func NewMsgCockSeasonWithWinnersTemplate(winners string, startDate, endDate string, seasonNum int) string {
-	return fmt.Sprintf(
-		MsgCockSeasonWithWinnersTemplate,
-		winners,
-		startDate,
-		endDate,
-		seasonNum,
-	)
+func NewMsgCockSeasonWithWinnersTemplate(localizationManager *localization.LocalizationManager, localizer *i18n.Localizer, winners string, startDate, endDate string, seasonNum int) string {
+	return localizationManager.Localize(localizer, MsgCockSeasonWithWinnersTemplate, map[string]any{
+		"Winners":   winners,
+		"StartDate": startDate,
+		"EndDate":   endDate,
+		"SeasonNum": seasonNum,
+	})
 }
 
-func NewMsgCockSeasonWinnerTemplate(medal, nickname, totalSize string, respects int, showRespects bool) string {
-	winnersLine := fmt.Sprintf(
-		MsgCockSeasonWinnerTemplate,
-		medal,
-		EscapeMarkdownV2(nickname),
-		EscapeMarkdownV2(totalSize),
-	)
-	
+func NewMsgCockSeasonWinnerTemplate(localizationManager *localization.LocalizationManager, localizer *i18n.Localizer, medal, nickname, totalSize string, respects int, showRespects bool) string {
+	winnersLine := localizationManager.Localize(localizer, MsgCockSeasonWinnerTemplate, map[string]any{
+		"Medal":    medal,
+		"Nickname": EscapeMarkdownV2(nickname),
+		"Size":     EscapeMarkdownV2(totalSize),
+	})
+
 	// Показываем респекты только если showRespects = true (для завершенных сезонов)
 	if showRespects {
 		formattedRespects := EscapeMarkdownV2(FormatDickSize(respects))
-		return fmt.Sprintf("%s *\\(\\+%s 🫡\\)*", winnersLine, formattedRespects)
+		return localizationManager.Localize(localizer, MsgCockSeasonWinnerWithRespects, map[string]any{
+			"WinnerLine": winnersLine,
+			"Respects":   formattedRespects,
+		})
 	}
-	
+
 	return winnersLine
 }
 
-func NewMsgCockSeasonTemplateFooter() string {
-	return MsgCockSeasonTemplateFooter
+func NewMsgCockSeasonTemplateFooter(localizationManager *localization.LocalizationManager, localizer *i18n.Localizer) string {
+	return localizationManager.Localize(localizer, MsgCockSeasonTemplateFooter, nil)
 }
 
-func NewMsgCockSeasonNoSeasonsTemplate() string {
-	return MsgCockSeasonNoSeasonsTemplate
+func NewMsgCockSeasonNoSeasonsTemplate(localizationManager *localization.LocalizationManager, localizer *i18n.Localizer) string {
+	return localizationManager.Localize(localizer, MsgCockSeasonNoSeasonsTemplate, nil)
 }
 
-func NewMsgSystemInfoTemplate(info *SystemInfo) string {
-	return fmt.Sprintf(
-		MsgSystemInfoTemplate,
+func NewMsgSystemInfoTemplate(localizationManager *localization.LocalizationManager, localizer *i18n.Localizer, info *SystemInfo) string {
+	return localizationManager.Localize(localizer, MsgSystemInfoTemplate, map[string]any{
 		// Сервис
-		EscapeMarkdownV2(info.Uptime),
-		EscapeMarkdownV2(info.Version),
-		EscapeMarkdownV2(info.BuildRev),
-		EscapeMarkdownV2(info.BuildAt),
+		"Uptime":   EscapeMarkdownV2(info.Uptime),
+		"Version":  EscapeMarkdownV2(info.Version),
+		"BuildRev": EscapeMarkdownV2(info.BuildRev),
+		"BuildAt":  EscapeMarkdownV2(info.BuildAt),
 		// Окружение
-		EscapeMarkdownV2(info.OS),
-		EscapeMarkdownV2(info.Arch),
-		EscapeMarkdownV2(info.GoVersion),
-		info.MemoryUsed,
-		info.MemoryTotal,
-		EscapeMarkdownV2(fmt.Sprintf("%.1f", info.MemoryPercent)),
+		"OS":            EscapeMarkdownV2(info.OS),
+		"Arch":          EscapeMarkdownV2(info.Arch),
+		"GoVersion":     EscapeMarkdownV2(info.GoVersion),
+		"MemoryUsed":    info.MemoryUsed,
+		"MemoryTotal":   info.MemoryTotal,
+		"MemoryPercent": EscapeMarkdownV2(fmt.Sprintf("%.1f", info.MemoryPercent)),
 		// Базы данных
-		EscapeMarkdownV2(info.MongoVersion),
-		EscapeMarkdownV2(info.RedisVersion),
+		"MongoVersion": EscapeMarkdownV2(info.MongoVersion),
+		"RedisVersion": EscapeMarkdownV2(info.RedisVersion),
 		// Запрос
-		EscapeMarkdownV2(info.Username),
-		info.UserID,
-		info.BotID,
-	)
+		"Username": EscapeMarkdownV2(info.Username),
+		"UserID":   info.UserID,
+		"BotID":    info.BotID,
+	})
 }
 
 // NewMsgCockSeasonSinglePage генерирует текст для одной страницы сезона (постраничная навигация)
-func NewMsgCockSeasonSinglePage(season CockSeason, getSeasonWinners func(CockSeason) []SeasonWinner, showDescription bool) string {
+func NewMsgCockSeasonSinglePage(localizationManager *localization.LocalizationManager, localizer *i18n.Localizer, season CockSeason, getSeasonWinners func(CockSeason) []SeasonWinner, showDescription bool) string {
 	startDate := EscapeMarkdownV2(season.StartDate.Format("02.01.2006"))
 	endDate := EscapeMarkdownV2(season.EndDate.Format("02.01.2006"))
-	
+
 	winners := getSeasonWinners(season)
 	var winnerLines []string
-	
+
 	for _, winner := range winners {
 		medal := GetMedalByPosition(winner.Place - 1)
-		normalizedNickname := NormalizeUsername(winner.Nickname, winner.UserID)
+		normalizedNickname := NormalizeUsername(localizationManager, localizer, winner.Nickname, winner.UserID)
 		respects := CalculateCockRespect(winner.Place)
 		// Показываем респекты только для завершенных сезонов
 		line := NewMsgCockSeasonWinnerTemplate(
+			localizationManager,
+			localizer,
 			medal,
 			normalizedNickname,
 			FormatDickSize(int(winner.TotalSize)),
@@ -507,55 +421,25 @@ func NewMsgCockSeasonSinglePage(season CockSeason, getSeasonWinners func(CockSea
 		)
 		winnerLines = append(winnerLines, line)
 	}
-	
+
 	winnersText := strings.Join(winnerLines, "\n")
-	
+
 	var seasonBlock string
 	if season.IsActive {
-		seasonBlock = NewMsgCockSeasonTemplate(winnersText, startDate, endDate, season.SeasonNum)
+		seasonBlock = NewMsgCockSeasonTemplate(localizationManager, localizer, winnersText, startDate, endDate, season.SeasonNum)
 		// Футер показываем только для активного (текущего) сезона И если showDescription = true
 		if showDescription {
-			footer := NewMsgCockSeasonTemplateFooter()
+			footer := NewMsgCockSeasonTemplateFooter(localizationManager, localizer)
 			return seasonBlock + "\n\n" + footer
 		}
 		return seasonBlock
 	} else {
-		seasonBlock = NewMsgCockSeasonWithWinnersTemplate(winnersText, startDate, endDate, season.SeasonNum)
+		seasonBlock = NewMsgCockSeasonWithWinnersTemplate(localizationManager, localizer, winnersText, startDate, endDate, season.SeasonNum)
 		return seasonBlock
 	}
 }
 
-// MsgCockAchievementsTemplate - шаблон для списка достижений (первая страница с описанием)
-const MsgCockAchievementsTemplate = `🏆 *Кок\-ачивки*
-Выполнено: *%d/%d* _\(%d%%\)_ • 🌟 Респекты: *%d*
-
-💡 _За каждую кок\-ачивку ты получаешь кок\-респекты™, которые скоро можно будет обменять на мерч в официальном магазине\!_
-
-%s`
-
-// MsgCockAchievementsTemplateOtherPages - шаблон для остальных страниц (без описания)
-const MsgCockAchievementsTemplateOtherPages = `🏆 *Кок\-ачивки*
-Выполнено: *%d/%d* _\(%d%%\)_ • 🌟 Респекты: *%d*
-
-%s`
-
-// MsgSystemInfoTemplate - шаблон для системных данных
-const MsgSystemInfoTemplate = `🔧 *Системные данные*
-
-⚙️ *Сервис:*
-Аптайм: *%s*
-Версия: *%s*
-Сборка: *%s* \(*%s*\)
-
-💻 *Окружение:*
-Система: *%s/%s*
-Go Runtime: *%s*
-Память: *%dМБ / %dМБ* \(%s%%\)
-
-🗄️ *Базы данных:*
-MongoDB: *%s*
-Redis: *%s*
-
-👤 *Запрос:*
-Пользователь: *@%s* \(*%d*\)
-Бот ID: *%d*`
+const (
+	MsgCockAchievementsTitle = "MsgCockAchievementsTitle"
+	MsgSystemInfoTitle       = "MsgSystemInfoTitle"
+)
