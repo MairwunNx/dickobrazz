@@ -2,6 +2,7 @@ package application
 
 import (
 	"context"
+	"dickobrazz/application/localization"
 	"dickobrazz/application/logging"
 	"os"
 	"os/signal"
@@ -16,17 +17,18 @@ import (
 )
 
 type Application struct {
-	ctx         context.Context
-	cancel      context.CancelFunc
-	log         *logging.Logger
-	bot         *tgbotapi.BotAPI
-	rnd         *Random
-	db          *mongo.Client
-	redis       *redis.Client
-	cache       *cache.Cache
-	healthcheck *HealthcheckServer
-	wg          sync.WaitGroup
-	startTime   time.Time
+	ctx          context.Context
+	cancel       context.CancelFunc
+	log          *logging.Logger
+	bot          *tgbotapi.BotAPI
+	localization *localization.LocalizationManager
+	rnd          *Random
+	db           *mongo.Client
+	redis        *redis.Client
+	cache        *cache.Cache
+	healthcheck  *HealthcheckServer
+	wg           sync.WaitGroup
+	startTime    time.Time
 }
 
 func NewApplication() *Application {
@@ -34,20 +36,25 @@ func NewApplication() *Application {
 	log := logging.NewLogger()
 
 	bot := InitializeTelegramBot(log)
+	localizationManager, err := localization.NewLocalizationManager(log)
+	if err != nil {
+		log.F("Failed to initialize localization manager", logging.InnerError, err)
+	}
 	rnd := InitializeRandom(log)
 	db := InitializeMongoConnection(ctx, log)
 	client, redisCache := InitializeRedisConnection(log)
 
 	app := &Application{
-		ctx:         ctx,
-		cancel:      cancel,
-		log:         log,
-		bot:         bot,
-		rnd:         rnd,
-		db:          db,
-		redis:       client,
-		cache:       redisCache,
-		startTime:   time.Now(),
+		ctx:          ctx,
+		cancel:       cancel,
+		log:          log,
+		bot:          bot,
+		localization: localizationManager,
+		rnd:          rnd,
+		db:           db,
+		redis:        client,
+		cache:        redisCache,
+		startTime:    time.Now(),
 	}
 	app.healthcheck = InitializeHealthcheckServer(log, &app.wg)
 
@@ -120,7 +127,7 @@ func (app *Application) Run() {
 					logging.ChatType, query.ChatType,
 				)
 
-				app.HandleInlineQuery(log, query)
+				app.HandleInlineQuery(log, &update)
 			}
 
 			if callback := update.CallbackQuery; callback != nil {
@@ -132,7 +139,7 @@ func (app *Application) Run() {
 					"callback_data", callback.Data,
 				)
 
-				app.HandleCallbackQuery(log, callback)
+				app.HandleCallbackQuery(log, &update)
 			}
 		}
 	}
