@@ -77,3 +77,5 @@ volumes:
     driver: local
   dickobrazz-redis-data:
     driver: local
+  go-modules:
+  go-build-cache:
