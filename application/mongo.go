@@ -77,6 +77,7 @@ func (app *Application) AggregateCockSizes(log *logging.Logger) []UserCockRace {
 	cursor, err := collection.Aggregate(app.ctx, database.PipelineTopUsersBySize())
 	if err != nil {
 		log.E("Failed to aggregate cock sizes", logging.InnerError, err)
+		return []UserCockRace{}
 	}
 
 	defer func(cursor *mongo.Cursor, ctx context.Context) {
@@ -89,6 +90,7 @@ func (app *Application) AggregateCockSizes(log *logging.Logger) []UserCockRace {
 	var results []UserCockRace
 	if err = cursor.All(app.ctx, &results); err != nil {
 		log.E("Failed to parse aggregation results", logging.InnerError, err)
+		return []UserCockRace{}
 	}
 
 	log.I("Successfully aggregated cock sizes")

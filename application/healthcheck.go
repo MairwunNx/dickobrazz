@@ -5,6 +5,7 @@ import (
 	"dickobrazz/application/logging"
 	"net/http"
 	"sync"
+	"time"
 )
 
 type HealthcheckServer struct {
@@ -16,7 +17,13 @@ type HealthcheckServer struct {
 func InitializeHealthcheckServer(log *logging.Logger, wg *sync.WaitGroup) *HealthcheckServer {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/health", healthCheckHandler)
-	server := &http.Server{Addr: ":80", Handler: mux}
+	server := &http.Server{
+		Addr:         ":80",
+		Handler:      mux,
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 10 * time.Second,
+		IdleTimeout:  120 * time.Second,
+	}
 	return &HealthcheckServer{server: server, log: log, wg: wg}
 }
 
