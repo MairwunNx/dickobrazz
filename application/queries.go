@@ -37,14 +37,14 @@ func (app *Application) shouldShowDescription(log *logging.Logger, userID int64,
 	if username == "mairwunnx0" {
 		return true
 	}
-	
+
 	cocksCount := app.GetUserCocksCount(log, userID)
-	
+
 	// Если больше 32 коков, не показываем описания, очевидно юзер уже не новичок
 	if cocksCount > 32 {
 		return false
 	}
-	
+
 	return true
 }
 
@@ -222,11 +222,11 @@ func (app *Application) InlineQueryCockLadder(log *logging.Logger, query *tgbota
 
 func (app *Application) InlineQueryCockRace(log *logging.Logger, query *tgbotapi.InlineQuery) tgbotapi.InlineQueryResultArticle {
 	currentSeason := app.GetCurrentSeason(log)
-	
+
 	var cocks []UserCockRace
 	var seasonStartDate string
 	var totalParticipants int
-	
+
 	if currentSeason != nil {
 		cocks = app.AggregateCockSizesForSeason(log, *currentSeason)
 		totalParticipants = app.GetSeasonCockersCount(log, *currentSeason)
@@ -236,7 +236,7 @@ func (app *Application) InlineQueryCockRace(log *logging.Logger, query *tgbotapi
 		totalParticipants = app.GetTotalCockersCount(log)
 		seasonStartDate = "хуй знает когда" // Заглушка для случая если нет активного сезона (чего в целом быть не может, я в это верю.)
 	}
-	
+
 	showDescription := app.shouldShowDescription(log, query.From.ID, query.From.UserName)
 	text := app.GenerateCockRaceScoreboard(log, query.From.ID, cocks, seasonStartDate, totalParticipants, currentSeason, showDescription)
 	return InitializeInlineQueryWithThumbAndDesc(
@@ -300,13 +300,13 @@ func (app *Application) InlineQueryCockDynamic(log *logging.Logger, query *tgbot
 	}
 
 	individualCockTotal := result.IndividualCockTotal[0]
-	
+
 	// Проверяем наличие данных по среднему коку (требует минимум 5 коков)
 	var individualCockRecentAverage int
 	if len(result.IndividualCockRecent) > 0 {
 		individualCockRecentAverage = result.IndividualCockRecent[0].Average
 	}
-	
+
 	// Проверяем наличие данных по рекорду
 	var individualRecordTotal int
 	var individualRecordDate time.Time
@@ -318,10 +318,10 @@ func (app *Application) InlineQueryCockDynamic(log *logging.Logger, query *tgbot
 		individualRecordTotal = individualCockTotal.Total
 		individualRecordDate = datetime.NowTime()
 	}
-	
+
 	individualIrk := result.IndividualIrk[0]
 	individualDominance := result.IndividualDominance[0]
-	
+
 	// Получаем дату первого кока пользователя
 	var userFirstCockDate time.Time
 	var userPullingPeriod string
@@ -331,7 +331,7 @@ func (app *Application) InlineQueryCockDynamic(log *logging.Logger, query *tgbot
 	} else {
 		userPullingPeriod = "недавно"
 	}
-	
+
 	// Проверяем наличие данных для дневной динамики (может отсутствовать у новых пользователей)
 	var yesterdayCockChange int
 	var yesterdayCockChangePercent float64
@@ -339,7 +339,7 @@ func (app *Application) InlineQueryCockDynamic(log *logging.Logger, query *tgbot
 		yesterdayCockChange = result.IndividualDailyDynamics[0].YesterdayCockChange
 		yesterdayCockChangePercent = result.IndividualDailyDynamics[0].YesterdayCockChangePercent
 	}
-	
+
 	// Проверяем наличие данных для динамики за 5 коков (требует минимум 5 коков)
 	var fiveCocksChange int
 	var fiveCocksChangePercent float64
@@ -347,7 +347,7 @@ func (app *Application) InlineQueryCockDynamic(log *logging.Logger, query *tgbot
 		fiveCocksChange = result.IndividualFiveCocksDynamics[0].FiveCocksChange
 		fiveCocksChangePercent = result.IndividualFiveCocksDynamics[0].FiveCocksChangePercent
 	}
-	
+
 	// Проверяем наличие данных для скорости роста (требует минимум 5 коков)
 	var growthSpeed float64
 	if len(result.IndividualGrowthSpeed) > 0 {
@@ -359,21 +359,21 @@ func (app *Application) InlineQueryCockDynamic(log *logging.Logger, query *tgbot
 	overallCockers := result.Uniques[0].Count
 	overallDistribution := result.Distribution[0]
 	overallRecord := result.Record[0]
-	
+
 	totalCocksCount := result.TotalCocksCount[0].TotalCount
-	
+
 	// Получаем скорость роста общей статистики
 	var overallGrowthSpeed float64
 	if len(result.OverallGrowthSpeed) > 0 {
 		overallGrowthSpeed = result.OverallGrowthSpeed[0].GrowthSpeed
 	}
-	
+
 	// Проверяем наличие данных по количеству коков пользователя
 	var userCocksCount int
 	if len(result.IndividualCocksCount) > 0 {
 		userCocksCount = result.IndividualCocksCount[0].UserCount
 	}
-	
+
 	// Проверяем наличие данных для коэффициента везения (требует минимум 5 коков)
 	var userLuckCoefficient float64
 	if len(result.IndividualLuck) > 0 {
@@ -381,7 +381,7 @@ func (app *Application) InlineQueryCockDynamic(log *logging.Logger, query *tgbot
 	} else {
 		userLuckCoefficient = 1.0 // Нейтральное значение
 	}
-	
+
 	// Проверяем наличие данных для волатильности (требует минимум 5 коков)
 	var userVolatility float64
 	if len(result.IndividualVolatility) > 0 {
@@ -433,13 +433,13 @@ func (app *Application) InlineQueryCockDynamic(log *logging.Logger, query *tgbot
 		/* Коэффициент везения и волатильность */
 		userLuckCoefficient,
 		userVolatility,
-		
+
 		/* Средняя скорость прироста */
 		growthSpeed,
-		
+
 		/* Скорость роста общей статистики */
 		overallGrowthSpeed,
-		
+
 		/* Период дергания кока пользователем */
 		userPullingPeriod,
 	)
@@ -452,7 +452,7 @@ func (app *Application) InlineQueryCockDynamic(log *logging.Logger, query *tgbot
 
 func (app *Application) InlineQueryCockSeason(log *logging.Logger, query *tgbotapi.InlineQuery) tgbotapi.InlineQueryResultArticle {
 	allSeasons := app.GetAllSeasonsForStats(log)
-	
+
 	if len(allSeasons) == 0 {
 		text := NewMsgCockSeasonNoSeasonsTemplate()
 		return InitializeInlineQueryWithThumbAndDesc(
@@ -462,21 +462,21 @@ func (app *Application) InlineQueryCockSeason(log *logging.Logger, query *tgbota
 			"https://files.mairwunnx.com/raw/public/dickobrazz%2Fico_seasons.png",
 		)
 	}
-	
+
 	// Начинаем с последнего (самого нового) сезона
 	currentSeasonIdx := len(allSeasons) - 1
 	currentSeason := allSeasons[currentSeasonIdx]
-	
+
 	getSeasonWinners := func(season CockSeason) []SeasonWinner {
 		return app.GetSeasonWinners(log, season)
 	}
-	
+
 	showDescription := app.shouldShowDescription(log, query.From.ID, query.From.UserName)
 	text := NewMsgCockSeasonSinglePage(currentSeason, getSeasonWinners, showDescription)
-	
+
 	// Создаем кнопки навигации
 	var buttons []tgbotapi.InlineKeyboardButton
-	
+
 	// Кнопка "предыдущий сезон" (более старый, влево)
 	if currentSeasonIdx > 0 {
 		prevSeason := allSeasons[currentSeasonIdx-1]
@@ -485,24 +485,26 @@ func (app *Application) InlineQueryCockSeason(log *logging.Logger, query *tgbota
 			fmt.Sprintf("season_page:%d", prevSeason.SeasonNum),
 		))
 	}
-	
+
 	// Кнопка "следующий сезон" (более новый, вправо) - только если есть более новый
 	// (на самом деле, если мы на последнем сезоне, следующего нет)
 	// Но для будущих сезонов это может быть полезно
-	
-	kb := tgbotapi.NewInlineKeyboardMarkup(
-		tgbotapi.NewInlineKeyboardRow(buttons...),
-	)
-	
+
 	article := tgbotapi.NewInlineQueryResultArticleMarkdownV2(
 		uuid.NewString(),
 		"Сезоны коков",
 		text,
 	)
-	article.ReplyMarkup = &kb
+
+	if len(buttons) > 0 {
+		kb := tgbotapi.NewInlineKeyboardMarkup(
+			tgbotapi.NewInlineKeyboardRow(buttons...),
+		)
+		article.ReplyMarkup = &kb
+	}
 	article.ThumbURL = "https://files.mairwunnx.com/raw/public/dickobrazz%2Fico_seasons.png"
 	article.Description = DescCockSeason
-	
+
 	return article
 }
 
@@ -530,7 +532,7 @@ func (app *Application) InlineQueryCockRuler(log *logging.Logger, query *tgbotap
 
 func (app *Application) InlineQueryCockAchievements(log *logging.Logger, query *tgbotapi.InlineQuery, page int) tgbotapi.InlineQueryResultArticle {
 	userID := query.From.ID
-	
+
 	// Проверка только для тестового пользователя
 	// if userID != 362695653 {
 	// 	text := "🔒 *Кок\\-ачивки временно доступны только для тестирования*\n\n_Скоро будут доступны для всех\\!_"
@@ -541,13 +543,13 @@ func (app *Application) InlineQueryCockAchievements(log *logging.Logger, query *
 	// 		"https://files.mairwunnx.com/raw/public/dickobrazz%2FGemini_Generated_Image_qkh4tfqkh4tfqkh4.png",
 	// 	)
 	// }
-	
+
 	// Проверяем и обновляем достижения (только для mairwunnx, раз в сутки)
 	app.CheckAndUpdateAchievements(log, userID)
-	
+
 	// Получаем достижения пользователя
 	userAchievements := app.GetUserAchievements(log, userID)
-	
+
 	// Генерируем текст с пагинацией (10 ачивок на страницу)
 	achievementsList, completedCount, totalRespects, percentComplete := GenerateAchievementsText(
 		AllAchievements,
@@ -555,10 +557,10 @@ func (app *Application) InlineQueryCockAchievements(log *logging.Logger, query *
 		page,
 		10,
 	)
-	
+
 	totalAchievements := len(AllAchievements)
 	totalPages := (totalAchievements + 9) / 10
-	
+
 	// Выбираем шаблон в зависимости от страницы
 	var template string
 	if page == 1 {
@@ -566,7 +568,7 @@ func (app *Application) InlineQueryCockAchievements(log *logging.Logger, query *
 	} else {
 		template = MsgCockAchievementsTemplateOtherPages
 	}
-	
+
 	text := fmt.Sprintf(
 		template,
 		completedCount,
@@ -575,27 +577,27 @@ func (app *Application) InlineQueryCockAchievements(log *logging.Logger, query *
 		totalRespects,
 		achievementsList,
 	)
-	
+
 	// Создаем кнопки пагинации (с userID владельца)
 	var buttons []tgbotapi.InlineKeyboardButton
-	
+
 	if page > 1 {
 		// Кнопка "предыдущая страница"
 		buttons = append(buttons, tgbotapi.NewInlineKeyboardButtonData("◀️", fmt.Sprintf("ach_page:%d:%d", userID, page-1)))
 	}
-	
+
 	// Кнопка "текущая страница / всего страниц"
 	buttons = append(buttons, tgbotapi.NewInlineKeyboardButtonData(fmt.Sprintf("%d/%d", page, totalPages), "ach_noop"))
-	
+
 	if page < totalPages {
 		// Кнопка "следующая страница"
 		buttons = append(buttons, tgbotapi.NewInlineKeyboardButtonData("▶️", fmt.Sprintf("ach_page:%d:%d", userID, page+1)))
 	}
-	
+
 	kb := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(buttons...),
 	)
-	
+
 	article := tgbotapi.NewInlineQueryResultArticleMarkdownV2(
 		uuid.NewString(),
 		"Кок-ачивки",
@@ -604,7 +606,7 @@ func (app *Application) InlineQueryCockAchievements(log *logging.Logger, query *
 	article.ReplyMarkup = &kb
 	article.ThumbURL = "https://files.mairwunnx.com/raw/public/dickobrazz%2Fico_achievements.png"
 	article.Description = DescCockAchievements
-	
+
 	return article
 }
 
@@ -627,9 +629,9 @@ func InitializeInlineQueryWithThumbAndDesc(title, message, description, thumbURL
 
 func (app *Application) InlineQuerySystemInfo(log *logging.Logger, query *tgbotapi.InlineQuery) tgbotapi.InlineQueryResultArticle {
 	info := app.GetSystemInfo(log, query.From.ID, query.From.UserName)
-	
+
 	text := NewMsgSystemInfoTemplate(info)
-	
+
 	return InitializeInlineQueryWithThumbAndDesc(
 		"Системные данные",
 		text,
@@ -641,7 +643,7 @@ func (app *Application) InlineQuerySystemInfo(log *logging.Logger, query *tgbota
 func (app *Application) HandleCallbackQuery(log *logging.Logger, callback *tgbotapi.CallbackQuery) {
 	// Парсим callback data
 	data := callback.Data
-	
+
 	// Обрабатываем пагинацию сезонов
 	if strings.HasPrefix(data, "season_page:") {
 		// Парсим номер сезона
@@ -653,10 +655,10 @@ func (app *Application) HandleCallbackQuery(log *logging.Logger, callback *tgbot
 		} else {
 			seasonNum = parsedSeasonNum
 		}
-		
+
 		// Получаем все сезоны
 		allSeasons := app.GetAllSeasonsForStats(log)
-		
+
 		// Находим нужный сезон
 		var targetSeason *CockSeason
 		var targetIdx int
@@ -667,7 +669,7 @@ func (app *Application) HandleCallbackQuery(log *logging.Logger, callback *tgbot
 				break
 			}
 		}
-		
+
 		if targetSeason == nil {
 			log.E("Season not found", "season_num", seasonNum)
 			callbackConfig := tgbotapi.NewCallback(callback.ID, "Сезон не найден")
@@ -676,17 +678,17 @@ func (app *Application) HandleCallbackQuery(log *logging.Logger, callback *tgbot
 			}
 			return
 		}
-		
+
 		getSeasonWinners := func(season CockSeason) []SeasonWinner {
 			return app.GetSeasonWinners(log, season)
 		}
-		
+
 		showDescription := app.shouldShowDescription(log, callback.From.ID, callback.From.UserName)
 		text := NewMsgCockSeasonSinglePage(*targetSeason, getSeasonWinners, showDescription)
-		
+
 		// Создаем кнопки навигации
 		var buttons []tgbotapi.InlineKeyboardButton
-		
+
 		// Кнопка "предыдущий сезон" (более старый, влево)
 		if targetIdx > 0 {
 			prevSeason := allSeasons[targetIdx-1]
@@ -695,7 +697,7 @@ func (app *Application) HandleCallbackQuery(log *logging.Logger, callback *tgbot
 				fmt.Sprintf("season_page:%d", prevSeason.SeasonNum),
 			))
 		}
-		
+
 		// Кнопка "следующий сезон" (более новый, вправо)
 		if targetIdx < len(allSeasons)-1 {
 			nextSeason := allSeasons[targetIdx+1]
@@ -704,23 +706,26 @@ func (app *Application) HandleCallbackQuery(log *logging.Logger, callback *tgbot
 				fmt.Sprintf("season_page:%d", nextSeason.SeasonNum),
 			))
 		}
-		
-		kb := tgbotapi.NewInlineKeyboardMarkup(
-			tgbotapi.NewInlineKeyboardRow(buttons...),
-		)
-		
+
 		// Отвечаем на callback
 		_, _ = app.bot.Request(tgbotapi.NewCallback(callback.ID, ""))
-		
+
 		// Редактируем существующее сообщение
 		if callback.InlineMessageID != "" {
 			edit := tgbotapi.EditMessageTextConfig{
 				BaseEdit: tgbotapi.BaseEdit{
 					InlineMessageID: callback.InlineMessageID,
-					ReplyMarkup:     &kb,
 				},
 				Text:      text,
 				ParseMode: "MarkdownV2",
+			}
+
+			// Добавляем клавиатуру только если есть кнопки
+			if len(buttons) > 0 {
+				kb := tgbotapi.NewInlineKeyboardMarkup(
+					tgbotapi.NewInlineKeyboardRow(buttons...),
+				)
+				edit.ReplyMarkup = &kb
 			}
 			if _, err := app.bot.Request(edit); err != nil {
 				log.E("Failed to edit inline message", logging.InnerError, err)
@@ -728,14 +733,21 @@ func (app *Application) HandleCallbackQuery(log *logging.Logger, callback *tgbot
 				log.I("Successfully edited inline message", "season_num", seasonNum)
 			}
 		} else if callback.Message != nil {
-			edit := tgbotapi.NewEditMessageTextAndMarkup(
+			edit := tgbotapi.NewEditMessageText(
 				callback.Message.Chat.ID,
 				callback.Message.MessageID,
 				text,
-				kb,
 			)
 			edit.ParseMode = "MarkdownV2"
-			
+
+			// Добавляем клавиатуру только если есть кнопки
+			if len(buttons) > 0 {
+				kb := tgbotapi.NewInlineKeyboardMarkup(
+					tgbotapi.NewInlineKeyboardRow(buttons...),
+				)
+				edit.ReplyMarkup = &kb
+			}
+
 			if _, err := app.bot.Request(edit); err != nil {
 				log.E("Failed to edit chat message", logging.InnerError, err)
 			} else {
@@ -755,7 +767,7 @@ func (app *Application) HandleCallbackQuery(log *logging.Logger, callback *tgbot
 			}
 			return
 		}
-		
+
 		userID, err := strconv.ParseInt(parts[0], 10, 64)
 		if err != nil {
 			log.E("Failed to parse userID from callback", logging.InnerError, err)
@@ -765,7 +777,7 @@ func (app *Application) HandleCallbackQuery(log *logging.Logger, callback *tgbot
 			}
 			return
 		}
-		
+
 		page := 1
 		if parsedPage, err := strconv.Atoi(parts[1]); err != nil {
 			log.E("Failed to parse page number", logging.InnerError, err)
@@ -781,13 +793,13 @@ func (app *Application) HandleCallbackQuery(log *logging.Logger, callback *tgbot
 		// 	}
 		// 	return
 		// }
-		
+
 		// Проверяем и обновляем достижения (раз в сутки)
 		app.CheckAndUpdateAchievements(log, userID)
-		
+
 		// Получаем достижения пользователя
 		userAchievements := app.GetUserAchievements(log, userID)
-		
+
 		// Генерируем текст для запрошенной страницы
 		achievementsList, completedCount, totalRespects, percentComplete := GenerateAchievementsText(
 			AllAchievements,
@@ -795,10 +807,10 @@ func (app *Application) HandleCallbackQuery(log *logging.Logger, callback *tgbot
 			page,
 			10,
 		)
-		
+
 		totalAchievements := len(AllAchievements)
 		totalPages := (totalAchievements + 9) / 10
-		
+
 		// Выбираем шаблон в зависимости от страницы
 		var template string
 		if page == 1 {
@@ -806,7 +818,7 @@ func (app *Application) HandleCallbackQuery(log *logging.Logger, callback *tgbot
 		} else {
 			template = MsgCockAchievementsTemplateOtherPages
 		}
-		
+
 		text := fmt.Sprintf(
 			template,
 			completedCount,
@@ -815,37 +827,40 @@ func (app *Application) HandleCallbackQuery(log *logging.Logger, callback *tgbot
 			totalRespects,
 			achievementsList,
 		)
-		
+
 		// Создаем кнопки пагинации для новой страницы (с userID владельца)
 		var buttons []tgbotapi.InlineKeyboardButton
-		
+
 		if page > 1 {
 			buttons = append(buttons, tgbotapi.NewInlineKeyboardButtonData("◀️", fmt.Sprintf("ach_page:%d:%d", userID, page-1)))
 		}
-		
+
 		buttons = append(buttons, tgbotapi.NewInlineKeyboardButtonData(fmt.Sprintf("%d/%d", page, totalPages), "ach_noop"))
-		
+
 		if page < totalPages {
 			buttons = append(buttons, tgbotapi.NewInlineKeyboardButtonData("▶️", fmt.Sprintf("ach_page:%d:%d", userID, page+1)))
 		}
-		
-		kb := tgbotapi.NewInlineKeyboardMarkup(
-			tgbotapi.NewInlineKeyboardRow(buttons...),
-		)
-		
+
 		// Отвечаем на callback (убираем "часики" на кнопке)
 		_, _ = app.bot.Request(tgbotapi.NewCallback(callback.ID, ""))
-		
+
 		// Редактируем существующее сообщение
 		if callback.InlineMessageID != "" {
 			// INLINE message: редактируем по InlineMessageID
 			edit := tgbotapi.EditMessageTextConfig{
 				BaseEdit: tgbotapi.BaseEdit{
 					InlineMessageID: callback.InlineMessageID,
-					ReplyMarkup:     &kb,
 				},
 				Text:      text,
 				ParseMode: "MarkdownV2",
+			}
+
+			// Добавляем клавиатуру только если есть кнопки
+			if len(buttons) > 0 {
+				kb := tgbotapi.NewInlineKeyboardMarkup(
+					tgbotapi.NewInlineKeyboardRow(buttons...),
+				)
+				edit.ReplyMarkup = &kb
 			}
 			if _, err := app.bot.Request(edit); err != nil {
 				log.E("Failed to edit inline message", logging.InnerError, err)
@@ -854,14 +869,21 @@ func (app *Application) HandleCallbackQuery(log *logging.Logger, callback *tgbot
 			}
 		} else if callback.Message != nil {
 			// Обычное сообщение в чате: редактируем по chat_id/message_id
-			edit := tgbotapi.NewEditMessageTextAndMarkup(
+			edit := tgbotapi.NewEditMessageText(
 				callback.Message.Chat.ID,
 				callback.Message.MessageID,
 				text,
-				kb,
 			)
 			edit.ParseMode = "MarkdownV2"
-			
+
+			// Добавляем клавиатуру только если есть кнопки
+			if len(buttons) > 0 {
+				kb := tgbotapi.NewInlineKeyboardMarkup(
+					tgbotapi.NewInlineKeyboardRow(buttons...),
+				)
+				edit.ReplyMarkup = &kb
+			}
+
 			if _, err := app.bot.Request(edit); err != nil {
 				log.E("Failed to edit chat message", logging.InnerError, err)
 			} else {
