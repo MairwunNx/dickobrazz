@@ -79,39 +79,56 @@ func (app *Application) Run() {
 	updates := tgbotapi.NewUpdate(0)
 	updates.Timeout = 60
 
-	for update := range app.bot.GetUpdatesChan(updates) {
-		if msg := update.Message; msg != nil {
-			user := update.SentFrom()
-			app.log.With(
-				logging.UserId, user.ID,
-				logging.UserName, user.UserName,
-				logging.ChatType, msg.Chat.Type,
-				logging.ChatId, msg.Chat.ID,
-			).I("Received message")
-		}
+	updatesChan := app.bot.GetUpdatesChan(updates)
 
-		if query := update.InlineQuery; query != nil {
-			user := update.SentFrom()
-			log := app.log.With(
-				logging.UserId, user.ID,
-				logging.UserName, user.UserName,
-				logging.QueryId, query.ID,
-				logging.ChatType, query.ChatType,
-			)
+	app.log.I("Bot started, waiting for updates...")
 
-			app.HandleInlineQuery(log, query)
-		}
+	for {
+		select {
+		case <-app.ctx.Done():
+			app.log.I("Received shutdown signal, stopping bot...")
+			app.bot.StopReceivingUpdates()
+			return
 
-		if callback := update.CallbackQuery; callback != nil {
-			user := update.SentFrom()
-			log := app.log.With(
-				logging.UserId, user.ID,
-				logging.UserName, user.UserName,
-				"callback_id", callback.ID,
-				"callback_data", callback.Data,
-			)
+		case update, ok := <-updatesChan:
+			if !ok {
+				app.log.I("Updates channel closed, stopping bot...")
+				return
+			}
 
-			app.HandleCallbackQuery(log, callback)
+			if msg := update.Message; msg != nil {
+				user := update.SentFrom()
+				app.log.With(
+					logging.UserId, user.ID,
+					logging.UserName, user.UserName,
+					logging.ChatType, msg.Chat.Type,
+					logging.ChatId, msg.Chat.ID,
+				).I("Received message")
+			}
+
+			if query := update.InlineQuery; query != nil {
+				user := update.SentFrom()
+				log := app.log.With(
+					logging.UserId, user.ID,
+					logging.UserName, user.UserName,
+					logging.QueryId, query.ID,
+					logging.ChatType, query.ChatType,
+				)
+
+				app.HandleInlineQuery(log, query)
+			}
+
+			if callback := update.CallbackQuery; callback != nil {
+				user := update.SentFrom()
+				log := app.log.With(
+					logging.UserId, user.ID,
+					logging.UserName, user.UserName,
+					"callback_id", callback.ID,
+					"callback_data", callback.Data,
+				)
+
+				app.HandleCallbackQuery(log, callback)
+			}
 		}
 	}
 }
