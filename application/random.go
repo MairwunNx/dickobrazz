@@ -4,6 +4,7 @@ import (
 	"dickobrazz/application/logging"
 	"math/rand/v2"
 	"os"
+	"sync"
 
 	"github.com/sgade/randomorg"
 )
@@ -11,6 +12,7 @@ import (
 type Random struct {
 	randomOrg *randomorg.Random
 	chacha8   *rand.ChaCha8
+	mu        sync.Mutex
 }
 
 func InitializeRandom(log *logging.Logger) *Random {
@@ -22,7 +24,12 @@ func (rnd *Random) IntN(log *logging.Logger, maxInclusive int) int {
 	if value, err := rnd.randomOrg.GenerateIntegers(1, 0, int64(maxInclusive+1)); err != nil {
 		log.E("Failed to generate random number", logging.RndSource, "external/random.org", logging.InnerError, err)
 		log.I("Successfully generated random number", logging.RndSource, "native/chacha8", logging.InnerError, err)
-		return int(rnd.chacha8.Uint64() % uint64(maxInclusive+1))
+
+		rnd.mu.Lock()
+		result := int(rnd.chacha8.Uint64() % uint64(maxInclusive+1))
+		rnd.mu.Unlock()
+
+		return result
 	} else {
 		log.I("Successfully generated random number", logging.RndSource, "external/random.org")
 		return int(value[0])
