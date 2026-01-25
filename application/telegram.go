@@ -17,30 +17,28 @@ func InitializeTelegramBot(log *logging.Logger) *tgbotapi.BotAPI {
 		log.F("Telegram token must be set and non-empty")
 	}
 
-	bot, err := tgbotapi.NewBotAPI(token)
-	if err != nil {
-		log.F("Failed to initialize Telegram Bot API", logging.InnerError, err)
-	}
-
 	telegramEnv := os.Getenv("TELEGRAM_ENV")
-	if telegramEnv == "" {
-		telegramEnv = "production"
-	}
+  if telegramEnv == "" {
+    telegramEnv = "production"
+  }
 
-	var apiEndpoint string
-	switch telegramEnv {
-	case "test":
-		apiEndpoint = "https://api.telegram.org/bot%s/test/%s"
-		log.I("Using Telegram TEST API endpoint")
-	case "production":
-		apiEndpoint = DefaultAPIEndpoint
-		log.I("Using Telegram PRODUCTION API endpoint")
-	default:
-		log.F("Invalid TELEGRAM_ENV value", "telegram_env", telegramEnv)
-	}
+  var apiEndpoint string
+  switch telegramEnv {
+  case "test":
+    apiEndpoint = "https://api.telegram.org/bot%s/test/%s"
+    log.I("Using Telegram TEST API endpoint")
+  case "production":
+    apiEndpoint = DefaultAPIEndpoint
+    log.I("Using Telegram PRODUCTION API endpoint")
+  default:
+    log.F("Invalid TELEGRAM_ENV value", "telegram_env", telegramEnv)
+  }
 
-	bot.SetAPIEndpoint(apiEndpoint)
+  bot, err := tgbotapi.NewBotAPIWithAPIEndpoint(token, apiEndpoint)
+  if err != nil {
+    log.F("Failed to initialize Telegram Bot API", logging.InnerError, err)
+  }
 
-	log.I("Successfully connected to Telegram Bot API!", "environment", telegramEnv)
-	return bot
+  log.I("Successfully connected to Telegram Bot API!", "environment", telegramEnv)
+  return bot
 }
