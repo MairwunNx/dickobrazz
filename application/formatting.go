@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"math"
@@ -109,7 +110,10 @@ var mathFancy = map[int]string{
 	61: "√3721",
 }
 
-var rnd = rand.New(rand.NewSource(time.Now().UnixNano()))
+var (
+	rnd   = rand.New(rand.NewSource(time.Now().UnixNano()))
+	rndMu sync.Mutex
+)
 
 // isMathDay — 14 марта (International Day of Mathematics / Pi Day)
 func isMathDay(t time.Time) bool {
@@ -122,7 +126,11 @@ func isProgrammersDay(t time.Time) bool {
 }
 
 func toProgrammersNotation(n int) string {
-	if rnd.Intn(2) == 0 {
+	rndMu.Lock()
+	useBinary := rnd.Intn(2) == 0
+	rndMu.Unlock()
+
+	if useBinary {
 		if n < 0 {
 			return "-0b" + strconv.FormatUint(uint64(-n), 2)
 		}
@@ -139,9 +147,16 @@ func glitchify(s string) string {
 	for _, ch := range s {
 		sb.WriteRune(ch)
 		// добавляем 1–3 случайных глитч символа
+		rndMu.Lock()
 		count := rnd.Intn(3) + 1
+		marks := make([]rune, count)
 		for i := 0; i < count; i++ {
-			sb.WriteRune(glitchMarks[rnd.Intn(len(glitchMarks))])
+			marks[i] = glitchMarks[rnd.Intn(len(glitchMarks))]
+		}
+		rndMu.Unlock()
+
+		for _, mark := range marks {
+			sb.WriteRune(mark)
 		}
 	}
 	return sb.String()
