@@ -153,13 +153,13 @@ func (app *Application) GetUserAggregatedCock(log *logging.Logger, userID int64)
 // GetUserCocksCount возвращает количество коков пользователя за все время
 func (app *Application) GetUserCocksCount(log *logging.Logger, userID int64) int {
 	collection := database.CollectionCocks(app.db)
-	
+
 	count, err := collection.CountDocuments(app.ctx, bson.M{"user_id": userID})
 	if err != nil {
 		log.E("Failed to count user cocks", logging.InnerError, err)
 		return 0
 	}
-	
+
 	return int(count)
 }
 
@@ -287,20 +287,20 @@ func (app *Application) GetUserPositionInSeason(log *logging.Logger, userID int6
 
 func (app *Application) GetFirstCockDate(log *logging.Logger) *time.Time {
 	collection := database.CollectionCocks(app.db)
-	
+
 	cursor, err := collection.Aggregate(app.ctx, database.PipelineFirstCockDate())
 	if err != nil {
 		log.E("Failed to get first cock date", logging.InnerError, err)
 		return nil
 	}
-	
+
 	defer func(cursor *mongo.Cursor, ctx context.Context) {
 		err := cursor.Close(ctx)
 		if err != nil {
 			log.E("Failed to close mongo cursor", logging.InnerError, err)
 		}
 	}(cursor, app.ctx)
-	
+
 	var result struct {
 		FirstDate time.Time `bson:"first_date"`
 	}
@@ -311,7 +311,7 @@ func (app *Application) GetFirstCockDate(log *logging.Logger) *time.Time {
 		}
 		return &result.FirstDate
 	}
-	
+
 	return nil
 }
 
@@ -321,42 +321,42 @@ func (app *Application) GetAllSeasons(log *logging.Logger) []CockSeason {
 		log.I("No cocks found in database")
 		return []CockSeason{}
 	}
-	
+
 	moscowLoc := datetime.NowLocation()
-	
+
 	// Нормализуем дату первого кока к началу дня (00:00:00) в московской локации
 	year, month, day := firstCockDate.Year(), firstCockDate.Month(), firstCockDate.Day()
 	normalizedFirstDate := time.Date(year, month, day, 0, 0, 0, 0, moscowLoc)
-	
+
 	var seasons []CockSeason
 	currentDate := normalizedFirstDate
 	seasonNum := 1
 	now := datetime.NowTime()
-	
+
 	// Нормализуем текущую дату к началу дня для корректного сравнения
 	nowYear, nowMonth, nowDay := now.Year(), now.Month(), now.Day()
 	normalizedNow := time.Date(nowYear, nowMonth, nowDay, 0, 0, 0, 0, moscowLoc)
-	
+
 	for currentDate.Before(normalizedNow) || currentDate.Equal(normalizedNow) {
 		// Каждый сезон длится 3 месяца
 		endDate := currentDate.AddDate(0, 3, 0)
 		isActive := (normalizedNow.After(currentDate) || normalizedNow.Equal(currentDate)) && normalizedNow.Before(endDate)
-		
+
 		seasons = append(seasons, CockSeason{
 			StartDate: currentDate,
 			EndDate:   endDate,
 			IsActive:  isActive,
 			SeasonNum: seasonNum,
 		})
-		
+
 		currentDate = endDate
 		seasonNum++
 	}
-	
+
 	if len(seasons) > MaxSeasonsToShow {
 		seasons = seasons[len(seasons)-MaxSeasonsToShow:]
 	}
-	
+
 	return seasons
 }
 
@@ -365,34 +365,34 @@ func (app *Application) GetAllSeasonsCount(log *logging.Logger) int {
 	if firstCockDate == nil {
 		return 0
 	}
-	
+
 	moscowLoc := datetime.NowLocation()
-	
+
 	// Нормализуем дату первого кока к началу дня (00:00:00) в московской локации
 	year, month, day := firstCockDate.Year(), firstCockDate.Month(), firstCockDate.Day()
 	normalizedFirstDate := time.Date(year, month, day, 0, 0, 0, 0, moscowLoc)
-	
+
 	currentDate := normalizedFirstDate
 	count := 0
 	now := datetime.NowTime()
-	
+
 	// Нормализуем текущую дату к началу дня для корректного сравнения
 	nowYear, nowMonth, nowDay := now.Year(), now.Month(), now.Day()
 	normalizedNow := time.Date(nowYear, nowMonth, nowDay, 0, 0, 0, 0, moscowLoc)
-	
+
 	for currentDate.Before(normalizedNow) || currentDate.Equal(normalizedNow) {
 		endDate := currentDate.AddDate(0, 3, 0)
 		count++
 		currentDate = endDate
 	}
-	
+
 	return count
 }
 
 func (app *Application) GetUserSeasonWins(log *logging.Logger, userID int64) int {
 	seasons := app.GetAllSeasonsForStats(log)
 	wins := 0
-	
+
 	for _, season := range seasons {
 		if !season.IsActive {
 			winners := app.GetSeasonWinners(log, season)
@@ -404,7 +404,7 @@ func (app *Application) GetUserSeasonWins(log *logging.Logger, userID int64) int
 			}
 		}
 	}
-	
+
 	return wins
 }
 
@@ -412,50 +412,50 @@ func (app *Application) GetUserCockRespect(log *logging.Logger, userID int64) in
 	// Респекты из сезонов
 	seasons := app.GetAllSeasonsForStats(log)
 	totalRespect := 0
-	
+
 	for _, season := range seasons {
 		if !season.IsActive {
 			respect := app.GetUserSeasonRespect(log, userID, season)
 			totalRespect += respect
 		}
 	}
-	
+
 	// Добавляем респекты из достижений
 	achievementRespects := app.GetUserAchievementRespects(log, userID)
 	totalRespect += achievementRespects
-	
+
 	return totalRespect
 }
 
 func (app *Application) GetUserSeasonRespect(log *logging.Logger, userID int64, season CockSeason) int {
 	collection := database.CollectionCocks(app.db)
-	
+
 	cursor, err := collection.Aggregate(app.ctx, database.PipelineAllUsersInSeason(season.StartDate, season.EndDate))
 	if err != nil {
 		log.E("Failed to get season ranking for respect calculation", logging.InnerError, err)
 		return 0
 	}
-	
+
 	defer func(cursor *mongo.Cursor, ctx context.Context) {
 		err := cursor.Close(ctx)
 		if err != nil {
 			log.E("Failed to close mongo cursor", logging.InnerError, err)
 		}
 	}(cursor, app.ctx)
-	
+
 	var results []UserCockRace
 	if err = cursor.All(app.ctx, &results); err != nil {
 		log.E("Failed to parse season ranking", logging.InnerError, err)
 		return 0
 	}
-	
+
 	for position, user := range results {
 		if user.UserID == userID {
 			place := position + 1
 			return CalculateCockRespect(place)
 		}
 	}
-	
+
 	return 0
 }
 
@@ -484,37 +484,37 @@ func (app *Application) GetAllSeasonsForStats(log *logging.Logger) []CockSeason 
 		log.I("No cocks found in database")
 		return []CockSeason{}
 	}
-	
+
 	moscowLoc := datetime.NowLocation()
-	
+
 	// Нормализуем дату первого кока к началу дня (00:00:00) в московской локации
 	year, month, day := firstCockDate.Year(), firstCockDate.Month(), firstCockDate.Day()
 	normalizedFirstDate := time.Date(year, month, day, 0, 0, 0, 0, moscowLoc)
-	
+
 	var seasons []CockSeason
 	currentDate := normalizedFirstDate
 	seasonNum := 1
 	now := datetime.NowTime()
-	
+
 	// Нормализуем текущую дату к началу дня для корректного сравнения
 	nowYear, nowMonth, nowDay := now.Year(), now.Month(), now.Day()
 	normalizedNow := time.Date(nowYear, nowMonth, nowDay, 0, 0, 0, 0, moscowLoc)
-	
+
 	for currentDate.Before(normalizedNow) || currentDate.Equal(normalizedNow) {
 		endDate := currentDate.AddDate(0, 3, 0)
 		isActive := (normalizedNow.After(currentDate) || normalizedNow.Equal(currentDate)) && normalizedNow.Before(endDate)
-		
+
 		seasons = append(seasons, CockSeason{
 			StartDate: currentDate,
 			EndDate:   endDate,
 			IsActive:  isActive,
 			SeasonNum: seasonNum,
 		})
-		
+
 		currentDate = endDate
 		seasonNum++
 	}
-	
+
 	return seasons
 }
 
@@ -530,31 +530,31 @@ func (app *Application) GetCurrentSeason(log *logging.Logger) *CockSeason {
 
 func (app *Application) GetSeasonWinners(log *logging.Logger, season CockSeason) []SeasonWinner {
 	collection := database.CollectionCocks(app.db)
-	
+
 	cursor, err := collection.Aggregate(app.ctx, database.PipelineSeasonWinners(season.StartDate, season.EndDate))
 	if err != nil {
 		log.E("Failed to get season winners", logging.InnerError, err)
 		return []SeasonWinner{}
 	}
-	
+
 	defer func(cursor *mongo.Cursor, ctx context.Context) {
 		err := cursor.Close(ctx)
 		if err != nil {
 			log.E("Failed to close mongo cursor", logging.InnerError, err)
 		}
 	}(cursor, app.ctx)
-	
+
 	var results []SeasonWinner
 	if err = cursor.All(app.ctx, &results); err != nil {
 		log.E("Failed to parse season winners", logging.InnerError, err)
 		return []SeasonWinner{}
 	}
-	
+
 	// Добавляем места (1, 2, 3)
 	for i := range results {
 		results[i].Place = i + 1
 	}
-	
+
 	return results
 }
 
@@ -646,7 +646,7 @@ func (app *Application) GetUserAchievementRespects(log *logging.Logger, userID i
 	// if userID != 362695653 {
 	// 	return 0
 	// }
-	
+
 	userAchievements := app.GetUserAchievements(log, userID)
 	totalRespects := 0
 
@@ -678,7 +678,7 @@ func (app *Application) CheckAndUpdateAchievements(log *logging.Logger, userID i
 		if !ach.LastCheckedAt.IsZero() {
 			moscowTime := ach.LastCheckedAt.In(datetime.NowLocation())
 			todayMoscow := now
-			
+
 			// Если уже проверяли сегодня, выходим
 			if moscowTime.Year() == todayMoscow.Year() &&
 				moscowTime.Month() == todayMoscow.Month() &&
@@ -719,25 +719,8 @@ func (app *Application) CheckAndUpdateAchievements(log *logging.Logger, userID i
 
 	data := results[0]
 
-	// Получаем глобальные максимум и минимум
-	globalCursor, err := collection.Aggregate(app.ctx, database.PipelineGlobalMaxMin())
-	if err != nil {
-		log.E("Failed to get global max/min", logging.InnerError, err)
-		return
-	}
-	defer globalCursor.Close(app.ctx)
-
-	var globalResults []database.DocumentGlobalMaxMin
-	if err = globalCursor.All(app.ctx, &globalResults); err != nil {
-		log.E("Failed to parse global max/min", logging.InnerError, err)
-		return
-	}
-
-	var globalMax, globalMin int32
-	if len(globalResults) > 0 {
-		globalMax = globalResults[0].Max
-		globalMin = globalResults[0].Min
-	}
+	const absoluteMax int32 = 61
+	const absoluteMin int32 = 0
 
 	// Обновляем достижения
 	achievementCollection := database.CollectionAchievements(app.db)
@@ -824,14 +807,16 @@ func (app *Application) CheckAndUpdateAchievements(log *logging.Logger, userID i
 	}
 
 	// Проверяем экстремумы (Эверест и Марианская впадина)
+	// Эверест - получить максимальный кок среди всех возможных (61см)
 	if len(data.MaxSize) > 0 {
 		userMax := data.MaxSize[0].Max
-		updateAchievement("everest", userMax == globalMax && globalMax > 0, int(userMax))
+		updateAchievement("everest", userMax == absoluteMax, int(userMax))
 	}
 
+	// Марианская впадина - получить минимальный кок среди всех возможных (0см)
 	if len(data.MinSize) > 0 {
 		userMin := data.MinSize[0].Min
-		updateAchievement("mariana_trench", userMin == globalMin && globalMin >= 0, int(userMin))
+		updateAchievement("mariana_trench", userMin == absoluteMin, int(userMin))
 	}
 
 	// Проверяем временные достижения
@@ -995,7 +980,7 @@ func (app *Application) CheckAndUpdateAchievements(log *logging.Logger, userID i
 		log.E("Failed to get season count", logging.InnerError, err)
 	} else {
 		defer seasonCursor.Close(app.ctx)
-		
+
 		var seasonResults []database.DocumentSeasonCount
 		if err = seasonCursor.All(app.ctx, &seasonResults); err == nil && len(seasonResults) > 0 {
 			count := seasonResults[0].Count
@@ -1011,7 +996,7 @@ func (app *Application) CheckAndUpdateAchievements(log *logging.Logger, userID i
 		log.E("Failed to check traveler achievement", logging.InnerError, err)
 	} else {
 		defer travelerCursor.Close(app.ctx)
-		
+
 		var travelerResults []database.DocumentTravelerCheck
 		if err = travelerCursor.All(app.ctx, &travelerResults); err == nil && len(travelerResults) > 0 {
 			uniqueSizes := travelerResults[0].UniqueSizes
@@ -1026,7 +1011,7 @@ func (app *Application) CheckAndUpdateAchievements(log *logging.Logger, userID i
 		log.E("Failed to check muscovite achievement", logging.InnerError, err)
 	} else {
 		defer muscoviteCursor.Close(app.ctx)
-		
+
 		var muscoviteResults []database.DocumentMuscoviteCheck
 		if err = muscoviteCursor.All(app.ctx, &muscoviteResults); err == nil && len(muscoviteResults) > 0 {
 			count := muscoviteResults[0].Count
@@ -1037,17 +1022,17 @@ func (app *Application) CheckAndUpdateAchievements(log *logging.Logger, userID i
 	// Проверяем специальные совпадения в последних 3 коках
 	if len(data.Recent3) >= 3 {
 		recent := data.Recent3
-		
+
 		// 1. Сумма предыдущих: recent[2] == recent[0] + recent[1]
 		if recent[2].Size == recent[0].Size+recent[1].Size {
 			updateAchievement("sum_of_previous", true, 0)
 		}
-		
+
 		// 2. Контрастный душ: после 60+ получить 0-3
 		if recent[1].Size >= 60 && recent[2].Size <= 3 {
 			updateAchievement("contrast_shower", true, 0)
 		}
-		
+
 		// 3. Пифагор: три кока подряд образуют пифагорову тройку
 		a, b, c := recent[0].Size, recent[1].Size, recent[2].Size
 		// Проверяем все варианты перестановок (a²+b²=c², a²+c²=b², b²+c²=a²)
@@ -1055,30 +1040,30 @@ func (app *Application) CheckAndUpdateAchievements(log *logging.Logger, userID i
 		if isPythagorean {
 			updateAchievement("pythagoras", true, 1)
 		}
-		
+
 		// 4. Leet speak (1337): 13см и 37см подряд
 		if (recent[1].Size == 13 && recent[2].Size == 37) {
 			updateAchievement("leet_speak", true, 1)
 		}
-		
+
 		// Проверяем последний кок на совпадения с временем
 		lastCock := recent[2]
 		moscowTime := lastCock.RequestedAt.In(datetime.NowLocation())
-		
+
 		hour := moscowTime.Hour()
 		minute := moscowTime.Minute()
 		day := moscowTime.Day()
-		
+
 		// 5. Минутная точность: размер == минуты (например 24см в xx:24)
 		if int32(minute) == lastCock.Size {
 			updateAchievement("minute_precision", true, 0)
 		}
-		
+
 		// 6. Часовая точность: размер == час (например 11см в 11:xx)
 		if int32(hour) == lastCock.Size {
 			updateAchievement("hour_precision", true, 0)
 		}
-		
+
 		// 7. День = Размер: размер == день месяца (например 15см 15 числа)
 		if int32(day) == lastCock.Size {
 			updateAchievement("day_equals_size", true, 0)
