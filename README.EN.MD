@@ -75,59 +75,76 @@ Dickobrazz works through **inline queries** in Telegram. Simply type `@dickobraz
 3. Choose the option you're interested in from the list
 4. Send the result to chat or view privately
 
-## Deployment
+## Run & Deployment 🚀
 
-### Dev Containers (recommended for development)
+### Before you start 📦
 
-The simplest way to run for development — using Dev Containers in VS Code or similar IDEs:
-
-1. Clone the repository:
+If the repository is not cloned yet:
 ```bash
 git clone https://github.com/mairwunnx/dickobrazz
 cd dickobrazz
 ```
 
-2. Configure only two required tokens (in `.env.dev` file):
+---
+
+### Dev Containers (recommended for development) 🧰
+
+**Requirements**:
+- **2 GB RAM** for containers
+- Running **Docker**
+- **VS Code** or **Cursor**
+
+**How to open**:
+1. Open the project in VS Code/Cursor
+2. Click **Reopen in Container**
+
+**Environment variables**:
+- File: `.devcontainer/devcontainer.env`
+- Minimum required:
 ```bash
 TELEGRAM_TOKEN="your_telegram_bot_token"
 RANDOMORG_TOKEN="your_random_org_api_key"
 ```
 
-3. Open the project in VS Code and select "Reopen in Container"
-
-Everything else (MongoDB, Redis, dependencies) will be configured automatically. Simple and fast!
-
-### Docker Compose (for production)
-
-1. Clone the repository:
+**Run dev bot** *(uses `.devcontainer/devcontainer.env`)*:
 ```bash
-git clone https://github.com/mairwunnx/dickobrazz
-cd dickobrazz
+air
+```
+`air` automatically restarts the app on source changes.
+or
+```bash
+go run program.go
 ```
 
-2. Configure two required tokens (in `.env` file):
+---
+
+### Production via Docker Compose 🐳
+
+**Environment variables**:
+- File: `.env`
+- Minimum required:
 ```bash
 TELEGRAM_TOKEN="your_telegram_bot_token"
 RANDOMORG_TOKEN="your_random_org_api_key"
 ```
 
-> **Note**: If needed, configure other environment variables (passwords for Redis and MongoDB).
+> **Note**: configure other environment variables if needed (Redis and MongoDB passwords).
 
-3. Start services:
+**Start**:
 ```bash
 docker compose up -d
 ```
 
-### Docker Compose with Ready Image
+---
 
-If you want to use a ready image and manage MongoDB/Redis separately:
+### Ready image + your own services 🧩
 
-1. Declare dickobrazz service in `docker-compose.yml`:
+Use the ready image if MongoDB and Redis are deployed separately:
 
 ```yaml
 services:
   dickobrazz:
-    image: ghcr.io/mairwunnx/dickobrazz:1.24.1
+    image: ghcr.io/mairwunnx/dickobrazz:1.30.3
     env_file: .env
     environment:
       DD_DB_HOST: dickobrazz-mongo
@@ -142,30 +159,26 @@ services:
       TZ: ${TZ}
 ```
 
-> **Note**: You'll need to pass all environment variables from `.env` file or any other convenient way.
+> **Note**: pass all environment variables from `.env` or any other convenient way.
 
-2. Declare MongoDB and Redis services in `docker-compose.yml`. 
-> Important: **MongoDB** version should be `8.2+`, and **Redis** should be `8.2+`.
+**Important**: **MongoDB** must be `8.2+`, and **Redis** must be `8.2+`.
 
-3. Start services:
-```bash
-docker compose up -d
-```
+---
 
-### Build from Source
+### Build from source 🛠️
 
-#### Manual and Direct Build
-
-Requirements:
-- Go 1.25+
+**Requirements**:
+- Go `1.25+`
 
 ```bash
 go build -o dickobrazz program.go
 ```
 
-#### Docker Build
+---
 
-Requirements:
+### Build with Docker 🧱
+
+**Requirements**:
 - Docker
 
 ```bash
