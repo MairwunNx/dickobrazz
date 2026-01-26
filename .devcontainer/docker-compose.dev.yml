@@ -10,7 +10,7 @@ services:
     cap_add: [ "SYS_PTRACE" ]
     command: ["sleep", "infinity"]
     container_name: dickobrazz-dev
-    depends_on: [ dickobrazz-redis, dickobrazz-mongo ]
+    depends_on: [ dickobrazz-redis, dickobrazz-mongo, dickobrazz-prometheus, dickobrazz-grafana ]
     env_file: [ devcontainer.env ]
     environment:
       DD_DB_HOST: dickobrazz-mongo
@@ -72,10 +72,67 @@ services:
     restart: unless-stopped
     volumes:
       - dickobrazz-redis-data:/data
+  dickobrazz-prometheus:
+    build:
+      context: ..
+      dockerfile: Dockerfile.prometheus
+    container_name: dickobrazz-prometheus
+    cpus: '0.5'
+    env_file: [ devcontainer.env ]
+    healthcheck:
+      interval: 15s
+      retries: 5
+      start_period: 30s
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:9090/-/ready"]
+      timeout: 5s
+    image: dickobrazz-prometheus:2.55.1
+    logging:
+      driver: local
+      options:
+        max-file: '3'
+        max-size: 10m
+    mem_limit: 512m
+    mem_reservation: 256m
+    networks: [ base ]
+    ports: [ "9090:9090" ]
+    restart: unless-stopped
+    volumes:
+      - dickobrazz-prometheus-data:/prometheus
+  dickobrazz-grafana:
+    build:
+      context: ..
+      dockerfile: Dockerfile.grafana
+    container_name: dickobrazz-grafana
+    cpus: '0.5'
+    depends_on: [ dickobrazz-prometheus ]
+    env_file: [ devcontainer.env ]
+    healthcheck:
+      interval: 15s
+      retries: 5
+      start_period: 30s
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/api/health"]
+      timeout: 5s
+    image: dickobrazz-grafana:11.5.0
+    logging:
+      driver: local
+      options:
+        max-file: '3'
+        max-size: 10m
+    mem_limit: 512m
+    mem_reservation: 256m
+    networks: [ base ]
+    ports: [ "3000:3000" ]
+    restart: unless-stopped
+    volumes:
+      - dickobrazz-grafana-data:/var/lib/grafana
 volumes:
   dickobrazz-mongo-data:
     driver: local
   dickobrazz-redis-data:
+    driver: local
+  dickobrazz-prometheus-data:
+    driver: local
+  dickobrazz-grafana-data:
     driver: local
   go-modules:
   go-build-cache:
