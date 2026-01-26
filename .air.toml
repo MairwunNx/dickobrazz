@@ -3,7 +3,7 @@ testdata_dir = "testdata"
 tmp_dir = "tmp"
 
 [build]
-  cmd = "go build -ldflags='-s -w' -o ./tmp/main ."
+  cmd = "go build -buildvcs=false -ldflags='-s -w' -o ./tmp/main ."
   bin = "./tmp/main"
 
   delay = 1000
