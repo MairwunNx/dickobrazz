@@ -470,7 +470,25 @@ other = "{{.Count}}m"
 other = "unknown"
 
 [AnonymousNameTemplate]
-other = "Anon{{.Number}}"
+other = "Anonym{{.Number}}"
+
+[MsgHelpText]
+other = "🧭 Commands\n\n/help — command list\n/hide — hide or reveal your nickname in contests"
+
+[MsgHidePrompt]
+other = "🙈 *Hide nickname*\n\nYou can hide your nickname from other participants\\. Your personal achievements will *still be tied* to your profile\\.\n\nAfter hiding, your nickname will be *@{{.Anon}}*\\.\n\n>Nickname hiding is not instant because of Telegram inline query caches\\. It is guaranteed after a few minutes\\.\n\nTap the button below to *hide* your nickname\\."
+
+[MsgHideStatusHidden]
+other = "🙊 *Nickname hidden*\n\nParticipation is *fully* anonymous\\.\n\nYou are shown as *@{{.Anon}}*\\. If you reveal it, it will become *@{{.Real}}* and others will see your achievements\\.\n\n>Nickname hiding is not instant because of Telegram inline query caches\\. It is guaranteed after a few minutes\\."
+
+[MsgHideButtonHide]
+other = "🙈 Hide my nickname"
+
+[MsgHideButtonShow]
+other = "👀 Reveal my nickname"
+
+[MsgCallbackNotForYou]
+other = "⛔ This button is only for the original user."
 
 [MsgAchievementCompleted]
 other = "✅ {{.Emoji}} *{{.Name}}* \\- {{.Description}}"

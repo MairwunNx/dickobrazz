@@ -470,7 +470,25 @@ other = "{{.Count}}m"
 other = "unbekannt"
 
 [AnonymousNameTemplate]
-other = "Anon{{.Number}}"
+other = "Anonym{{.Number}}"
+
+[MsgHelpText]
+other = "🧭 Befehle\n\n/help — Befehlsliste\n/hide — Nickname in Wettbewerben verbergen oder anzeigen"
+
+[MsgHidePrompt]
+other = "🙈 *Nickname verbergen*\n\nDu kannst deinen Nickname vor anderen Teilnehmern verbergen\\. Deine persönlichen Erfolge bleiben mit deinem Profil verknüpft\\.\n\nNach dem Verbergen lautet dein Nickname *@{{.Anon}}*\\.\n\n>Das Verbergen ist nicht sofort, da Telegram Inline-Query-Caches nutzt\\. Garantiert nach ein paar Minuten\\.\n\nDrücke die Taste unten, um deinen Nickname zu verbergen\\."
+
+[MsgHideStatusHidden]
+other = "🙊 *Nickname verborgen*\n\nDie Teilnahme *ist vollständig* anonym\\.\n\nDu wirst als *@{{.Anon}}* angezeigt\\. Wenn du ihn wieder sichtbar machst, wird es *@{{.Real}}* und andere sehen deine Erfolge\\.\n\n>Das Verbergen ist nicht sofort, da Telegram Inline-Query-Caches nutzt\\. Garantiert nach ein paar Minuten\\."
+
+[MsgHideButtonHide]
+other = "🙈 Meinen Nickname verbergen"
+
+[MsgHideButtonShow]
+other = "👀 Meinen Nickname anzeigen"
+
+[MsgCallbackNotForYou]
+other = "⛔ Diese Schaltfläche ist nur für den ursprünglichen Nutzer."
 
 [MsgAchievementCompleted]
 other = "✅ {{.Emoji}} *{{.Name}}* \\- {{.Description}}"

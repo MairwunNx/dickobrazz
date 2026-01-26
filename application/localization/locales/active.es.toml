@@ -470,7 +470,25 @@ other = "{{.Count}}m"
 other = "desconocido"
 
 [AnonymousNameTemplate]
-other = "Anon{{.Number}}"
+other = "Anonym{{.Number}}"
+
+[MsgHelpText]
+other = "🧭 Comandos\n\n/help — lista de comandos\n/hide — ocultar o mostrar tu apodo en concursos"
+
+[MsgHidePrompt]
+other = "🙈 *Ocultar apodo*\n\nPuedes ocultar tu apodo a otros participantes\\. Tus logros personales seguirán vinculados a tu perfil\\.\n\nDespués de ocultarlo, tu apodo será *@{{.Anon}}*.\n\n>El ocultado no es inmediato por el caché de consultas inline de Telegram\\. Se garantiza después de unos minutos\\.\n\nPulsa el botón de abajo para ocultar tu apodo\\."
+
+[MsgHideStatusHidden]
+other = "🙊 *Apodo oculto*\n\nLa participación *es completamente* anónima\\.\n\nAhora se muestra como *@{{.Anon}}*. Si lo revelas, será *@{{.Real}}* y otros verán tus logros\\.\n\n>El ocultado no es inmediato por el caché de consultas inline de Telegram\\. Se garantiza después de unos minutos\\."
+
+[MsgHideButtonHide]
+other = "🙈 Ocultar mi apodo"
+
+[MsgHideButtonShow]
+other = "👀 Mostrar mi apodo"
+
+[MsgCallbackNotForYou]
+other = "⛔ Este botón solo está disponible para el usuario original."
 
 [MsgAchievementCompleted]
 other = "✅ {{.Emoji}} *{{.Name}}* \\- {{.Description}}"

@@ -470,7 +470,25 @@ other = "{{.Count}}m"
 other = "inconnu"
 
 [AnonymousNameTemplate]
-other = "Anon{{.Number}}"
+other = "Anonym{{.Number}}"
+
+[MsgHelpText]
+other = "🧭 Commandes\n\n/help — liste des commandes\n/hide — masquer ou afficher ton pseudo en compétition"
+
+[MsgHidePrompt]
+other = "🙈 *Masquer le pseudo*\n\nTu peux masquer ton pseudo aux autres participants\\. Tes succès personnels restent liés à ton profil\\.\n\nAprès masquage, ton pseudo sera *@{{.Anon}}*.\n\n>Le masquage n'est pas instantané à cause du cache des requêtes inline de Telegram\\. Garanti après quelques minutes\\.\n\nAppuie sur le bouton ci-dessous pour le masquer\\."
+
+[MsgHideStatusHidden]
+other = "🙊 *Pseudo masqué*\n\nLa participation est entièrement anonyme\\.\n\nTu es affiché comme *@{{.Anon}}*. Si tu le révèles, il deviendra *@{{.Real}}* et les autres verront tes succès\\.\n\n>Le masquage n'est pas instantané à cause du cache des requêtes inline de Telegram\\. Garanti après quelques minutes\\."
+
+[MsgHideButtonHide]
+other = "🙈 Masquer mon pseudo"
+
+[MsgHideButtonShow]
+other = "👀 Afficher mon pseudo"
+
+[MsgCallbackNotForYou]
+other = "⛔ Ce bouton est réservé à l'utilisateur d'origine."
 
 [MsgAchievementCompleted]
 other = "✅ {{.Emoji}} *{{.Name}}* \\- {{.Description}}"
