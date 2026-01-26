@@ -2,8 +2,10 @@ package application
 
 import (
 	"context"
+	"dickobrazz/application/collector"
 	"dickobrazz/application/localization"
 	"dickobrazz/application/logging"
+	"dickobrazz/application/metrics"
 	"os"
 	"os/signal"
 	"sync"
@@ -26,7 +28,8 @@ type Application struct {
 	db           *mongo.Client
 	redis        *redis.Client
 	cache        *cache.Cache
-	healthcheck  *HealthcheckServer
+	outsiders    *OutsiderServers
+	statsCollector *collector.StatsCollector
 	wg           sync.WaitGroup
 	startTime    time.Time
 }
@@ -34,6 +37,9 @@ type Application struct {
 func NewApplication() *Application {
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	log := logging.NewLogger()
+	if err := metrics.Register(); err != nil {
+		log.F("Failed to register metrics", logging.InnerError, err)
+	}
 
 	bot := InitializeTelegramBot(log)
 	localizationManager, err := localization.NewLocalizationManager(log)
@@ -43,6 +49,7 @@ func NewApplication() *Application {
 	rnd := InitializeRandom(log)
 	db := InitializeMongoConnection(ctx, log)
 	client, redisCache := InitializeRedisConnection(log)
+	startTime := time.Now()
 
 	app := &Application{
 		ctx:          ctx,
@@ -54,9 +61,10 @@ func NewApplication() *Application {
 		db:           db,
 		redis:        client,
 		cache:        redisCache,
-		startTime:    time.Now(),
+		startTime:    startTime,
 	}
-	app.healthcheck = InitializeHealthcheckServer(log, &app.wg)
+	app.outsiders = InitializeOutsiderServers(log, &app.wg)
+	app.statsCollector = collector.NewStatsCollector(app.ctx, log, db, client, startTime)
 
 	return app
 }
@@ -64,9 +72,9 @@ func NewApplication() *Application {
 func (app *Application) Shutdown() {
 	app.cancel()
 
-	if app.healthcheck != nil {
-		if err := app.healthcheck.Shutdown(app.ctx); err != nil {
-			app.log.E("Failed to shutdown healthcheck server", logging.InnerError, err)
+	if app.outsiders != nil {
+		if err := app.outsiders.Shutdown(app.ctx); err != nil {
+			app.log.E("Failed to shutdown outsider servers", logging.InnerError, err)
 		}
 	}
 
@@ -84,8 +92,15 @@ func (app *Application) Shutdown() {
 }
 
 func (app *Application) Run() {
-	if app.healthcheck != nil {
-		app.healthcheck.Start()
+	if app.outsiders != nil {
+		app.outsiders.Start()
+	}
+	if app.statsCollector != nil {
+		app.wg.Add(1)
+		go func() {
+			defer app.wg.Done()
+			app.statsCollector.Start()
+		}()
 	}
 
 	updates := tgbotapi.NewUpdate(0)
@@ -108,6 +123,13 @@ func (app *Application) Run() {
 				return
 			}
 
+			processingStarted := time.Now()
+			handledKinds := 0
+			updateKind := "ignored"
+			if _, detectedLang := app.localization.LocalizerByUpdate(&update); detectedLang != "" {
+				metrics.IncDetectedLanguage(detectedLang)
+			}
+
 			if msg := update.Message; msg != nil {
 				user := update.SentFrom()
 				app.log.With(
@@ -116,6 +138,9 @@ func (app *Application) Run() {
 					logging.ChatType, msg.Chat.Type,
 					logging.ChatId, msg.Chat.ID,
 				).I("Received message")
+				metrics.IncMessagesHandled("message")
+				handledKinds++
+				updateKind = "message"
 			}
 
 			if query := update.InlineQuery; query != nil {
@@ -128,6 +153,9 @@ func (app *Application) Run() {
 				)
 
 				app.HandleInlineQuery(log, &update)
+				metrics.IncMessagesHandled("inline_query")
+				handledKinds++
+				updateKind = "inline_query"
 			}
 
 			if callback := update.CallbackQuery; callback != nil {
@@ -140,7 +168,18 @@ func (app *Application) Run() {
 				)
 
 				app.HandleCallbackQuery(log, &update)
+				metrics.IncMessagesHandled("callback_query")
+				handledKinds++
+				updateKind = "callback_query"
 			}
+
+			if handledKinds == 0 {
+				metrics.IncMessagesIgnored("unsupported_update")
+				updateKind = "ignored"
+			} else if handledKinds > 1 {
+				updateKind = "multiple"
+			}
+			metrics.ObserveUpdateDuration(updateKind, time.Since(processingStarted))
 		}
 	}
 }
