@@ -75,59 +75,76 @@ Dickobrazz 通过 Telegram 的 **内联查询** 工作。只需在任何聊天�
 3. 从列表中选择感兴趣的选项
 4. 将结果发送到聊天或私下查看
 
-## 部署
+## 运行与部署 🚀
 
-### Dev Containers（推荐用于开发）
+### 开始前准备 📦
 
-开发的最简单方式 — 在 VS Code 或类似 IDE 中使用 Dev Containers：
-
-1. 克隆仓库：
+如果仓库尚未克隆：
 ```bash
 git clone https://github.com/mairwunnx/dickobrazz
 cd dickobrazz
 ```
 
-2. 只需配置两个必需的令牌（在 `.env.dev` 文件中）：
+---
+
+### Dev Containers（推荐用于开发） 🧰
+
+**要求**：
+- 容器可用 **2 GB RAM**
+- **Docker** 已运行
+- **VS Code** 或 **Cursor**
+
+**如何打开**：
+1. 在 VS Code/Cursor 中打开项目
+2. 点击 **Reopen in Container**
+
+**环境变量**：
+- 文件：`.devcontainer/devcontainer.env`
+- 最低必需：
 ```bash
 TELEGRAM_TOKEN="你的 telegram_bot_token"
 RANDOMORG_TOKEN="你的 random_org_api_key"
 ```
 
-3. 在 VS Code 中打开项目并选择 "Reopen in Container"
-
-其余所有内容（MongoDB、Redis、依赖项）将自动配置。简单快速！
-
-### Docker Compose（生产环境）
-
-1. 克隆仓库：
+**运行开发版机器人** *(使用 `.devcontainer/devcontainer.env`)*：
 ```bash
-git clone https://github.com/mairwunnx/dickobrazz
-cd dickobrazz
+air
+```
+`air` 会在源码变更时自动重启应用。
+或
+```bash
+go run program.go
 ```
 
-2. 配置两个必需的令牌（在 `.env` 文件中）：
+---
+
+### 使用 Docker Compose 部署生产环境 🐳
+
+**环境变量**：
+- 文件：`.env`
+- 最低必需：
 ```bash
 TELEGRAM_TOKEN="你的 telegram_bot_token"
 RANDOMORG_TOKEN="你的 random_org_api_key"
 ```
 
-> **注意**：如需要，请配置其余环境变量（Redis 和 MongoDB 密码）。
+> **注意**：如需，请配置其他环境变量（Redis 和 MongoDB 密码）。
 
-3. 启动服务：
+**启动**：
 ```bash
 docker compose up -d
 ```
 
-### Docker Compose 使用现成镜像
+---
 
-如果想使用现成镜像并自行管理 MongoDB/Redis：
+### 现成镜像 + 自建服务 🧩
 
-1. 在 `docker-compose.yml` 中声明 dickobrazz 服务：
+如果 MongoDB 和 Redis 是单独部署的，可直接使用现成镜像：
 
 ```yaml
 services:
   dickobrazz:
-    image: ghcr.io/mairwunnx/dickobrazz:1.24.1
+    image: ghcr.io/mairwunnx/dickobrazz:1.30.3
     env_file: .env
     environment:
       DD_DB_HOST: dickobrazz-mongo
@@ -142,30 +159,26 @@ services:
       TZ: ${TZ}
 ```
 
-> **注意**：需要传递 `.env` 文件中的所有环境变量或通过其他方便的方式。
+> **注意**：需要传递 `.env` 中的全部环境变量或用其他方式提供。
 
-2. 在 `docker-compose.yml` 中声明 MongoDB 和 Redis 服务。
-> 重要：**MongoDB** 版本必须是 `8.2+`，**Redis** 版本必须是 `8.2+`。
+**重要**：**MongoDB** 需为 `8.2+`，**Redis** 需为 `8.2+`。
 
-3. 启动服务：
-```bash
-docker compose up -d
-```
+---
 
-### 从源码构建
+### 从源码构建 🛠️
 
-#### 手动直接构建方式
-
-要求：
-- Go 1.25+
+**要求**：
+- Go `1.25+`
 
 ```bash
 go build -o dickobrazz program.go
 ```
 
-#### 使用 Docker 构建
+---
 
-要求：
+### 使用 Docker 构建 🧱
+
+**要求**：
 - Docker
 
 ```bash
