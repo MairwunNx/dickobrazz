@@ -276,7 +276,9 @@
       "targets": [
         {
           "expr": "dickobrazz_size_distribution",
+          "instant": true,
           "legendFormat": "{{bucket}}",
+          "range": false,
           "refId": "A"
         }
       ]
