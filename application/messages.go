@@ -87,6 +87,7 @@ const (
 	MsgSeasonNotFound         = "MsgSeasonNotFound"
 	MsgCallbackInvalidFormat  = "MsgCallbackInvalidFormat"
 	MsgCallbackParseError     = "MsgCallbackParseError"
+	MsgCallbackNotForYou      = "MsgCallbackNotForYou"
 
 	MsgUserPullingRecently = "MsgUserPullingRecently"
 	MsgUserPullingSince    = "MsgUserPullingSince"
@@ -108,6 +109,12 @@ const (
 	MsgUnknownValue = "MsgUnknownValue"
 
 	AnonymousNameTemplate = "AnonymousNameTemplate"
+
+	MsgHelpText         = "MsgHelpText"
+	MsgHidePrompt       = "MsgHidePrompt"
+	MsgHideStatusHidden = "MsgHideStatusHidden"
+	MsgHideButtonHide   = "MsgHideButtonHide"
+	MsgHideButtonShow   = "MsgHideButtonShow"
 
 	MsgAchievementCompleted    = "MsgAchievementCompleted"
 	MsgAchievementInProgress   = "MsgAchievementInProgress"
@@ -398,7 +405,7 @@ func NewMsgSystemInfoTemplate(localizationManager *localization.LocalizationMana
 }
 
 // NewMsgCockSeasonSinglePage генерирует текст для одной страницы сезона (постраничная навигация)
-func NewMsgCockSeasonSinglePage(localizationManager *localization.LocalizationManager, localizer *i18n.Localizer, season CockSeason, getSeasonWinners func(CockSeason) []SeasonWinner, showDescription bool) string {
+func NewMsgCockSeasonSinglePage(localizationManager *localization.LocalizationManager, localizer *i18n.Localizer, season CockSeason, getSeasonWinners func(CockSeason) []SeasonWinner, resolveNickname func(int64, string) string, showDescription bool) string {
 	startDate := EscapeMarkdownV2(season.StartDate.Format("02.01.2006"))
 	endDate := EscapeMarkdownV2(season.EndDate.Format("02.01.2006"))
 
@@ -407,7 +414,7 @@ func NewMsgCockSeasonSinglePage(localizationManager *localization.LocalizationMa
 
 	for _, winner := range winners {
 		medal := GetMedalByPosition(winner.Place - 1)
-		normalizedNickname := NormalizeUsername(localizationManager, localizer, winner.Nickname, winner.UserID)
+		normalizedNickname := resolveNickname(winner.UserID, winner.Nickname)
 		respects := CalculateCockRespect(winner.Place)
 		// Показываем респекты только для завершенных сезонов
 		line := NewMsgCockSeasonWinnerTemplate(

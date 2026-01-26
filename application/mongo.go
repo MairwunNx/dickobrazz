@@ -71,6 +71,42 @@ func (app *Application) SaveCockToMongo(log *logging.Logger, cock *Cock) {
 	}
 }
 
+func (app *Application) GetUserProfile(log *logging.Logger, userID int64) *database.DocumentUserProfile {
+	collection := database.CollectionUsers(app.db)
+
+	var profile database.DocumentUserProfile
+	if err := collection.FindOne(app.ctx, bson.D{{Key: "user_id", Value: userID}}).Decode(&profile); err != nil {
+		if err == mongo.ErrNoDocuments {
+			return nil
+		}
+		log.E("Failed to get user profile", logging.InnerError, err)
+		return nil
+	}
+	return &profile
+}
+
+func (app *Application) UpsertUserProfile(log *logging.Logger, userID int64, username string, isHidden bool) {
+	collection := database.CollectionUsers(app.db)
+
+	update := bson.D{{Key: "$set", Value: bson.D{
+		{Key: "user_id", Value: userID},
+		{Key: "username", Value: username},
+		{Key: "is_hidden", Value: isHidden},
+		{Key: "updated_at", Value: datetime.NowTime()},
+	}}}
+	if _, err := collection.UpdateOne(app.ctx, bson.D{{Key: "user_id", Value: userID}}, update, options.Update().SetUpsert(true)); err != nil {
+		log.E("Failed to upsert user profile", logging.InnerError, err)
+	}
+}
+
+func (app *Application) UpdateUserNickname(log *logging.Logger, userID int64, nickname string) {
+	collection := database.CollectionCocks(app.db)
+
+	if _, err := collection.UpdateMany(app.ctx, bson.D{{Key: "user_id", Value: userID}}, bson.D{{Key: "$set", Value: bson.D{{Key: "nickname", Value: nickname}}}}); err != nil {
+		log.E("Failed to update user nickname in MongoDB", logging.InnerError, err)
+	}
+}
+
 func (app *Application) AggregateCockSizes(log *logging.Logger) []UserCockRace {
 	collection := database.CollectionCocks(app.db)
 

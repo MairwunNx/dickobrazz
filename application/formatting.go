@@ -218,8 +218,8 @@ func (app *Application) GenerateCockRulerText(log *logging.Logger, localizer *i1
 		emoji := GetPlaceEmoji(index+1, isCurrentUser)
 		formattedSize := FormatCockSizeForDate(cock.Size)
 
-		// Нормализуем username (генерируем анонимное имя если пустой)
-		normalizedUsername := NormalizeUsername(app.localization, localizer, cock.UserName, cock.UserId)
+		// Нормализуем username с учетом скрытия
+		normalizedUsername := app.ResolveDisplayNickname(log, localizer, cock.UserId, cock.UserName)
 
 		var line string
 		if isCurrentUser {
@@ -303,7 +303,7 @@ func (app *Application) GenerateCockRulerText(log *logging.Logger, localizer *i1
 			for idx, neighbor := range neighbors {
 				pos := startIdx + idx + 1
 				isCurrentInContext := neighbor.UserId == userID
-				normalizedNick := NormalizeUsername(app.localization, localizer, neighbor.UserName, neighbor.UserId)
+				normalizedNick := app.ResolveDisplayNickname(log, localizer, neighbor.UserId, neighbor.UserName)
 				formattedSize := FormatCockSizeForDate(neighbor.Size)
 				emoji := EmojiFromSize(neighbor.Size)
 				posEmoji := GetPlaceEmojiForContext(pos, isCurrentInContext)
@@ -381,8 +381,8 @@ func (app *Application) GenerateCockRaceScoreboard(log *logging.Logger, localize
 			isUserInScoreboard = true
 		}
 
-		// Нормализуем username (генерируем анонимное имя если пустой)
-		normalizedNickname := NormalizeUsername(app.localization, localizer, user.Nickname, user.UserID)
+		// Нормализуем username с учетом скрытия
+		normalizedNickname := app.ResolveDisplayNickname(log, localizer, user.UserID, user.Nickname)
 
 		var scoreboardLine string
 		if isCurrentUser {
@@ -446,7 +446,7 @@ func (app *Application) GenerateCockRaceScoreboard(log *logging.Logger, localize
 			for idx, neighbor := range neighbors {
 				pos := startPos + idx
 				isCurrentInContext := neighbor.UserID == userID
-				normalizedNick := NormalizeUsername(app.localization, localizer, neighbor.Nickname, neighbor.UserID)
+				normalizedNick := app.ResolveDisplayNickname(log, localizer, neighbor.UserID, neighbor.Nickname)
 				formattedSize := EscapeMarkdownV2(FormatDickSize(int(neighbor.TotalSize)))
 				posEmoji := GetPlaceEmojiForContext(pos, isCurrentInContext)
 
@@ -555,8 +555,8 @@ func (app *Application) GenerateCockLadderScoreboard(log *logging.Logger, locali
 			isUserInScoreboard = true
 		}
 
-		// Нормализуем username (генерируем анонимное имя если пустой)
-		normalizedNickname := NormalizeUsername(app.localization, localizer, user.Nickname, user.UserID)
+		// Нормализуем username с учетом скрытия
+		normalizedNickname := app.ResolveDisplayNickname(log, localizer, user.UserID, user.Nickname)
 
 		var scoreboardLine string
 		if isCurrentUser {
@@ -612,7 +612,7 @@ func (app *Application) GenerateCockLadderScoreboard(log *logging.Logger, locali
 			for idx, neighbor := range neighbors {
 				pos := startPos + idx
 				isCurrentInContext := neighbor.UserID == userID
-				normalizedNick := NormalizeUsername(app.localization, localizer, neighbor.Nickname, neighbor.UserID)
+				normalizedNick := app.ResolveDisplayNickname(log, localizer, neighbor.UserID, neighbor.Nickname)
 				formattedSize := EscapeMarkdownV2(FormatDickSize(int(neighbor.TotalSize)))
 				posEmoji := GetPlaceEmojiForContext(pos, isCurrentInContext)
 

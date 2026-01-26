@@ -90,6 +90,14 @@ type DocumentCockDynamic struct {
 	} `bson:"overall_growth_speed"`
 }
 
+// DocumentUserProfile представляет профиль пользователя для настройки приватности
+type DocumentUserProfile struct {
+	UserID    int64     `bson:"user_id"`
+	Username  string    `bson:"username,omitempty"`
+	IsHidden  bool      `bson:"is_hidden"`
+	UpdatedAt time.Time `bson:"updated_at"`
+}
+
 // DocumentUserAchievement представляет достижение пользователя в MongoDB
 type DocumentUserAchievement struct {
 	UserID        int64     `bson:"user_id"`

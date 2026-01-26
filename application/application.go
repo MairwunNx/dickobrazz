@@ -132,15 +132,20 @@ func (app *Application) Run() {
 
 			if msg := update.Message; msg != nil {
 				user := update.SentFrom()
-				app.log.With(
+				log := app.log.With(
 					logging.UserId, user.ID,
 					logging.UserName, user.UserName,
 					logging.ChatType, msg.Chat.Type,
 					logging.ChatId, msg.Chat.ID,
-				).I("Received message")
+				)
+				log.I("Received message")
 				metrics.IncMessagesHandled("message")
 				handledKinds++
 				updateKind = "message"
+
+				if msg.IsCommand() {
+					app.HandleCommand(log, &update)
+				}
 			}
 
 			if query := update.InlineQuery; query != nil {

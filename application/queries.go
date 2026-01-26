@@ -175,8 +175,8 @@ func (app *Application) InlineQueryCockSize(log *logging.Logger, update *tgbotap
 	} else {
 		size = app.rnd.IntN(log, 60)
 
-		// Нормализуем username (генерируем анонимное имя если пустой)
-		normalizedUsername := NormalizeUsername(app.localization, localizer, query.From.UserName, query.From.ID)
+		// Определяем отображаемый ник с учетом скрытия
+		normalizedUsername := app.ResolveUserNickname(log, localizer, query.From)
 
 		cock := &Cock{
 			ID:          uuid.NewString(),
@@ -492,7 +492,10 @@ func (app *Application) InlineQueryCockSeason(log *logging.Logger, update *tgbot
 	}
 
 	showDescription := app.shouldShowDescription(log, query.From.ID, query.From.UserName)
-	text := NewMsgCockSeasonSinglePage(app.localization, localizer, currentSeason, getSeasonWinners, showDescription)
+	resolveNickname := func(userID int64, nickname string) string {
+		return app.ResolveDisplayNickname(log, localizer, userID, nickname)
+	}
+	text := NewMsgCockSeasonSinglePage(app.localization, localizer, currentSeason, getSeasonWinners, resolveNickname, showDescription)
 
 	// Создаем кнопки навигации
 	var buttons []tgbotapi.InlineKeyboardButton
@@ -688,6 +691,94 @@ func (app *Application) HandleCallbackQuery(log *logging.Logger, update *tgbotap
 	// Парсим callback data
 	data := callback.Data
 
+	if strings.HasPrefix(data, hideCallbackPrefix) {
+		parts := strings.Split(strings.TrimPrefix(data, hideCallbackPrefix), ":")
+		if len(parts) != 2 {
+			log.E("Invalid hide callback data format", "data", data)
+			callbackConfig := tgbotapi.NewCallback(callback.ID, app.localization.Localize(localizer, MsgCallbackInvalidFormat, nil))
+			if _, err := app.bot.Request(callbackConfig); err != nil {
+				log.E("Failed to answer callback query", logging.InnerError, err)
+			}
+			return
+		}
+
+		targetUserID, err := strconv.ParseInt(parts[0], 10, 64)
+		if err != nil {
+			log.E("Failed to parse userID from hide callback", logging.InnerError, err)
+			callbackConfig := tgbotapi.NewCallback(callback.ID, app.localization.Localize(localizer, MsgCallbackParseError, nil))
+			if _, err := app.bot.Request(callbackConfig); err != nil {
+				log.E("Failed to answer callback query", logging.InnerError, err)
+			}
+			return
+		}
+
+		action := parts[1]
+		hide := false
+		switch action {
+		case hideActionHide:
+			hide = true
+		case hideActionShow:
+			hide = false
+		default:
+			log.E("Invalid hide callback action", "action", action)
+			callbackConfig := tgbotapi.NewCallback(callback.ID, app.localization.Localize(localizer, MsgCallbackInvalidFormat, nil))
+			if _, err := app.bot.Request(callbackConfig); err != nil {
+				log.E("Failed to answer callback query", logging.InnerError, err)
+			}
+			return
+		}
+
+		if callback.From == nil || callback.From.ID != targetUserID {
+			callbackConfig := tgbotapi.NewCallback(callback.ID, app.localization.Localize(localizer, MsgCallbackNotForYou, nil))
+			callbackConfig.ShowAlert = true
+			if _, err := app.bot.Request(callbackConfig); err != nil {
+				log.E("Failed to answer callback query", logging.InnerError, err)
+			}
+			return
+		}
+
+		anonName, realName := app.setUserHiddenStatus(log, localizer, callback.From, hide)
+		text, keyboard := app.buildHideMessage(localizer, hide, anonName, realName, targetUserID)
+
+		_, _ = app.bot.Request(tgbotapi.NewCallback(callback.ID, ""))
+
+		if callback.InlineMessageID != "" {
+			edit := tgbotapi.EditMessageTextConfig{
+				BaseEdit: tgbotapi.BaseEdit{
+					InlineMessageID: callback.InlineMessageID,
+				},
+				Text:      text,
+				ParseMode: "MarkdownV2",
+			}
+			if keyboard != nil {
+				edit.ReplyMarkup = keyboard
+			}
+			if _, err := app.bot.Request(edit); err != nil {
+				log.E("Failed to edit inline message", logging.InnerError, err)
+			} else {
+				log.I("Successfully edited hide message", "user_id", targetUserID)
+			}
+		} else if callback.Message != nil {
+			edit := tgbotapi.NewEditMessageText(
+				callback.Message.Chat.ID,
+				callback.Message.MessageID,
+				text,
+			)
+			edit.ParseMode = "MarkdownV2"
+			if keyboard != nil {
+				edit.ReplyMarkup = keyboard
+			}
+			if _, err := app.bot.Request(edit); err != nil {
+				log.E("Failed to edit chat message", logging.InnerError, err)
+			} else {
+				log.I("Successfully edited hide message", "user_id", targetUserID)
+			}
+		} else {
+			log.E("CallbackQuery has neither Message nor InlineMessageID")
+		}
+		return
+	}
+
 	// Обрабатываем пагинацию сезонов
 	if strings.HasPrefix(data, "season_page:") {
 		// Парсим номер сезона
@@ -727,7 +818,10 @@ func (app *Application) HandleCallbackQuery(log *logging.Logger, update *tgbotap
 		}
 
 		showDescription := app.shouldShowDescription(log, callback.From.ID, callback.From.UserName)
-		text := NewMsgCockSeasonSinglePage(app.localization, localizer, *targetSeason, getSeasonWinners, showDescription)
+		resolveNickname := func(userID int64, nickname string) string {
+			return app.ResolveDisplayNickname(log, localizer, userID, nickname)
+		}
+		text := NewMsgCockSeasonSinglePage(app.localization, localizer, *targetSeason, getSeasonWinners, resolveNickname, showDescription)
 
 		// Создаем кнопки навигации
 		var buttons []tgbotapi.InlineKeyboardButton
