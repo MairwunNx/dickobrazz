@@ -38,6 +38,7 @@ services:
     mem_limit: 256m
     mem_reservation: 64m
     networks: [ base ]
+    ports: [ "8090:8090" ]
     restart: unless-stopped
   dickobrazz-mongo:
     command: ["--wiredTigerCacheSizeGB", "0.25"]

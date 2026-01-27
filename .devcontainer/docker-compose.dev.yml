@@ -15,6 +15,7 @@ services:
     environment:
       DD_DB_HOST: dickobrazz-mongo
     networks: [ base ]
+    ports: [ "8090:8090" ]
     security_opt: [ "seccomp:unconfined" ]
     volumes:
       - ..:/workspace:cached

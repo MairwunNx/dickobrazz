@@ -8,7 +8,8 @@
   "remoteUser": "devuser",
   "forwardPorts": [
     6379,
-    27017
+    27017,
+    8090
   ],
   "portsAttributes": {
     "6379": {
@@ -17,6 +18,10 @@
     },
     "27017": {
       "label": "MongoDB",
+      "onAutoForward": "notify"
+    },
+    "8090": {
+      "label": "Dickobrazz API",
       "onAutoForward": "notify"
     }
   },
