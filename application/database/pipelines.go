@@ -324,14 +324,11 @@ func PipelineDynamic(userId int64) mongo.Pipeline {
 					{Key: "_id", Value: nil},
 					{Key: "growth_speed", Value: bson.D{{Key: "$round", Value: bson.A{
 						bson.D{{Key: "$cond", Value: bson.A{
-							bson.D{{Key: "$gte", Value: bson.A{"$count", 2}}},
-							// Скорость = (последний день - первый день) / (количество дней - 1)
+							bson.D{{Key: "$gt", Value: bson.A{"$count", 0}}},
+							// Скорость = средний дневной прирост за период
 							bson.D{{Key: "$divide", Value: bson.A{
-								bson.D{{Key: "$subtract", Value: bson.A{
-									bson.D{{Key: "$arrayElemAt", Value: bson.A{"$daily_totals", 0}}},  // Последний день (самый новый)
-									bson.D{{Key: "$arrayElemAt", Value: bson.A{"$daily_totals", -1}}}, // Первый день (самый старый)
-								}}},
-								bson.D{{Key: "$subtract", Value: bson.A{"$count", 1}}},
+								bson.D{{Key: "$sum", Value: "$daily_totals"}},
+								"$count",
 							}}},
 							0,
 						}}},
@@ -497,15 +494,12 @@ func PipelineDynamic(userId int64) mongo.Pipeline {
 					{Key: "_id", Value: nil},
 					{Key: "growth_speed", Value: bson.D{{Key: "$round", Value: bson.A{
 						bson.D{{Key: "$cond", Value: bson.A{
-							bson.D{{Key: "$gte", Value: bson.A{"$count", 2}}},
-							// Скорость = abs((последний день - первый день) / (количество дней - 1))
-							bson.D{{Key: "$abs", Value: bson.D{{Key: "$divide", Value: bson.A{
-								bson.D{{Key: "$subtract", Value: bson.A{
-									bson.D{{Key: "$arrayElemAt", Value: bson.A{"$daily_sizes", 0}}},  // Последний день (самый новый)
-									bson.D{{Key: "$arrayElemAt", Value: bson.A{"$daily_sizes", -1}}}, // Первый день (самый старый)
-								}}},
-								bson.D{{Key: "$subtract", Value: bson.A{"$count", 1}}},
-							}}}}},
+							bson.D{{Key: "$gt", Value: bson.A{"$count", 0}}},
+							// Скорость = средний дневной прирост за период
+							bson.D{{Key: "$divide", Value: bson.A{
+								bson.D{{Key: "$sum", Value: "$daily_sizes"}},
+								"$count",
+							}}},
 							0,
 						}}},
 						1,
