@@ -99,14 +99,6 @@ func (app *Application) UpsertUserProfile(log *logging.Logger, userID int64, use
 	}
 }
 
-func (app *Application) UpdateUserNickname(log *logging.Logger, userID int64, nickname string) {
-	collection := database.CollectionCocks(app.db)
-
-	if _, err := collection.UpdateMany(app.ctx, bson.D{{Key: "user_id", Value: userID}}, bson.D{{Key: "$set", Value: bson.D{{Key: "nickname", Value: nickname}}}}); err != nil {
-		log.E("Failed to update user nickname in MongoDB", logging.InnerError, err)
-	}
-}
-
 func (app *Application) AggregateCockSizes(log *logging.Logger) []UserCockRace {
 	collection := database.CollectionCocks(app.db)
 
