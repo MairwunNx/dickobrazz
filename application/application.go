@@ -19,36 +19,37 @@ import (
 )
 
 type Application struct {
-	ctx          context.Context
-	cancel       context.CancelFunc
-	log          *logging.Logger
-	bot          *tgbotapi.BotAPI
-	localization *localization.LocalizationManager
-	rnd          *Random
-	db           *mongo.Client
-	redis        *redis.Client
-	cache        *cache.Cache
-	outsiders    *OutsiderServers
+	ctx            context.Context
+	cancel         context.CancelFunc
+	log            *logging.Logger
+	bot            *tgbotapi.BotAPI
+	localization   *localization.LocalizationManager
+	rnd            *Random
+	db             *mongo.Client
+	redis          *redis.Client
+	cache          *cache.Cache
+	outsiders      *OutsiderServers
 	statsCollector *collector.StatsCollector
-	wg           sync.WaitGroup
-	startTime    time.Time
+	wg             sync.WaitGroup
+	startTime      time.Time
 }
 
 func NewApplication() *Application {
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	log := logging.NewLogger()
+	cfg := LoadConfiguration(log)
 	if err := metrics.Register(); err != nil {
 		log.F("Failed to register metrics", logging.InnerError, err)
 	}
 
-	bot := InitializeTelegramBot(log)
+	bot := InitializeTelegramBot(log, cfg)
 	localizationManager, err := localization.NewLocalizationManager(log)
 	if err != nil {
 		log.F("Failed to initialize localization manager", logging.InnerError, err)
 	}
-	rnd := InitializeRandom(log)
-	db := InitializeMongoConnection(ctx, log)
-	client, redisCache := InitializeRedisConnection(log)
+	rnd := InitializeRandom(log, cfg)
+	db := InitializeMongoConnection(ctx, log, cfg)
+	client, redisCache := InitializeRedisConnection(log, cfg)
 	startTime := time.Now()
 
 	app := &Application{

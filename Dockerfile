@@ -29,6 +29,7 @@ FROM busybox:1.37-musl
 COPY --from=certs /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=certs /usr/share/zoneinfo /usr/share/zoneinfo
 COPY --from=builder /app/dickobrazz /usr/local/bin/dickobrazz
+COPY config.yaml /etc/dickobrazz/config.yaml
 
 RUN adduser -D -s /bin/sh dickobrazz
 USER dickobrazz

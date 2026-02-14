@@ -3,7 +3,6 @@ package application
 import (
 	"dickobrazz/application/logging"
 	"math/rand/v2"
-	"os"
 	"sync"
 
 	"github.com/sgade/randomorg"
@@ -15,8 +14,8 @@ type Random struct {
 	mu        sync.Mutex
 }
 
-func InitializeRandom(log *logging.Logger) *Random {
-	rndorg, chacha8 := InitializeRandomOrg(log), InitializeChaCha8(log)
+func InitializeRandom(log *logging.Logger, cfg *Configuration) *Random {
+	rndorg, chacha8 := InitializeRandomOrg(log, cfg), InitializeChaCha8(log)
 	return &Random{randomOrg: rndorg, chacha8: chacha8}
 }
 
@@ -36,9 +35,9 @@ func (rnd *Random) IntN(log *logging.Logger, maxInclusive int) int {
 	}
 }
 
-func InitializeRandomOrg(log *logging.Logger) *randomorg.Random {
-	token, exist := os.LookupEnv("RANDOMORG_TOKEN")
-	if !exist || token == "" {
+func InitializeRandomOrg(log *logging.Logger, cfg *Configuration) *randomorg.Random {
+	token := cfg.Bot.Rnd.RandomOrg.Token
+	if token == "" {
 		log.F("Random.org token must be set and non-empty")
 	}
 

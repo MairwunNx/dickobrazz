@@ -1,0 +1,13 @@
+bot:
+  db:
+    mongo:
+      url: "mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@dickobrazz-mongo:27017/${MONGO_INITDB_DATABASE}?authSource=admin"
+    redis:
+      url: "${REDIS_ADDRESS:-dickobrazz-redis:6379}"
+      password: "${REDIS_PASSWORD}"
+  rnd:
+    rndorg:
+      token: "${RANDOMORG_TOKEN}"
+  tg:
+    token: "${TELEGRAM_TOKEN}"
+    env: "${TELEGRAM_ENV:-production}"

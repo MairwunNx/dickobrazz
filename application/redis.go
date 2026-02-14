@@ -5,7 +5,6 @@ import (
 	"dickobrazz/application/datetime"
 	"dickobrazz/application/logging"
 	"fmt"
-	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -20,15 +19,15 @@ type UserCock struct {
 	Size     int    `json:"size,omitempty"`
 }
 
-func InitializeRedisConnection(log *logging.Logger) (*redis.Client, *cache.Cache) {
-	password := os.Getenv("REDIS_PASSWORD")
+func InitializeRedisConnection(log *logging.Logger, cfg *Configuration) (*redis.Client, *cache.Cache) {
+	password := cfg.Bot.DB.Redis.Password
 	if password == "" {
-		log.F("REDIS_PASSWORD does not have value, set it in .env file")
+		log.F("Redis password does not have value, set it in config.yaml")
 	}
 
-	address := os.Getenv("REDIS_ADDRESS")
+	address := cfg.Bot.DB.Redis.URL
 	if address == "" {
-		log.F("REDIS_ADDRESS does not have value, set it in .env file")
+		log.F("Redis address does not have value, set it in config.yaml")
 	}
 
 	client := redis.NewClient(&redis.Options{Addr: address, Password: password, DB: 0})

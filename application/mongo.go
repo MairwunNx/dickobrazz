@@ -6,7 +6,6 @@ import (
 	"dickobrazz/application/datetime"
 	"dickobrazz/application/logging"
 	"math"
-	"os"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -44,13 +43,11 @@ type SeasonWinner struct {
 	Place     int    // 1, 2, 3
 }
 
-func InitializeMongoConnection(ctx context.Context, log *logging.Logger) *mongo.Client {
-	uri := os.Getenv("MONGODB_URI")
+func InitializeMongoConnection(ctx context.Context, log *logging.Logger, cfg *Configuration) *mongo.Client {
+	uri := cfg.Bot.DB.Mongo.URL
 	if uri == "" {
-		log.F("MONGODB_URI does not have value, set it in .env file")
+		log.F("MongoDB URI does not have value, set it in config.yaml")
 	}
-
-	uri = os.ExpandEnv(uri)
 
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI(uri).SetAppName("Dickobrazz").SetTimeout(10*time.Second))
 	if err != nil {
