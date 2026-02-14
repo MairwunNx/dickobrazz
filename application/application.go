@@ -2,6 +2,7 @@ package application
 
 import (
 	"context"
+	"dickobrazz/application/api"
 	"dickobrazz/application/collector"
 	"dickobrazz/application/localization"
 	"dickobrazz/application/logging"
@@ -12,10 +13,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/go-redis/cache/v9"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"github.com/redis/go-redis/v9"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type Application struct {
@@ -24,10 +22,7 @@ type Application struct {
 	log            *logging.Logger
 	bot            *tgbotapi.BotAPI
 	localization   *localization.LocalizationManager
-	rnd            *Random
-	db             *mongo.Client
-	redis          *redis.Client
-	cache          *cache.Cache
+	api            *api.APIClient
 	outsiders      *OutsiderServers
 	statsCollector *collector.StatsCollector
 	wg             sync.WaitGroup
@@ -47,9 +42,7 @@ func NewApplication() *Application {
 	if err != nil {
 		log.F("Failed to initialize localization manager", logging.InnerError, err)
 	}
-	rnd := InitializeRandom(log, cfg)
-	db := InitializeMongoConnection(ctx, log, cfg)
-	client, redisCache := InitializeRedisConnection(log, cfg)
+	apiClient := api.NewAPIClient(cfg.Bot.Server.BaseURL, cfg.Bot.CSOT)
 	startTime := time.Now()
 
 	app := &Application{
@@ -58,14 +51,11 @@ func NewApplication() *Application {
 		log:          log,
 		bot:          bot,
 		localization: localizationManager,
-		rnd:          rnd,
-		db:           db,
-		redis:        client,
-		cache:        redisCache,
+		api:          apiClient,
 		startTime:    startTime,
 	}
 	app.outsiders = InitializeOutsiderServers(log, &app.wg)
-	app.statsCollector = collector.NewStatsCollector(app.ctx, log, db, client, startTime)
+	app.statsCollector = collector.NewStatsCollector(app.ctx, startTime)
 
 	return app
 }
@@ -80,14 +70,6 @@ func (app *Application) Shutdown() {
 	}
 
 	app.wg.Wait()
-
-	if err := app.db.Disconnect(app.ctx); err != nil {
-		app.log.E("Failed to disconnect MongoDB", logging.InnerError, err)
-	}
-
-	if err := app.redis.Close(); err != nil {
-		app.log.E("Failed to close Redis connection", logging.InnerError, err)
-	}
 
 	app.log.I("Gracefully shutting down... Bye!")
 }
