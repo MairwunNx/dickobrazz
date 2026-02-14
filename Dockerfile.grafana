@@ -1,4 +1,0 @@
-FROM grafana/grafana:11.5.0
-
-COPY --chown=472:472 configurations/grafana/provisioning /etc/grafana/provisioning
-COPY --chown=472:472 configurations/grafana/dashboards /etc/grafana/dashboards

@@ -1,3 +1,0 @@
-FROM prom/prometheus:v2.55.1
-
-COPY --chown=65534:65534 configurations/prometheus/prometheus.yml /etc/prometheus/prometheus.yml
