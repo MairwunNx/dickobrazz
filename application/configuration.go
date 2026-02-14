@@ -22,31 +22,13 @@ type Configuration struct {
 }
 
 type BotConfiguration struct {
-	DB  DatabaseConfiguration `yaml:"db"`
-	Rnd RandomConfiguration   `yaml:"rnd"`
-	Tg  TelegramConfiguration `yaml:"tg"`
+	CSOT   string                `yaml:"csot"`
+	Server ServerConfiguration   `yaml:"server"`
+	Tg     TelegramConfiguration `yaml:"tg"`
 }
 
-type DatabaseConfiguration struct {
-	Mongo MongoConfiguration `yaml:"mongo"`
-	Redis RedisConfiguration `yaml:"redis"`
-}
-
-type MongoConfiguration struct {
-	URL string `yaml:"url"`
-}
-
-type RedisConfiguration struct {
-	URL      string `yaml:"url"`
-	Password string `yaml:"password"`
-}
-
-type RandomConfiguration struct {
-	RandomOrg RandomOrgConfiguration `yaml:"rndorg"`
-}
-
-type RandomOrgConfiguration struct {
-	Token string `yaml:"token"`
+type ServerConfiguration struct {
+	BaseURL string `yaml:"base_url"`
 }
 
 type TelegramConfiguration struct {
@@ -136,17 +118,11 @@ func expandConfigurationEnvironment(content string) string {
 }
 
 func validateConfiguration(cfg *Configuration) error {
-	if strings.TrimSpace(cfg.Bot.DB.Mongo.URL) == "" {
-		return fmt.Errorf("bot.db.mongo.url must be set")
+	if strings.TrimSpace(cfg.Bot.CSOT) == "" {
+		return fmt.Errorf("bot.csot must be set")
 	}
-	if strings.TrimSpace(cfg.Bot.DB.Redis.URL) == "" {
-		return fmt.Errorf("bot.db.redis.url must be set")
-	}
-	if strings.TrimSpace(cfg.Bot.DB.Redis.Password) == "" {
-		return fmt.Errorf("bot.db.redis.password must be set")
-	}
-	if strings.TrimSpace(cfg.Bot.Rnd.RandomOrg.Token) == "" {
-		return fmt.Errorf("bot.rnd.rndorg.token must be set")
+	if strings.TrimSpace(cfg.Bot.Server.BaseURL) == "" {
+		return fmt.Errorf("bot.server.base_url must be set")
 	}
 	if strings.TrimSpace(cfg.Bot.Tg.Token) == "" {
 		return fmt.Errorf("bot.tg.token must be set")
