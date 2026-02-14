@@ -285,9 +285,6 @@ other = """>📖 About cock seasons:
 [MsgCockSeasonWinnerTemplate]
 other = "{{.Medal}} *@{{.Nickname}}* with cock *{{.Size}} cm*"
 
-[MsgCockSeasonWinnerWithRespects]
-other = "{{.WinnerLine}} *\\(\\+{{.Respects}} 🫡\\)*"
-
 [MsgCockSeasonNoSeasonsTemplate]
 other = """*Cock seasons*
 
@@ -306,27 +303,6 @@ other = """🏆 *Cock\\-achievements*
 Completed: *{{.Completed}}/{{.Total}}* _\\({{.Percent}}%\\)_ • 🌟 Respects: *{{.Respects}}*
 
 {{.Achievements}}"""
-
-[MsgSystemInfoTemplate]
-other = """🔧 *System data*
-
-⚙️ *Service:*
-Uptime: *{{.Uptime}}*
-Version: *{{.Version}}*
-Build: *{{.BuildRev}}* \\(*{{.BuildAt}}*\\)
-
-💻 *Environment:*
-System: *{{.OS}}/{{.Arch}}*
-Go Runtime: *{{.GoVersion}}*
-Memory: *{{.MemoryUsed}}MB / {{.MemoryTotal}}MB* \\({{.MemoryPercent}}%\\)
-
-🗄️ *Databases:*
-MongoDB: *{{.MongoVersion}}*
-Redis: *{{.RedisVersion}}*
-
-👤 *Request:*
-User: *@{{.Username}}* \\(*{{.UserID}}*\\)
-Bot ID: *{{.BotID}}*"""
 
 [InlineTitleCockSize]
 other = "Cock size"
@@ -349,9 +325,6 @@ other = "Cock seasons"
 [InlineTitleCockAchievements]
 other = "Cock achievements"
 
-[InlineTitleSystemInfo]
-other = "System data"
-
 [DescCockSize]
 other = "📏 Check your size for today (0-61 cm)"
 
@@ -372,9 +345,6 @@ other = "📅 Season history and winners"
 
 [DescCockAchievements]
 other = "🏅 Achievements and cock-respects™"
-
-[DescSystemInfo]
-other = "⚙️ Version, uptime, memory, databases"
 
 [MsgCockDynamicNoData]
 other = "🤔 *Not enough data for dynamics*\n\n_First, jerk your cock at least once\\!_"

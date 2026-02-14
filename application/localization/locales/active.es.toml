@@ -285,9 +285,6 @@ other = """>📖 Sobre las temporadas de pollas:
 [MsgCockSeasonWinnerTemplate]
 other = "{{.Medal}} *@{{.Nickname}}* con polla *{{.Size}} cm*"
 
-[MsgCockSeasonWinnerWithRespects]
-other = "{{.WinnerLine}} *\\(\\+{{.Respects}} 🫡\\)*"
-
 [MsgCockSeasonNoSeasonsTemplate]
 other = """*Temporadas de pollas*
 
@@ -306,27 +303,6 @@ other = """🏆 *Polla\\-logros*
 Completado: *{{.Completed}}/{{.Total}}* _\\({{.Percent}}%\\)_ • 🌟 Respetos: *{{.Respects}}*
 
 {{.Achievements}}"""
-
-[MsgSystemInfoTemplate]
-other = """🔧 *Datos del sistema*
-
-⚙️ *Servicio:*
-Uptime: *{{.Uptime}}*
-Versión: *{{.Version}}*
-Build: *{{.BuildRev}}* \\(*{{.BuildAt}}*\\)
-
-💻 *Entorno:*
-Sistema: *{{.OS}}/{{.Arch}}*
-Go Runtime: *{{.GoVersion}}*
-Memoria: *{{.MemoryUsed}}MB / {{.MemoryTotal}}MB* \\({{.MemoryPercent}}%\\)
-
-🗄️ *Bases de datos:*
-MongoDB: *{{.MongoVersion}}*
-Redis: *{{.RedisVersion}}*
-
-👤 *Solicitud:*
-Usuario: *@{{.Username}}* \\(*{{.UserID}}*\\)
-Bot ID: *{{.BotID}}*"""
 
 [InlineTitleCockSize]
 other = "Tamaño de polla"
@@ -349,9 +325,6 @@ other = "Temporadas de pollas"
 [InlineTitleCockAchievements]
 other = "Polla-logros"
 
-[InlineTitleSystemInfo]
-other = "Datos del sistema"
-
 [DescCockSize]
 other = "📏 Mira tu tamaño de hoy (0-61 cm)"
 
@@ -372,9 +345,6 @@ other = "📅 Historia de temporadas y ganadores"
 
 [DescCockAchievements]
 other = "🏅 Logros y polla-respetos™"
-
-[DescSystemInfo]
-other = "⚙️ Versión, uptime, memoria, bases de datos"
 
 [MsgCockDynamicNoData]
 other = "🤔 *No hay datos suficientes para la dinámica*\n\n_¡Primero tira la polla al menos una vez\\!_"

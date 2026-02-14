@@ -285,9 +285,6 @@ other = """>📖 关于鸡巴赛季:
 [MsgCockSeasonWinnerTemplate]
 other = "{{.Medal}} *@{{.Nickname}}* 鸡巴 *{{.Size}} cm*"
 
-[MsgCockSeasonWinnerWithRespects]
-other = "{{.WinnerLine}} *\\(\\+{{.Respects}} 🫡\\)*"
-
 [MsgCockSeasonNoSeasonsTemplate]
 other = """*鸡巴赛季*
 
@@ -306,27 +303,6 @@ other = """🏆 *鸡巴成就*
 完成: *{{.Completed}}/{{.Total}}* _\\({{.Percent}}%\\)_ • 🌟 尊敬: *{{.Respects}}*
 
 {{.Achievements}}"""
-
-[MsgSystemInfoTemplate]
-other = """🔧 *系统数据*
-
-⚙️ *服务:*
-运行时间: *{{.Uptime}}*
-版本: *{{.Version}}*
-构建: *{{.BuildRev}}* \\(*{{.BuildAt}}*\\)
-
-💻 *环境:*
-系统: *{{.OS}}/{{.Arch}}*
-Go Runtime: *{{.GoVersion}}*
-内存: *{{.MemoryUsed}}MB / {{.MemoryTotal}}MB* \\({{.MemoryPercent}}%\\)
-
-🗄️ *数据库:*
-MongoDB: *{{.MongoVersion}}*
-Redis: *{{.RedisVersion}}*
-
-👤 *请求:*
-用户: *@{{.Username}}* \\(*{{.UserID}}*\\)
-Bot ID: *{{.BotID}}*"""
 
 [InlineTitleCockSize]
 other = "鸡巴尺寸"
@@ -349,9 +325,6 @@ other = "鸡巴赛季"
 [InlineTitleCockAchievements]
 other = "鸡巴成就"
 
-[InlineTitleSystemInfo]
-other = "系统数据"
-
 [DescCockSize]
 other = "📏 看看今天的尺寸 (0-61 cm)"
 
@@ -372,9 +345,6 @@ other = "📅 赛季历史和赢家"
 
 [DescCockAchievements]
 other = "🏅 成就与鸡巴尊敬™"
-
-[DescSystemInfo]
-other = "⚙️ 版本、运行时间、内存、数据库"
 
 [MsgCockDynamicNoData]
 other = "🤔 *数据不足，无法计算动态*\n\n_先撸一次鸡巴\\!_"

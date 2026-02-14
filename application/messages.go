@@ -4,7 +4,6 @@ import (
 	"dickobrazz/application/datetime"
 	"dickobrazz/application/localization"
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/nicksnyder/go-i18n/v2/i18n"
@@ -55,13 +54,10 @@ const (
 	MsgCockSeasonWithWinnersTemplate = "MsgCockSeasonWithWinnersTemplate"
 	MsgCockSeasonTemplateFooter      = "MsgCockSeasonTemplateFooter"
 	MsgCockSeasonWinnerTemplate      = "MsgCockSeasonWinnerTemplate"
-	MsgCockSeasonWinnerWithRespects  = "MsgCockSeasonWinnerWithRespects"
 	MsgCockSeasonNoSeasonsTemplate   = "MsgCockSeasonNoSeasonsTemplate"
 
 	MsgCockAchievementsTemplate           = "MsgCockAchievementsTemplate"
 	MsgCockAchievementsTemplateOtherPages = "MsgCockAchievementsTemplateOtherPages"
-
-	MsgSystemInfoTemplate = "MsgSystemInfoTemplate"
 
 	InlineTitleCockSize         = "InlineTitleCockSize"
 	InlineTitleCockRuler        = "InlineTitleCockRuler"
@@ -70,7 +66,6 @@ const (
 	InlineTitleCockDynamic      = "InlineTitleCockDynamic"
 	InlineTitleCockSeason       = "InlineTitleCockSeason"
 	InlineTitleCockAchievements = "InlineTitleCockAchievements"
-	InlineTitleSystemInfo       = "InlineTitleSystemInfo"
 
 	DescCockSize         = "DescCockSize"
 	DescCockRuler        = "DescCockRuler"
@@ -79,7 +74,6 @@ const (
 	DescCockDynamic      = "DescCockDynamic"
 	DescCockSeason       = "DescCockSeason"
 	DescCockAchievements = "DescCockAchievements"
-	DescSystemInfo       = "DescSystemInfo"
 
 	MsgCockDynamicNoData      = "MsgCockDynamicNoData"
 	MsgSeasonUnknownStartDate = "MsgSeasonUnknownStartDate"
@@ -353,23 +347,12 @@ func NewMsgCockSeasonWithWinnersTemplate(localizationManager *localization.Local
 	})
 }
 
-func NewMsgCockSeasonWinnerTemplate(localizationManager *localization.LocalizationManager, localizer *i18n.Localizer, medal, nickname, totalSize string, respects int, showRespects bool) string {
-	winnersLine := localizationManager.Localize(localizer, MsgCockSeasonWinnerTemplate, map[string]any{
+func NewMsgCockSeasonWinnerTemplate(localizationManager *localization.LocalizationManager, localizer *i18n.Localizer, medal, nickname, totalSize string) string {
+	return localizationManager.Localize(localizer, MsgCockSeasonWinnerTemplate, map[string]any{
 		"Medal":    medal,
 		"Nickname": EscapeMarkdownV2(nickname),
 		"Size":     EscapeMarkdownV2(totalSize),
 	})
-
-	// Показываем респекты только если showRespects = true (для завершенных сезонов)
-	if showRespects {
-		formattedRespects := EscapeMarkdownV2(FormatDickSize(respects))
-		return localizationManager.Localize(localizer, MsgCockSeasonWinnerWithRespects, map[string]any{
-			"WinnerLine": winnersLine,
-			"Respects":   formattedRespects,
-		})
-	}
-
-	return winnersLine
 }
 
 func NewMsgCockSeasonTemplateFooter(localizationManager *localization.LocalizationManager, localizer *i18n.Localizer) string {
@@ -379,74 +362,3 @@ func NewMsgCockSeasonTemplateFooter(localizationManager *localization.Localizati
 func NewMsgCockSeasonNoSeasonsTemplate(localizationManager *localization.LocalizationManager, localizer *i18n.Localizer) string {
 	return localizationManager.Localize(localizer, MsgCockSeasonNoSeasonsTemplate, nil)
 }
-
-func NewMsgSystemInfoTemplate(localizationManager *localization.LocalizationManager, localizer *i18n.Localizer, info *SystemInfo) string {
-	return localizationManager.Localize(localizer, MsgSystemInfoTemplate, map[string]any{
-		// Сервис
-		"Uptime":   EscapeMarkdownV2(info.Uptime),
-		"Version":  EscapeMarkdownV2(info.Version),
-		"BuildRev": EscapeMarkdownV2(info.BuildRev),
-		"BuildAt":  EscapeMarkdownV2(info.BuildAt),
-		// Окружение
-		"OS":            EscapeMarkdownV2(info.OS),
-		"Arch":          EscapeMarkdownV2(info.Arch),
-		"GoVersion":     EscapeMarkdownV2(info.GoVersion),
-		"MemoryUsed":    info.MemoryUsed,
-		"MemoryTotal":   info.MemoryTotal,
-		"MemoryPercent": EscapeMarkdownV2(fmt.Sprintf("%.1f", info.MemoryPercent)),
-		// Базы данных
-		"MongoVersion": EscapeMarkdownV2(info.MongoVersion),
-		"RedisVersion": EscapeMarkdownV2(info.RedisVersion),
-		// Запрос
-		"Username": EscapeMarkdownV2(info.Username),
-		"UserID":   info.UserID,
-		"BotID":    info.BotID,
-	})
-}
-
-// NewMsgCockSeasonSinglePage генерирует текст для одной страницы сезона (постраничная навигация)
-func NewMsgCockSeasonSinglePage(localizationManager *localization.LocalizationManager, localizer *i18n.Localizer, season CockSeason, getSeasonWinners func(CockSeason) []SeasonWinner, resolveNickname func(int64, string) string, showDescription bool) string {
-	startDate := EscapeMarkdownV2(season.StartDate.Format("02.01.2006"))
-	endDate := EscapeMarkdownV2(season.EndDate.Format("02.01.2006"))
-
-	winners := getSeasonWinners(season)
-	var winnerLines []string
-
-	for _, winner := range winners {
-		medal := GetMedalByPosition(winner.Place - 1)
-		normalizedNickname := resolveNickname(winner.UserID, winner.Nickname)
-		respects := CalculateCockRespect(winner.Place)
-		// Показываем респекты только для завершенных сезонов
-		line := NewMsgCockSeasonWinnerTemplate(
-			localizationManager,
-			localizer,
-			medal,
-			normalizedNickname,
-			FormatDickSize(int(winner.TotalSize)),
-			respects,
-			!season.IsActive, // showRespects = true только если сезон завершен
-		)
-		winnerLines = append(winnerLines, line)
-	}
-
-	winnersText := strings.Join(winnerLines, "\n")
-
-	var seasonBlock string
-	if season.IsActive {
-		seasonBlock = NewMsgCockSeasonTemplate(localizationManager, localizer, winnersText, startDate, endDate, season.SeasonNum)
-		// Футер показываем только для активного (текущего) сезона И если showDescription = true
-		if showDescription {
-			footer := NewMsgCockSeasonTemplateFooter(localizationManager, localizer)
-			return seasonBlock + "\n\n" + footer
-		}
-		return seasonBlock
-	} else {
-		seasonBlock = NewMsgCockSeasonWithWinnersTemplate(localizationManager, localizer, winnersText, startDate, endDate, season.SeasonNum)
-		return seasonBlock
-	}
-}
-
-const (
-	MsgCockAchievementsTitle = "MsgCockAchievementsTitle"
-	MsgSystemInfoTitle       = "MsgSystemInfoTitle"
-)

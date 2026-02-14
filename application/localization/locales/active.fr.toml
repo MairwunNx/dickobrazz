@@ -285,9 +285,6 @@ other = """>📖 À propos des saisons de bites:
 [MsgCockSeasonWinnerTemplate]
 other = "{{.Medal}} *@{{.Nickname}}* avec une bite de *{{.Size}} cm*"
 
-[MsgCockSeasonWinnerWithRespects]
-other = "{{.WinnerLine}} *\\(\\+{{.Respects}} 🫡\\)*"
-
 [MsgCockSeasonNoSeasonsTemplate]
 other = """*Saisons de bites*
 
@@ -306,27 +303,6 @@ other = """🏆 *Succès de bite*
 Complété: *{{.Completed}}/{{.Total}}* _\\({{.Percent}}%\\)_ • 🌟 Respects: *{{.Respects}}*
 
 {{.Achievements}}"""
-
-[MsgSystemInfoTemplate]
-other = """🔧 *Données système*
-
-⚙️ *Service:*
-Uptime: *{{.Uptime}}*
-Version: *{{.Version}}*
-Build: *{{.BuildRev}}* \\(*{{.BuildAt}}*\\)
-
-💻 *Environnement:*
-Système: *{{.OS}}/{{.Arch}}*
-Go Runtime: *{{.GoVersion}}*
-Mémoire: *{{.MemoryUsed}}MB / {{.MemoryTotal}}MB* \\({{.MemoryPercent}}%\\)
-
-🗄️ *Bases de données:*
-MongoDB: *{{.MongoVersion}}*
-Redis: *{{.RedisVersion}}*
-
-👤 *Requête:*
-Utilisateur: *@{{.Username}}* \\(*{{.UserID}}*\\)
-Bot ID: *{{.BotID}}*"""
 
 [InlineTitleCockSize]
 other = "Taille de bite"
@@ -349,9 +325,6 @@ other = "Saisons de bites"
 [InlineTitleCockAchievements]
 other = "Succès de bite"
 
-[InlineTitleSystemInfo]
-other = "Données système"
-
 [DescCockSize]
 other = "📏 Check ta taille d'aujourd'hui (0-61 cm)"
 
@@ -372,9 +345,6 @@ other = "📅 Historique des saisons et gagnants"
 
 [DescCockAchievements]
 other = "🏅 Succès et respect-bites™"
-
-[DescSystemInfo]
-other = "⚙️ Version, uptime, mémoire, bases de données"
 
 [MsgCockDynamicNoData]
 other = "🤔 *Pas assez de données pour la dynamique*\n\n_D'abord, tire ta bite au moins une fois\\!_"

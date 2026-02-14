@@ -285,9 +285,6 @@ other = """>📖 Über Schwanz\\-Saisons:
 [MsgCockSeasonWinnerTemplate]
 other = "{{.Medal}} *@{{.Nickname}}* mit Schwanz *{{.Size}} cm*"
 
-[MsgCockSeasonWinnerWithRespects]
-other = "{{.WinnerLine}} *\\(\\+{{.Respects}} 🫡\\)*"
-
 [MsgCockSeasonNoSeasonsTemplate]
 other = """*Schwanz\\-Saisons*
 
@@ -306,27 +303,6 @@ other = """🏆 *Schwanz\\-Achievements*
 Erledigt: *{{.Completed}}/{{.Total}}* _\\({{.Percent}}%\\)_ • 🌟 Respekt: *{{.Respects}}*
 
 {{.Achievements}}"""
-
-[MsgSystemInfoTemplate]
-other = """🔧 *Systemdaten*
-
-⚙️ *Service:*
-Uptime: *{{.Uptime}}*
-Version: *{{.Version}}*
-Build: *{{.BuildRev}}* \\(*{{.BuildAt}}*\\)
-
-💻 *Umgebung:*
-System: *{{.OS}}/{{.Arch}}*
-Go Runtime: *{{.GoVersion}}*
-Speicher: *{{.MemoryUsed}}MB / {{.MemoryTotal}}MB* \\({{.MemoryPercent}}%\\)
-
-🗄️ *Datenbanken:*
-MongoDB: *{{.MongoVersion}}*
-Redis: *{{.RedisVersion}}*
-
-👤 *Anfrage:*
-User: *@{{.Username}}* \\(*{{.UserID}}*\\)
-Bot ID: *{{.BotID}}*"""
 
 [InlineTitleCockSize]
 other = "Schwanzgröße"
@@ -349,9 +325,6 @@ other = "Schwanz-Saisons"
 [InlineTitleCockAchievements]
 other = "Schwanz-Achievements"
 
-[InlineTitleSystemInfo]
-other = "Systemdaten"
-
 [DescCockSize]
 other = "📏 Check deine Größe für heute (0-61 cm)"
 
@@ -372,9 +345,6 @@ other = "📅 Saison-Historie und Gewinner"
 
 [DescCockAchievements]
 other = "🏅 Achievements und Schwanz-Respekts™"
-
-[DescSystemInfo]
-other = "⚙️ Version, Uptime, Speicher, Datenbanken"
 
 [MsgCockDynamicNoData]
 other = "🤔 *Nicht genug Daten für Dynamik*\n\n_Erstmal den Schwanz mindestens einmal ziehen\\!_"
