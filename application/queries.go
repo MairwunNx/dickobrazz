@@ -1,35 +1,41 @@
 package application
 
 import (
-	"context"
-	"dickobrazz/application/database"
+	"dickobrazz/application/api"
 	"dickobrazz/application/datetime"
 	"dickobrazz/application/geo"
+	"dickobrazz/application/localization"
 	"dickobrazz/application/logging"
 	"dickobrazz/application/timings"
 	"fmt"
-	"sort"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"github.com/google/uuid"
-	"go.mongodb.org/mongo-driver/mongo"
+	"github.com/nicksnyder/go-i18n/v2/i18n"
 )
 
-// shouldShowDescription проверяет, нужно ли показывать описания для пользователя
-// Описания НЕ показываются если: userCocksCount > 32 И username != "mairwunnx"
+// shouldShowDescription проверяет, нужно ли показывать описания для пользователя.
+// Описания НЕ показываются если пользователь зарегистрирован более 32 дней назад.
 func (app *Application) shouldShowDescription(log *logging.Logger, userID int64, username string) bool {
-	if username == "mairwunnx0" {
+	profile, err := app.api.GetProfile(app.ctx, userID, username)
+	if err != nil {
+		log.E("Failed to get profile for shouldShowDescription", logging.InnerError, err)
 		return true
 	}
 
-	cocksCount := app.GetUserCocksCount(log, userID)
+	if profile.CreatedAt == nil {
+		return true
+	}
 
-	// Если больше 32 коков, не показываем описания, очевидно юзер уже не новичок
-	if cocksCount > 32 {
+	createdAt, err := datetime.ParseUTC(*profile.CreatedAt)
+	if err != nil {
+		return true
+	}
+
+	if time.Since(createdAt).Hours()/24 > 32 {
 		return false
 	}
 
@@ -53,16 +59,10 @@ func (app *Application) HandleInlineQuery(log *logging.Logger, update *tgbotapi.
 		result tgbotapi.InlineQueryResultArticle
 	}
 
-	// Определяем количество параллельных запросов
-	parallelQueriesCount := 6 // CockRace, CockRuler, CockLadder, CockDynamic, CockSeason, CockAchievements
-	if query.From.UserName == "mairwunnx" {
-		parallelQueriesCount = 7 // + SystemInfo
-	}
-
+	parallelQueriesCount := 6
 	resultsChan := make(chan queryResult, parallelQueriesCount)
 	var wg sync.WaitGroup
 
-	// Запускаем параллельные запросы
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
@@ -113,39 +113,22 @@ func (app *Application) HandleInlineQuery(log *logging.Logger, update *tgbotapi.
 		defer wg.Done()
 		result := timings.ReportExecutionForResult(log.With(logging.QueryType, "CockAchievements"),
 			func() tgbotapi.InlineQueryResultArticle {
-				// Парсим номер страницы из query (если есть)
-				page := 1
-				// По умолчанию страница 1, можно расширить парсинг в будущем
-				return app.InlineQueryCockAchievements(log, update, page)
+				return app.InlineQueryCockAchievements(log, update, 1)
 			}, traceQueryCreated,
 		)
 		resultsChan <- queryResult{index: 6, result: result}
 	}()
-
-	// Опциональный SystemInfo для mairwunnx
-	if query.From.UserName == "mairwunnx" {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			result := timings.ReportExecutionForResult(log.With(logging.QueryType, "SystemInfo"),
-				func() tgbotapi.InlineQueryResultArticle { return app.InlineQuerySystemInfo(log, update) }, traceQueryCreated,
-			)
-			resultsChan <- queryResult{index: 7, result: result}
-		}()
-	}
 
 	go func() {
 		wg.Wait()
 		close(resultsChan)
 	}()
 
-	// Собираем результаты в правильном порядке
 	parallelResults := make([]tgbotapi.InlineQueryResultArticle, parallelQueriesCount)
 	for result := range resultsChan {
 		parallelResults[result.index-1] = result.result
 	}
 
-	// Формируем финальный массив запросов: CockSize + параллельные результаты
 	queries := make([]any, 0, parallelQueriesCount+1)
 	queries = append(queries, cockSizeResult)
 	for _, result := range parallelResults {
@@ -168,28 +151,14 @@ func (app *Application) InlineQueryCockSize(log *logging.Logger, update *tgbotap
 		return tgbotapi.InlineQueryResultArticle{}
 	}
 	localizer, _ := app.localization.LocalizerByUpdate(update)
-	var size int
 
-	if cached := app.GetCockSizeFromCache(log, query.From.ID); cached != nil {
-		size = *cached
-	} else {
-		size = app.rnd.IntN(log, 60)
-
-		// Определяем отображаемый ник с учетом скрытия
-		normalizedUsername := app.ResolveUserNickname(log, localizer, query.From)
-
-		cock := &Cock{
-			ID:          uuid.NewString(),
-			Size:        int32(size),
-			Nickname:    normalizedUsername,
-			UserID:      query.From.ID,
-			RequestedAt: datetime.NowTime(),
-		}
-
-		app.SaveCockToCache(log, query.From.ID, normalizedUsername, size)
-		app.SaveCockToMongo(log, cock)
+	cockData, err := app.api.GenerateCockSize(app.ctx, query.From.ID, query.From.UserName)
+	if err != nil {
+		log.E("Failed to generate cock size via API", logging.InnerError, err)
+		return tgbotapi.InlineQueryResultArticle{}
 	}
 
+	size := cockData.Size
 	emoji := EmojiFromSize(size)
 	text := GenerateCockSizeText(app.localization, localizer, size, emoji)
 	subtext := geo.GetRegionBySize(size)
@@ -211,10 +180,15 @@ func (app *Application) InlineQueryCockLadder(log *logging.Logger, update *tgbot
 		return tgbotapi.InlineQueryResultArticle{}
 	}
 	localizer, _ := app.localization.LocalizerByUpdate(update)
-	cocks := app.AggregateCockSizes(log)
-	totalParticipants := app.GetTotalCockersCount(log)
+
+	data, err := app.api.GetCockLadder(app.ctx, query.From.ID, query.From.UserName, 13, 1)
+	if err != nil {
+		log.E("Failed to get cock ladder via API", logging.InnerError, err)
+		return tgbotapi.InlineQueryResultArticle{}
+	}
+
 	showDescription := app.shouldShowDescription(log, query.From.ID, query.From.UserName)
-	text := app.GenerateCockLadderScoreboard(log, localizer, query.From.ID, cocks, totalParticipants, showDescription)
+	text := app.GenerateCockLadderScoreboard(log, localizer, query.From.ID, data, showDescription)
 	return InitializeInlineQueryWithThumbAndDesc(
 		app.localization.Localize(localizer, InlineTitleCockLadder, nil),
 		text,
@@ -229,24 +203,15 @@ func (app *Application) InlineQueryCockRace(log *logging.Logger, update *tgbotap
 		return tgbotapi.InlineQueryResultArticle{}
 	}
 	localizer, _ := app.localization.LocalizerByUpdate(update)
-	currentSeason := app.GetCurrentSeason(log)
 
-	var cocks []UserCockRace
-	var seasonStartDate string
-	var totalParticipants int
-
-	if currentSeason != nil {
-		cocks = app.AggregateCockSizesForSeason(log, *currentSeason)
-		totalParticipants = app.GetSeasonCockersCount(log, *currentSeason)
-		seasonStartDate = EscapeMarkdownV2(currentSeason.StartDate.Format("02.01.2006"))
-	} else {
-		cocks = app.AggregateCockSizes(log)
-		totalParticipants = app.GetTotalCockersCount(log)
-		seasonStartDate = app.localization.Localize(localizer, MsgSeasonUnknownStartDate, nil)
+	data, err := app.api.GetCockRace(app.ctx, query.From.ID, query.From.UserName, 13, 1)
+	if err != nil {
+		log.E("Failed to get cock race via API", logging.InnerError, err)
+		return tgbotapi.InlineQueryResultArticle{}
 	}
 
 	showDescription := app.shouldShowDescription(log, query.From.ID, query.From.UserName)
-	text := app.GenerateCockRaceScoreboard(log, localizer, query.From.ID, cocks, seasonStartDate, totalParticipants, currentSeason, showDescription)
+	text := app.GenerateCockRaceScoreboard(log, localizer, query.From.ID, data, showDescription)
 	return InitializeInlineQueryWithThumbAndDesc(
 		app.localization.Localize(localizer, InlineTitleCockRace, nil),
 		text,
@@ -261,48 +226,50 @@ func (app *Application) InlineQueryCockDynamic(log *logging.Logger, update *tgbo
 		return tgbotapi.InlineQueryResultArticle{}
 	}
 	localizer, _ := app.localization.LocalizerByUpdate(update)
-	collection := timings.ReportExecutionForResult(log,
-		func() *mongo.Collection { return database.CollectionCocks(app.db) },
-		func(l *logging.Logger) { l.I("Collection successfully fetched") },
-	)
+	userID := query.From.ID
+	username := query.From.UserName
 
-	pipeline := timings.ReportExecutionForResult(log,
-		func() mongo.Pipeline { return database.PipelineDynamic(query.From.ID) },
-		func(l *logging.Logger) { l.I("Cock dynamic pipeline has successfully built") },
-	)
-
-	cursor, err := timings.ReportExecutionForResultError(log,
-		func() (*mongo.Cursor, error) {
-			return collection.Aggregate(app.ctx, pipeline)
-		},
-		func(l *logging.Logger) { l.I("Cock dynamic pipeline has successfully aggregated") },
-	)
-
-	if err != nil {
-		log.E("Aggregation failed", logging.InnerError, err)
-		return tgbotapi.InlineQueryResultArticle{}
+	// Три параллельных запроса: global, personal, respects
+	type globalResult struct {
+		data *api.CockDynamicGlobalData
+		err  error
+	}
+	type personalResult struct {
+		data *api.CockDynamicPersonalData
+		err  error
+	}
+	type respectsResult struct {
+		data *api.RespectData
+		err  error
 	}
 
-	defer func(cursor *mongo.Cursor, ctx context.Context) {
-		err := cursor.Close(ctx)
-		if err != nil {
-			log.E("Failed to close mongo cursor", logging.InnerError, err)
-		}
-	}(cursor, app.ctx)
+	globalCh := make(chan globalResult, 1)
+	personalCh := make(chan personalResult, 1)
+	respectsCh := make(chan respectsResult, 1)
 
-	var result *database.DocumentCockDynamic
+	go func() {
+		data, err := app.api.GetCockDynamicGlobal(app.ctx)
+		globalCh <- globalResult{data, err}
+	}()
+	go func() {
+		data, err := app.api.GetCockDynamicPersonal(app.ctx, userID, username)
+		personalCh <- personalResult{data, err}
+	}()
+	go func() {
+		data, err := app.api.GetCockRespects(app.ctx, userID, username)
+		respectsCh <- respectsResult{data, err}
+	}()
 
-	if err := timings.ReportExecutionForResult(log,
-		func() error { cursor.Next(app.ctx); return cursor.Decode(&result) },
-		func(l *logging.Logger) { l.I("Cock dynamic pipeline has successfully decoded") },
-	); err != nil {
-		log.E("Failed to decode aggregation results", logging.InnerError, err)
+	globalRes := <-globalCh
+	personalRes := <-personalCh
+	respectsRes := <-respectsCh
+
+	if globalRes.err != nil {
+		log.E("Failed to get global dynamic", logging.InnerError, globalRes.err)
 		return tgbotapi.InlineQueryResultArticle{}
 	}
-
-	// Проверяем, что у пользователя есть данные
-	if len(result.IndividualCockTotal) == 0 || len(result.Overall) == 0 {
-		log.E("User has no cock data yet")
+	if personalRes.err != nil {
+		log.E("Failed to get personal dynamic", logging.InnerError, personalRes.err)
 		text := app.localization.Localize(localizer, MsgCockDynamicNoData, nil)
 		return InitializeInlineQueryWithThumbAndDesc(
 			app.localization.Localize(localizer, InlineTitleCockDynamic, nil),
@@ -312,148 +279,96 @@ func (app *Application) InlineQueryCockDynamic(log *logging.Logger, update *tgbo
 		)
 	}
 
-	individualCockTotal := result.IndividualCockTotal[0]
+	global := globalRes.data
+	personal := personalRes.data
 
-	// Проверяем наличие данных по среднему коку (требует минимум 5 коков)
-	var individualCockRecentAverage int
-	if len(result.IndividualCockRecent) > 0 {
-		individualCockRecentAverage = result.IndividualCockRecent[0].Average
+	// Респекты
+	userSeasonWins := 0
+	userCockRespect := 0
+	if respectsRes.err == nil && respectsRes.data != nil {
+		userCockRespect = int(respectsRes.data.TotalRespect)
 	}
 
-	// Проверяем наличие данных по рекорду
-	var individualRecordTotal int
-	var individualRecordDate time.Time
-	if len(result.IndividualRecord) > 0 {
-		individualRecordTotal = result.IndividualRecord[0].Total
-		individualRecordDate = result.IndividualRecord[0].RequestedAt
-	} else {
-		// Если нет рекорда, используем данные из общего
-		individualRecordTotal = individualCockTotal.Total
-		individualRecordDate = datetime.NowTime()
+	// Персональный рекорд
+	individualRecordTotal := personal.Record.Size
+	individualRecordDate := datetime.NowTime()
+	if personal.Record.RequestedAt != nil {
+		if t, err := datetime.ParseUTC(*personal.Record.RequestedAt); err == nil {
+			individualRecordDate = t
+		}
 	}
 
-	individualIrk := result.IndividualIrk[0]
-	individualDominance := result.IndividualDominance[0]
+	// Общий рекорд
+	overallRecordTotal := global.Record.Total
+	overallRecordDate := datetime.NowTime()
+	if global.Record.RequestedAt != nil {
+		if t, err := datetime.ParseUTC(*global.Record.RequestedAt); err == nil {
+			overallRecordDate = t
+		}
+	}
 
-	// Получаем дату первого кока пользователя
-	var userFirstCockDate time.Time
+	// Период дёргания кока
 	var userPullingPeriod string
-	if len(result.IndividualFirstCockDate) > 0 {
-		userFirstCockDate = result.IndividualFirstCockDate[0].FirstDate
-		userPullingPeriod = FormatUserPullingPeriod(app.localization, localizer, userFirstCockDate, datetime.NowTime())
+	if personal.FirstCockDate != nil {
+		if firstDate, err := datetime.ParseUTC(*personal.FirstCockDate); err == nil {
+			userPullingPeriod = FormatUserPullingPeriod(app.localization, localizer, firstDate, datetime.NowTime())
+		} else {
+			userPullingPeriod = app.localization.Localize(localizer, MsgUserPullingRecently, nil)
+		}
 	} else {
 		userPullingPeriod = app.localization.Localize(localizer, MsgUserPullingRecently, nil)
 	}
-
-	// Проверяем наличие данных для дневной динамики (может отсутствовать у новых пользователей)
-	var yesterdayCockChange int
-	var yesterdayCockChangePercent float64
-	if len(result.IndividualDailyDynamics) > 0 {
-		yesterdayCockChange = result.IndividualDailyDynamics[0].YesterdayCockChange
-		yesterdayCockChangePercent = result.IndividualDailyDynamics[0].YesterdayCockChangePercent
-	}
-
-	// Проверяем наличие данных для динамики за 5 коков (требует минимум 5 коков)
-	var fiveCocksChange int
-	var fiveCocksChangePercent float64
-	if len(result.IndividualFiveCocksDynamics) > 0 {
-		fiveCocksChange = result.IndividualFiveCocksDynamics[0].FiveCocksChange
-		fiveCocksChangePercent = result.IndividualFiveCocksDynamics[0].FiveCocksChangePercent
-	}
-
-	// Проверяем наличие данных для скорости роста (требует минимум 5 коков)
-	var growthSpeed float64
-	if len(result.IndividualGrowthSpeed) > 0 {
-		growthSpeed = result.IndividualGrowthSpeed[0].GrowthSpeed
-	}
-
-	overall := result.Overall[0]
-	overallRecent := result.OverallRecent[0]
-	overallCockers := result.Uniques[0].Count
-	overallDistribution := result.Distribution[0]
-	overallRecord := result.Record[0]
-
-	totalCocksCount := result.TotalCocksCount[0].TotalCount
-
-	// Получаем скорость роста общей статистики
-	var overallGrowthSpeed float64
-	if len(result.OverallGrowthSpeed) > 0 {
-		overallGrowthSpeed = result.OverallGrowthSpeed[0].GrowthSpeed
-	}
-
-	// Проверяем наличие данных по количеству коков пользователя
-	var userCocksCount int
-	if len(result.IndividualCocksCount) > 0 {
-		userCocksCount = result.IndividualCocksCount[0].UserCount
-	}
-
-	// Проверяем наличие данных для коэффициента везения (требует минимум 5 коков)
-	var userLuckCoefficient float64
-	if len(result.IndividualLuck) > 0 {
-		userLuckCoefficient = result.IndividualLuck[0].LuckCoefficient
-	} else {
-		userLuckCoefficient = 1.0 // Нейтральное значение
-	}
-
-	// Проверяем наличие данных для волатильности (требует минимум 5 коков)
-	var userVolatility float64
-	if len(result.IndividualVolatility) > 0 {
-		userVolatility = result.IndividualVolatility[0].Volatility
-	}
-
-	userSeasonWins := app.GetUserSeasonWins(log, query.From.ID)
-	userCockRespect := app.GetUserCockRespect(log, query.From.ID)
 
 	text := NewMsgCockDynamicsTemplate(
 		app.localization,
 		localizer,
 		/* Общая динамика коков */
-		overall.Size,
-		overallCockers,
-		overallRecent.Average,
-		overallRecent.Median,
+		global.TotalSize,
+		global.UniqueUsers,
+		int(global.Recent.Average),
+		int(global.Recent.Median),
 
 		/* Персональная динамика кока */
-		individualCockTotal.Total,
-		individualCockRecentAverage,
-		individualIrk.Irk,
+		personal.TotalSize,
+		int(personal.RecentAverage),
+		personal.Irk,
 		individualRecordTotal,
 		individualRecordDate,
 
 		/* Кок-активы */
-		yesterdayCockChangePercent,
-		yesterdayCockChange,
-		fiveCocksChangePercent,
-		fiveCocksChange,
+		personal.DailyDynamics.YesterdayCockChangePercent,
+		personal.DailyDynamics.YesterdayCockChange,
+		personal.FiveCocksDynamics.FiveCocksChangePercent,
+		personal.FiveCocksDynamics.FiveCocksChange,
 
 		/* Соотношение коков */
-		overallDistribution.HugePercent,
-		overallDistribution.LittlePercent,
+		global.Distribution.HugePercent,
+		global.Distribution.LittlePercent,
 
 		/* Самый большой кок */
-		overallRecord.RequestedAt,
-		overallRecord.Total,
+		overallRecordDate,
+		overallRecordTotal,
 
 		/* % доминирование */
-		individualDominance.Dominance,
+		personal.Dominance,
 
 		/* Сезонные достижения */
 		userSeasonWins,
 		userCockRespect,
 
 		/* Всего дёрнуто коков */
-		totalCocksCount,
-		userCocksCount,
+		global.TotalCocksCount,
+		personal.CocksCount,
 
 		/* Коэффициент везения и волатильность */
-		userLuckCoefficient,
-		userVolatility,
+		personal.LuckCoefficient,
+		personal.Volatility,
 
 		/* Средняя скорость прироста */
-		growthSpeed,
+		personal.GrowthSpeed,
 
 		/* Скорость роста общей статистики */
-		overallGrowthSpeed,
+		global.GrowthSpeed,
 
 		/* Период дергания кока пользователем */
 		userPullingPeriod,
@@ -471,9 +386,10 @@ func (app *Application) InlineQueryCockSeason(log *logging.Logger, update *tgbot
 		return tgbotapi.InlineQueryResultArticle{}
 	}
 	localizer, _ := app.localization.LocalizerByUpdate(update)
-	allSeasons := app.GetAllSeasonsForStats(log)
 
-	if len(allSeasons) == 0 {
+	seasonsData, err := app.api.GetCockSeasons(app.ctx, query.From.ID, query.From.UserName, 15, 1)
+	if err != nil {
+		log.E("Failed to get cock seasons via API", logging.InnerError, err)
 		text := NewMsgCockSeasonNoSeasonsTemplate(app.localization, localizer)
 		return InitializeInlineQueryWithThumbAndDesc(
 			app.localization.Localize(localizer, InlineTitleCockSeason, nil),
@@ -483,26 +399,27 @@ func (app *Application) InlineQueryCockSeason(log *logging.Logger, update *tgbot
 		)
 	}
 
-	// Начинаем с последнего (самого нового) сезона
-	currentSeasonIdx := len(allSeasons) - 1
-	currentSeason := allSeasons[currentSeasonIdx]
-
-	getSeasonWinners := func(season CockSeason) []SeasonWinner {
-		return app.GetSeasonWinners(log, season)
+	if len(seasonsData.Seasons) == 0 {
+		text := NewMsgCockSeasonNoSeasonsTemplate(app.localization, localizer)
+		return InitializeInlineQueryWithThumbAndDesc(
+			app.localization.Localize(localizer, InlineTitleCockSeason, nil),
+			text,
+			app.localization.Localize(localizer, DescCockSeason, nil),
+			"https://files.mairwunnx.com/raw/public/dickobrazz%2Fico_seasons.png",
+		)
 	}
 
+	// Первый элемент = самый новый (текущий) сезон
+	currentSeason := seasonsData.Seasons[0]
 	showDescription := app.shouldShowDescription(log, query.From.ID, query.From.UserName)
-	resolveNickname := func(userID int64, nickname string) string {
-		return app.ResolveDisplayNickname(log, localizer, userID, nickname)
-	}
-	text := NewMsgCockSeasonSinglePage(app.localization, localizer, currentSeason, getSeasonWinners, resolveNickname, showDescription)
+	text := generateSeasonPageText(app.localization, localizer, currentSeason, showDescription)
 
-	// Создаем кнопки навигации
+	// Кнопки навигации
 	var buttons []tgbotapi.InlineKeyboardButton
 
-	// Кнопка "предыдущий сезон" (более старый, влево)
-	if currentSeasonIdx > 0 {
-		prevSeason := allSeasons[currentSeasonIdx-1]
+	// Кнопка "предыдущий сезон" (более старый)
+	if len(seasonsData.Seasons) > 1 {
+		prevSeason := seasonsData.Seasons[1]
 		buttons = append(buttons, tgbotapi.NewInlineKeyboardButtonData(
 			app.localization.Localize(localizer, MsgSeasonButton, map[string]any{
 				"Arrow":     "◀️",
@@ -512,12 +429,8 @@ func (app *Application) InlineQueryCockSeason(log *logging.Logger, update *tgbot
 		))
 	}
 
-	// Кнопка "следующий сезон" (более новый, вправо) - только если есть более новый
-	// (на самом деле, если мы на последнем сезоне, следующего нет)
-	// Но для будущих сезонов это может быть полезно
-
 	article := tgbotapi.NewInlineQueryResultArticleMarkdownV2(
-		uuid.NewString(),
+		fmt.Sprintf("season_%d", currentSeason.SeasonNum),
 		app.localization.Localize(localizer, InlineTitleCockSeason, nil),
 		text,
 	)
@@ -540,19 +453,15 @@ func (app *Application) InlineQueryCockRuler(log *logging.Logger, update *tgbota
 		return tgbotapi.InlineQueryResultArticle{}
 	}
 	localizer, _ := app.localization.LocalizerByUpdate(update)
-	cocks := app.GetCockSizesFromCache(log)
-	totalParticipants := len(cocks)
 
-	sort.Slice(cocks, func(i, j int) bool {
-		return cocks[i].Size > cocks[j].Size
-	})
-
-	if len(cocks) > 13 {
-		cocks = cocks[:13]
+	data, err := app.api.GetCockRuler(app.ctx, query.From.ID, query.From.UserName, 13, 1)
+	if err != nil {
+		log.E("Failed to get cock ruler via API", logging.InnerError, err)
+		return tgbotapi.InlineQueryResultArticle{}
 	}
 
 	showDescription := app.shouldShowDescription(log, query.From.ID, query.From.UserName)
-	text := app.GenerateCockRulerText(log, localizer, query.From.ID, cocks, totalParticipants, showDescription)
+	text := app.GenerateCockRulerText(log, localizer, query.From.ID, data, showDescription)
 	return InitializeInlineQueryWithThumbAndDesc(
 		app.localization.Localize(localizer, InlineTitleCockRuler, nil),
 		text,
@@ -569,37 +478,54 @@ func (app *Application) InlineQueryCockAchievements(log *logging.Logger, update 
 	localizer, _ := app.localization.LocalizerByUpdate(update)
 	userID := query.From.ID
 
-	// Проверка только для тестового пользователя
-	// if userID != 362695653 {
-	// 	text := "🔒 *Кок\\-ачивки временно доступны только для тестирования*\n\n_Скоро будут доступны для всех\\!_"
-	// 	return InitializeInlineQueryWithThumbAndDesc(
-	// 		"Кок-ачивки",
-	// 		text,
-	// 		DescCockAchievements,
-	// 		"https://files.mairwunnx.com/raw/public/dickobrazz%2FGemini_Generated_Image_qkh4tfqkh4tfqkh4.png",
-	// 	)
-	// }
+	// Параллельно получаем ачивки и респекты
+	type achResult struct {
+		data *api.CockAchievementsData
+		err  error
+	}
+	type respResult struct {
+		data *api.RespectData
+		err  error
+	}
 
-	// Проверяем и обновляем достижения (только для mairwunnx, раз в сутки)
-	app.CheckAndUpdateAchievements(log, userID)
+	achCh := make(chan achResult, 1)
+	respCh := make(chan respResult, 1)
 
-	// Получаем достижения пользователя
-	userAchievements := app.GetUserAchievements(log, userID)
+	go func() {
+		data, err := app.api.GetCockAchievements(app.ctx, userID, query.From.UserName)
+		achCh <- achResult{data, err}
+	}()
+	go func() {
+		data, err := app.api.GetCockRespects(app.ctx, userID, query.From.UserName)
+		respCh <- respResult{data, err}
+	}()
 
-	// Генерируем текст с пагинацией (10 ачивок на страницу)
-	achievementsList, completedCount, totalRespects, percentComplete := GenerateAchievementsText(
+	achRes := <-achCh
+	respRes := <-respCh
+
+	if achRes.err != nil {
+		log.E("Failed to get achievements via API", logging.InnerError, achRes.err)
+		return tgbotapi.InlineQueryResultArticle{}
+	}
+	achData := achRes.data
+
+	achievementRespects := 0
+	if respRes.err == nil && respRes.data != nil {
+		achievementRespects = int(respRes.data.AchievementRespect)
+	}
+
+	achievementsList := GenerateAchievementsText(
 		app.localization,
 		localizer,
 		AllAchievements,
-		userAchievements,
+		achData.Achievements,
 		page,
 		10,
 	)
 
-	totalAchievements := len(AllAchievements)
+	totalAchievements := achData.AchievementsTotal
 	totalPages := (totalAchievements + 9) / 10
 
-	// Выбираем шаблон в зависимости от страницы
 	var templateID string
 	if page == 1 {
 		templateID = MsgCockAchievementsTemplate
@@ -608,26 +534,22 @@ func (app *Application) InlineQueryCockAchievements(log *logging.Logger, update 
 	}
 
 	text := app.localization.Localize(localizer, templateID, map[string]any{
-		"Completed":    completedCount,
+		"Completed":    achData.AchievementsDone,
 		"Total":        totalAchievements,
-		"Percent":      percentComplete,
-		"Respects":     totalRespects,
+		"Percent":      int(achData.AchievementsDonePercent),
+		"Respects":     achievementRespects,
 		"Achievements": achievementsList,
 	})
 
-	// Создаем кнопки пагинации (с userID владельца)
 	var buttons []tgbotapi.InlineKeyboardButton
 
 	if page > 1 {
-		// Кнопка "предыдущая страница"
 		buttons = append(buttons, tgbotapi.NewInlineKeyboardButtonData("◀️", fmt.Sprintf("ach_page:%d:%d", userID, page-1)))
 	}
 
-	// Кнопка "текущая страница / всего страниц"
 	buttons = append(buttons, tgbotapi.NewInlineKeyboardButtonData(fmt.Sprintf("%d/%d", page, totalPages), "ach_noop"))
 
 	if page < totalPages {
-		// Кнопка "следующая страница"
 		buttons = append(buttons, tgbotapi.NewInlineKeyboardButtonData("▶️", fmt.Sprintf("ach_page:%d:%d", userID, page+1)))
 	}
 
@@ -636,7 +558,7 @@ func (app *Application) InlineQueryCockAchievements(log *logging.Logger, update 
 	)
 
 	article := tgbotapi.NewInlineQueryResultArticleMarkdownV2(
-		uuid.NewString(),
+		fmt.Sprintf("ach_%d_%d", userID, page),
 		app.localization.Localize(localizer, InlineTitleCockAchievements, nil),
 		text,
 	)
@@ -647,39 +569,11 @@ func (app *Application) InlineQueryCockAchievements(log *logging.Logger, update 
 	return article
 }
 
-func InitializeInlineQuery(title, message string) tgbotapi.InlineQueryResultArticle {
-	return tgbotapi.NewInlineQueryResultArticleMarkdownV2(uuid.NewString(), title, message)
-}
-
-func InitializeInlineQueryWithThumb(title, message, thumbURL string) tgbotapi.InlineQueryResultArticle {
-	article := tgbotapi.NewInlineQueryResultArticleMarkdownV2(uuid.NewString(), title, message)
-	article.ThumbURL = thumbURL
-	return article
-}
-
 func InitializeInlineQueryWithThumbAndDesc(title, message, description, thumbURL string) tgbotapi.InlineQueryResultArticle {
-	article := tgbotapi.NewInlineQueryResultArticleMarkdownV2(uuid.NewString(), title, message)
+	article := tgbotapi.NewInlineQueryResultArticleMarkdownV2(fmt.Sprintf("q_%d", time.Now().UnixNano()), title, message)
 	article.ThumbURL = thumbURL
 	article.Description = description
 	return article
-}
-
-func (app *Application) InlineQuerySystemInfo(log *logging.Logger, update *tgbotapi.Update) tgbotapi.InlineQueryResultArticle {
-	query := update.InlineQuery
-	if query == nil {
-		return tgbotapi.InlineQueryResultArticle{}
-	}
-	localizer, _ := app.localization.LocalizerByUpdate(update)
-	info := app.GetSystemInfo(log, localizer, query.From.ID, query.From.UserName)
-
-	text := NewMsgSystemInfoTemplate(app.localization, localizer, info)
-
-	return InitializeInlineQueryWithThumbAndDesc(
-		app.localization.Localize(localizer, InlineTitleSystemInfo, nil),
-		text,
-		app.localization.Localize(localizer, DescSystemInfo, nil),
-		"https://files.mairwunnx.com/raw/public/dickobrazz%2Fico_system.png",
-	)
 }
 
 func (app *Application) HandleCallbackQuery(log *logging.Logger, update *tgbotapi.Update) {
@@ -688,359 +582,382 @@ func (app *Application) HandleCallbackQuery(log *logging.Logger, update *tgbotap
 		return
 	}
 	localizer, _ := app.localization.LocalizerByUpdate(update)
-	// Парсим callback data
 	data := callback.Data
 
 	if strings.HasPrefix(data, hideCallbackPrefix) {
-		parts := strings.Split(strings.TrimPrefix(data, hideCallbackPrefix), ":")
-		if len(parts) != 2 {
-			log.E("Invalid hide callback data format", "data", data)
-			callbackConfig := tgbotapi.NewCallback(callback.ID, app.localization.Localize(localizer, MsgCallbackInvalidFormat, nil))
-			if _, err := app.bot.Request(callbackConfig); err != nil {
-				log.E("Failed to answer callback query", logging.InnerError, err)
-			}
-			return
-		}
-
-		targetUserID, err := strconv.ParseInt(parts[0], 10, 64)
-		if err != nil {
-			log.E("Failed to parse userID from hide callback", logging.InnerError, err)
-			callbackConfig := tgbotapi.NewCallback(callback.ID, app.localization.Localize(localizer, MsgCallbackParseError, nil))
-			if _, err := app.bot.Request(callbackConfig); err != nil {
-				log.E("Failed to answer callback query", logging.InnerError, err)
-			}
-			return
-		}
-
-		action := parts[1]
-		hide := false
-		switch action {
-		case hideActionHide:
-			hide = true
-		case hideActionShow:
-			hide = false
-		default:
-			log.E("Invalid hide callback action", "action", action)
-			callbackConfig := tgbotapi.NewCallback(callback.ID, app.localization.Localize(localizer, MsgCallbackInvalidFormat, nil))
-			if _, err := app.bot.Request(callbackConfig); err != nil {
-				log.E("Failed to answer callback query", logging.InnerError, err)
-			}
-			return
-		}
-
-		if callback.From == nil || callback.From.ID != targetUserID {
-			callbackConfig := tgbotapi.NewCallback(callback.ID, app.localization.Localize(localizer, MsgCallbackNotForYou, nil))
-			callbackConfig.ShowAlert = true
-			if _, err := app.bot.Request(callbackConfig); err != nil {
-				log.E("Failed to answer callback query", logging.InnerError, err)
-			}
-			return
-		}
-
-		anonName, realName := app.setUserHiddenStatus(log, localizer, callback.From, hide)
-		text, keyboard := app.buildHideMessage(localizer, hide, anonName, realName, targetUserID)
-
-		_, _ = app.bot.Request(tgbotapi.NewCallback(callback.ID, ""))
-
-		if callback.InlineMessageID != "" {
-			edit := tgbotapi.EditMessageTextConfig{
-				BaseEdit: tgbotapi.BaseEdit{
-					InlineMessageID: callback.InlineMessageID,
-				},
-				Text:      text,
-				ParseMode: "MarkdownV2",
-			}
-			if keyboard != nil {
-				edit.ReplyMarkup = keyboard
-			}
-			if _, err := app.bot.Request(edit); err != nil {
-				log.E("Failed to edit inline message", logging.InnerError, err)
-			} else {
-				log.I("Successfully edited hide message", "user_id", targetUserID)
-			}
-		} else if callback.Message != nil {
-			edit := tgbotapi.NewEditMessageText(
-				callback.Message.Chat.ID,
-				callback.Message.MessageID,
-				text,
-			)
-			edit.ParseMode = "MarkdownV2"
-			if keyboard != nil {
-				edit.ReplyMarkup = keyboard
-			}
-			if _, err := app.bot.Request(edit); err != nil {
-				log.E("Failed to edit chat message", logging.InnerError, err)
-			} else {
-				log.I("Successfully edited hide message", "user_id", targetUserID)
-			}
-		} else {
-			log.E("CallbackQuery has neither Message nor InlineMessageID")
-		}
+		app.handleHideCallback(log, localizer, callback)
 		return
 	}
 
-	// Обрабатываем пагинацию сезонов
 	if strings.HasPrefix(data, "season_page:") {
-		// Парсим номер сезона
-		seasonNumStr := strings.TrimPrefix(data, "season_page:")
-		seasonNum := 1
-		if parsedSeasonNum, err := strconv.Atoi(seasonNumStr); err != nil {
-			log.E("Failed to parse season number", logging.InnerError, err)
-		} else {
-			seasonNum = parsedSeasonNum
-		}
+		app.handleSeasonPageCallback(log, localizer, callback)
+		return
+	}
 
-		// Получаем все сезоны
-		allSeasons := app.GetAllSeasonsForStats(log)
+	if strings.HasPrefix(data, "ach_page:") {
+		app.handleAchPageCallback(log, localizer, callback)
+		return
+	}
 
-		// Находим нужный сезон
-		var targetSeason *CockSeason
-		var targetIdx int
-		for idx, s := range allSeasons {
-			if s.SeasonNum == seasonNum {
-				targetSeason = &s
-				targetIdx = idx
-				break
-			}
-		}
-
-		if targetSeason == nil {
-			log.E("Season not found", "season_num", seasonNum)
-			callbackConfig := tgbotapi.NewCallback(callback.ID, app.localization.Localize(localizer, MsgSeasonNotFound, nil))
-			if _, err := app.bot.Request(callbackConfig); err != nil {
-				log.E("Failed to answer callback query", logging.InnerError, err)
-			}
-			return
-		}
-
-		getSeasonWinners := func(season CockSeason) []SeasonWinner {
-			return app.GetSeasonWinners(log, season)
-		}
-
-		showDescription := app.shouldShowDescription(log, callback.From.ID, callback.From.UserName)
-		resolveNickname := func(userID int64, nickname string) string {
-			return app.ResolveDisplayNickname(log, localizer, userID, nickname)
-		}
-		text := NewMsgCockSeasonSinglePage(app.localization, localizer, *targetSeason, getSeasonWinners, resolveNickname, showDescription)
-
-		// Создаем кнопки навигации
-		var buttons []tgbotapi.InlineKeyboardButton
-
-		// Кнопка "предыдущий сезон" (более старый, влево)
-		if targetIdx > 0 {
-			prevSeason := allSeasons[targetIdx-1]
-			buttons = append(buttons, tgbotapi.NewInlineKeyboardButtonData(
-				app.localization.Localize(localizer, MsgSeasonButton, map[string]any{
-					"Arrow":     "◀️",
-					"SeasonNum": prevSeason.SeasonNum,
-				}),
-				fmt.Sprintf("season_page:%d", prevSeason.SeasonNum),
-			))
-		}
-
-		// Кнопка "следующий сезон" (более новый, вправо)
-		if targetIdx < len(allSeasons)-1 {
-			nextSeason := allSeasons[targetIdx+1]
-			buttons = append(buttons, tgbotapi.NewInlineKeyboardButtonData(
-				app.localization.Localize(localizer, MsgSeasonButton, map[string]any{
-					"Arrow":     "▶️",
-					"SeasonNum": nextSeason.SeasonNum,
-				}),
-				fmt.Sprintf("season_page:%d", nextSeason.SeasonNum),
-			))
-		}
-
-		// Отвечаем на callback
-		_, _ = app.bot.Request(tgbotapi.NewCallback(callback.ID, ""))
-
-		// Редактируем существующее сообщение
-		if callback.InlineMessageID != "" {
-			edit := tgbotapi.EditMessageTextConfig{
-				BaseEdit: tgbotapi.BaseEdit{
-					InlineMessageID: callback.InlineMessageID,
-				},
-				Text:      text,
-				ParseMode: "MarkdownV2",
-			}
-
-			// Добавляем клавиатуру только если есть кнопки
-			if len(buttons) > 0 {
-				kb := tgbotapi.NewInlineKeyboardMarkup(
-					tgbotapi.NewInlineKeyboardRow(buttons...),
-				)
-				edit.ReplyMarkup = &kb
-			}
-			if _, err := app.bot.Request(edit); err != nil {
-				log.E("Failed to edit inline message", logging.InnerError, err)
-			} else {
-				log.I("Successfully edited inline message", "season_num", seasonNum)
-			}
-		} else if callback.Message != nil {
-			edit := tgbotapi.NewEditMessageText(
-				callback.Message.Chat.ID,
-				callback.Message.MessageID,
-				text,
-			)
-			edit.ParseMode = "MarkdownV2"
-
-			// Добавляем клавиатуру только если есть кнопки
-			if len(buttons) > 0 {
-				kb := tgbotapi.NewInlineKeyboardMarkup(
-					tgbotapi.NewInlineKeyboardRow(buttons...),
-				)
-				edit.ReplyMarkup = &kb
-			}
-
-			if _, err := app.bot.Request(edit); err != nil {
-				log.E("Failed to edit chat message", logging.InnerError, err)
-			} else {
-				log.I("Successfully edited chat message", "season_num", seasonNum)
-			}
-		} else {
-			log.E("CallbackQuery has neither Message nor InlineMessageID")
-		}
-	} else if strings.HasPrefix(data, "ach_page:") {
-		// Парсим userID и номер страницы из формата "ach_page:userID:page"
-		parts := strings.Split(strings.TrimPrefix(data, "ach_page:"), ":")
-		if len(parts) != 2 {
-			log.E("Invalid ach_page callback data format", "data", data)
-			callbackConfig := tgbotapi.NewCallback(callback.ID, app.localization.Localize(localizer, MsgCallbackInvalidFormat, nil))
-			if _, err := app.bot.Request(callbackConfig); err != nil {
-				log.E("Failed to answer callback query", logging.InnerError, err)
-			}
-			return
-		}
-
-		userID, err := strconv.ParseInt(parts[0], 10, 64)
-		if err != nil {
-			log.E("Failed to parse userID from callback", logging.InnerError, err)
-			callbackConfig := tgbotapi.NewCallback(callback.ID, app.localization.Localize(localizer, MsgCallbackParseError, nil))
-			if _, err := app.bot.Request(callbackConfig); err != nil {
-				log.E("Failed to answer callback query", logging.InnerError, err)
-			}
-			return
-		}
-
-		page := 1
-		if parsedPage, err := strconv.Atoi(parts[1]); err != nil {
-			log.E("Failed to parse page number", logging.InnerError, err)
-		} else {
-			page = parsedPage
-		}
-		// if userID != 362695653 {
-		// 	// Отвечаем на callback и выходим
-		// 	callbackConfig := tgbotapi.NewCallback(callback.ID, "Ачивки доступны только для тестирования")
-		// 	if _, err := app.bot.Request(callbackConfig); err != nil {
-		// 		log.E("Failed to answer callback query", logging.InnerError, err)
-		// 	}
-		// 	return
-		// }
-
-		// Проверяем и обновляем достижения (раз в сутки)
-		app.CheckAndUpdateAchievements(log, userID)
-
-		// Получаем достижения пользователя
-		userAchievements := app.GetUserAchievements(log, userID)
-
-		// Генерируем текст для запрошенной страницы
-		achievementsList, completedCount, totalRespects, percentComplete := GenerateAchievementsText(
-			app.localization,
-			localizer,
-			AllAchievements,
-			userAchievements,
-			page,
-			10,
-		)
-
-		totalAchievements := len(AllAchievements)
-		totalPages := (totalAchievements + 9) / 10
-
-		// Выбираем шаблон в зависимости от страницы
-		var templateID string
-		if page == 1 {
-			templateID = MsgCockAchievementsTemplate
-		} else {
-			templateID = MsgCockAchievementsTemplateOtherPages
-		}
-
-		text := app.localization.Localize(localizer, templateID, map[string]any{
-			"Completed":    completedCount,
-			"Total":        totalAchievements,
-			"Percent":      percentComplete,
-			"Respects":     totalRespects,
-			"Achievements": achievementsList,
-		})
-
-		// Создаем кнопки пагинации для новой страницы (с userID владельца)
-		var buttons []tgbotapi.InlineKeyboardButton
-
-		if page > 1 {
-			buttons = append(buttons, tgbotapi.NewInlineKeyboardButtonData("◀️", fmt.Sprintf("ach_page:%d:%d", userID, page-1)))
-		}
-
-		buttons = append(buttons, tgbotapi.NewInlineKeyboardButtonData(fmt.Sprintf("%d/%d", page, totalPages), "ach_noop"))
-
-		if page < totalPages {
-			buttons = append(buttons, tgbotapi.NewInlineKeyboardButtonData("▶️", fmt.Sprintf("ach_page:%d:%d", userID, page+1)))
-		}
-
-		// Отвечаем на callback (убираем "часики" на кнопке)
-		_, _ = app.bot.Request(tgbotapi.NewCallback(callback.ID, ""))
-
-		// Редактируем существующее сообщение
-		if callback.InlineMessageID != "" {
-			// INLINE message: редактируем по InlineMessageID
-			edit := tgbotapi.EditMessageTextConfig{
-				BaseEdit: tgbotapi.BaseEdit{
-					InlineMessageID: callback.InlineMessageID,
-				},
-				Text:      text,
-				ParseMode: "MarkdownV2",
-			}
-
-			// Добавляем клавиатуру только если есть кнопки
-			if len(buttons) > 0 {
-				kb := tgbotapi.NewInlineKeyboardMarkup(
-					tgbotapi.NewInlineKeyboardRow(buttons...),
-				)
-				edit.ReplyMarkup = &kb
-			}
-			if _, err := app.bot.Request(edit); err != nil {
-				log.E("Failed to edit inline message", logging.InnerError, err)
-			} else {
-				log.I("Successfully edited inline message", "page", page)
-			}
-		} else if callback.Message != nil {
-			// Обычное сообщение в чате: редактируем по chat_id/message_id
-			edit := tgbotapi.NewEditMessageText(
-				callback.Message.Chat.ID,
-				callback.Message.MessageID,
-				text,
-			)
-			edit.ParseMode = "MarkdownV2"
-
-			// Добавляем клавиатуру только если есть кнопки
-			if len(buttons) > 0 {
-				kb := tgbotapi.NewInlineKeyboardMarkup(
-					tgbotapi.NewInlineKeyboardRow(buttons...),
-				)
-				edit.ReplyMarkup = &kb
-			}
-
-			if _, err := app.bot.Request(edit); err != nil {
-				log.E("Failed to edit chat message", logging.InnerError, err)
-			} else {
-				log.I("Successfully edited chat message", "page", page)
-			}
-		} else {
-			// Крайний случай — некуда редактировать
-			log.E("CallbackQuery has neither Message nor InlineMessageID")
-		}
-	} else if data == "ach_noop" {
-		// Просто отвечаем на callback (для кнопки с текущей страницей)
+	if data == "ach_noop" {
 		callbackConfig := tgbotapi.NewCallback(callback.ID, "")
 		if _, err := app.bot.Request(callbackConfig); err != nil {
 			log.E("Failed to answer callback query", logging.InnerError, err)
 		}
 	}
+}
+
+func (app *Application) handleHideCallback(log *logging.Logger, localizer *i18n.Localizer, callback *tgbotapi.CallbackQuery) {
+	data := callback.Data
+	parts := strings.Split(strings.TrimPrefix(data, hideCallbackPrefix), ":")
+	if len(parts) != 2 {
+		log.E("Invalid hide callback data format", "data", data)
+		callbackConfig := tgbotapi.NewCallback(callback.ID, app.localization.Localize(localizer, MsgCallbackInvalidFormat, nil))
+		if _, err := app.bot.Request(callbackConfig); err != nil {
+			log.E("Failed to answer callback query", logging.InnerError, err)
+		}
+		return
+	}
+
+	targetUserID, err := strconv.ParseInt(parts[0], 10, 64)
+	if err != nil {
+		log.E("Failed to parse userID from hide callback", logging.InnerError, err)
+		callbackConfig := tgbotapi.NewCallback(callback.ID, app.localization.Localize(localizer, MsgCallbackParseError, nil))
+		if _, err := app.bot.Request(callbackConfig); err != nil {
+			log.E("Failed to answer callback query", logging.InnerError, err)
+		}
+		return
+	}
+
+	action := parts[1]
+	hide := false
+	switch action {
+	case hideActionHide:
+		hide = true
+	case hideActionShow:
+		hide = false
+	default:
+		log.E("Invalid hide callback action", "action", action)
+		callbackConfig := tgbotapi.NewCallback(callback.ID, app.localization.Localize(localizer, MsgCallbackInvalidFormat, nil))
+		if _, err := app.bot.Request(callbackConfig); err != nil {
+			log.E("Failed to answer callback query", logging.InnerError, err)
+		}
+		return
+	}
+
+	if callback.From == nil || callback.From.ID != targetUserID {
+		callbackConfig := tgbotapi.NewCallback(callback.ID, app.localization.Localize(localizer, MsgCallbackNotForYou, nil))
+		callbackConfig.ShowAlert = true
+		if _, err := app.bot.Request(callbackConfig); err != nil {
+			log.E("Failed to answer callback query", logging.InnerError, err)
+		}
+		return
+	}
+
+	anonName, realName := app.setUserHiddenStatus(log, localizer, callback.From, hide)
+	text, keyboard := app.buildHideMessage(localizer, hide, anonName, realName, targetUserID)
+
+	_, _ = app.bot.Request(tgbotapi.NewCallback(callback.ID, ""))
+
+	app.editCallbackMessage(log, callback, text, keyboard)
+}
+
+func (app *Application) handleSeasonPageCallback(log *logging.Logger, localizer *i18n.Localizer, callback *tgbotapi.CallbackQuery) {
+	seasonNumStr := strings.TrimPrefix(callback.Data, "season_page:")
+	seasonNum := 1
+	if parsedSeasonNum, err := strconv.Atoi(seasonNumStr); err != nil {
+		log.E("Failed to parse season number", logging.InnerError, err)
+	} else {
+		seasonNum = parsedSeasonNum
+	}
+
+	userID := int64(0)
+	username := ""
+	if callback.From != nil {
+		userID = callback.From.ID
+		username = callback.From.UserName
+	}
+
+	// Запрашиваем сезоны с бэкэнда
+	seasonsData, err := app.api.GetCockSeasons(app.ctx, userID, username, 15, 1)
+	if err != nil {
+		log.E("Failed to get seasons via API", logging.InnerError, err)
+		callbackConfig := tgbotapi.NewCallback(callback.ID, app.localization.Localize(localizer, MsgSeasonNotFound, nil))
+		if _, err := app.bot.Request(callbackConfig); err != nil {
+			log.E("Failed to answer callback query", logging.InnerError, err)
+		}
+		return
+	}
+
+	// Ищем нужный сезон в полученных данных
+	var targetSeason *api.SeasonWithWinners
+	var targetIdx int
+	for idx, s := range seasonsData.Seasons {
+		if s.SeasonNum == seasonNum {
+			targetSeason = &seasonsData.Seasons[idx]
+			targetIdx = idx
+			break
+		}
+	}
+
+	// Если не нашли на первой странице, пробуем вычислить нужную API-страницу
+	if targetSeason == nil && seasonsData.Page.TotalPages > 1 {
+		// Сезоны от новых к старым: сезон с наибольшим номером на первой странице
+		// Вычисляем apiPage для нужного сезона
+		for apiPage := 2; apiPage <= seasonsData.Page.TotalPages; apiPage++ {
+			pageData, err := app.api.GetCockSeasons(app.ctx, userID, username, 15, apiPage)
+			if err != nil {
+				break
+			}
+			for idx, s := range pageData.Seasons {
+				if s.SeasonNum == seasonNum {
+					targetSeason = &pageData.Seasons[idx]
+					targetIdx = idx
+					seasonsData = pageData
+					break
+				}
+			}
+			if targetSeason != nil {
+				break
+			}
+		}
+	}
+
+	if targetSeason == nil {
+		log.E("Season not found", "season_num", seasonNum)
+		callbackConfig := tgbotapi.NewCallback(callback.ID, app.localization.Localize(localizer, MsgSeasonNotFound, nil))
+		if _, err := app.bot.Request(callbackConfig); err != nil {
+			log.E("Failed to answer callback query", logging.InnerError, err)
+		}
+		return
+	}
+
+	showDescription := app.shouldShowDescription(log, userID, username)
+	text := generateSeasonPageText(app.localization, localizer, *targetSeason, showDescription)
+
+	// Кнопки навигации
+	var buttons []tgbotapi.InlineKeyboardButton
+
+	// Кнопка "предыдущий сезон" (более старый)
+	if targetIdx < len(seasonsData.Seasons)-1 {
+		prevSeason := seasonsData.Seasons[targetIdx+1]
+		buttons = append(buttons, tgbotapi.NewInlineKeyboardButtonData(
+			app.localization.Localize(localizer, MsgSeasonButton, map[string]any{
+				"Arrow":     "◀️",
+				"SeasonNum": prevSeason.SeasonNum,
+			}),
+			fmt.Sprintf("season_page:%d", prevSeason.SeasonNum),
+		))
+	} else if targetSeason.SeasonNum > 1 {
+		// Есть более старые сезоны, но на другой странице API
+		buttons = append(buttons, tgbotapi.NewInlineKeyboardButtonData(
+			app.localization.Localize(localizer, MsgSeasonButton, map[string]any{
+				"Arrow":     "◀️",
+				"SeasonNum": targetSeason.SeasonNum - 1,
+			}),
+			fmt.Sprintf("season_page:%d", targetSeason.SeasonNum-1),
+		))
+	}
+
+	// Кнопка "следующий сезон" (более новый)
+	if targetIdx > 0 {
+		nextSeason := seasonsData.Seasons[targetIdx-1]
+		buttons = append(buttons, tgbotapi.NewInlineKeyboardButtonData(
+			app.localization.Localize(localizer, MsgSeasonButton, map[string]any{
+				"Arrow":     "▶️",
+				"SeasonNum": nextSeason.SeasonNum,
+			}),
+			fmt.Sprintf("season_page:%d", nextSeason.SeasonNum),
+		))
+	}
+
+	_, _ = app.bot.Request(tgbotapi.NewCallback(callback.ID, ""))
+
+	var keyboard *tgbotapi.InlineKeyboardMarkup
+	if len(buttons) > 0 {
+		kb := tgbotapi.NewInlineKeyboardMarkup(tgbotapi.NewInlineKeyboardRow(buttons...))
+		keyboard = &kb
+	}
+	app.editCallbackMessage(log, callback, text, keyboard)
+}
+
+func (app *Application) handleAchPageCallback(log *logging.Logger, localizer *i18n.Localizer, callback *tgbotapi.CallbackQuery) {
+	parts := strings.Split(strings.TrimPrefix(callback.Data, "ach_page:"), ":")
+	if len(parts) != 2 {
+		log.E("Invalid ach_page callback data format", "data", callback.Data)
+		callbackConfig := tgbotapi.NewCallback(callback.ID, app.localization.Localize(localizer, MsgCallbackInvalidFormat, nil))
+		if _, err := app.bot.Request(callbackConfig); err != nil {
+			log.E("Failed to answer callback query", logging.InnerError, err)
+		}
+		return
+	}
+
+	userID, err := strconv.ParseInt(parts[0], 10, 64)
+	if err != nil {
+		log.E("Failed to parse userID from callback", logging.InnerError, err)
+		callbackConfig := tgbotapi.NewCallback(callback.ID, app.localization.Localize(localizer, MsgCallbackParseError, nil))
+		if _, err := app.bot.Request(callbackConfig); err != nil {
+			log.E("Failed to answer callback query", logging.InnerError, err)
+		}
+		return
+	}
+
+	page := 1
+	if parsedPage, err := strconv.Atoi(parts[1]); err != nil {
+		log.E("Failed to parse page number", logging.InnerError, err)
+	} else {
+		page = parsedPage
+	}
+
+	username := ""
+	if callback.From != nil {
+		username = callback.From.UserName
+	}
+
+	// Параллельно получаем ачивки и респекты
+	type achResult struct {
+		data *api.CockAchievementsData
+		err  error
+	}
+	type respResult struct {
+		data *api.RespectData
+		err  error
+	}
+
+	achCh := make(chan achResult, 1)
+	respCh := make(chan respResult, 1)
+
+	go func() {
+		data, err := app.api.GetCockAchievements(app.ctx, userID, username)
+		achCh <- achResult{data, err}
+	}()
+	go func() {
+		data, err := app.api.GetCockRespects(app.ctx, userID, username)
+		respCh <- respResult{data, err}
+	}()
+
+	achRes := <-achCh
+	respRes := <-respCh
+
+	if achRes.err != nil {
+		log.E("Failed to get achievements via API", logging.InnerError, achRes.err)
+		_, _ = app.bot.Request(tgbotapi.NewCallback(callback.ID, ""))
+		return
+	}
+	achData := achRes.data
+
+	achievementRespects := 0
+	if respRes.err == nil && respRes.data != nil {
+		achievementRespects = int(respRes.data.AchievementRespect)
+	}
+
+	achievementsList := GenerateAchievementsText(
+		app.localization,
+		localizer,
+		AllAchievements,
+		achData.Achievements,
+		page,
+		10,
+	)
+
+	totalAchievements := achData.AchievementsTotal
+	totalPages := (totalAchievements + 9) / 10
+
+	var templateID string
+	if page == 1 {
+		templateID = MsgCockAchievementsTemplate
+	} else {
+		templateID = MsgCockAchievementsTemplateOtherPages
+	}
+
+	text := app.localization.Localize(localizer, templateID, map[string]any{
+		"Completed":    achData.AchievementsDone,
+		"Total":        totalAchievements,
+		"Percent":      int(achData.AchievementsDonePercent),
+		"Respects":     achievementRespects,
+		"Achievements": achievementsList,
+	})
+
+	var buttons []tgbotapi.InlineKeyboardButton
+
+	if page > 1 {
+		buttons = append(buttons, tgbotapi.NewInlineKeyboardButtonData("◀️", fmt.Sprintf("ach_page:%d:%d", userID, page-1)))
+	}
+
+	buttons = append(buttons, tgbotapi.NewInlineKeyboardButtonData(fmt.Sprintf("%d/%d", page, totalPages), "ach_noop"))
+
+	if page < totalPages {
+		buttons = append(buttons, tgbotapi.NewInlineKeyboardButtonData("▶️", fmt.Sprintf("ach_page:%d:%d", userID, page+1)))
+	}
+
+	_, _ = app.bot.Request(tgbotapi.NewCallback(callback.ID, ""))
+
+	kb := tgbotapi.NewInlineKeyboardMarkup(tgbotapi.NewInlineKeyboardRow(buttons...))
+	app.editCallbackMessage(log, callback, text, &kb)
+}
+
+// editCallbackMessage — вспомогательная функция для редактирования сообщения из callback
+func (app *Application) editCallbackMessage(log *logging.Logger, callback *tgbotapi.CallbackQuery, text string, keyboard *tgbotapi.InlineKeyboardMarkup) {
+	if callback.InlineMessageID != "" {
+		edit := tgbotapi.EditMessageTextConfig{
+			BaseEdit: tgbotapi.BaseEdit{
+				InlineMessageID: callback.InlineMessageID,
+			},
+			Text:      text,
+			ParseMode: "MarkdownV2",
+		}
+		if keyboard != nil {
+			edit.ReplyMarkup = keyboard
+		}
+		if _, err := app.bot.Request(edit); err != nil {
+			log.E("Failed to edit inline message", logging.InnerError, err)
+		}
+	} else if callback.Message != nil {
+		edit := tgbotapi.NewEditMessageText(
+			callback.Message.Chat.ID,
+			callback.Message.MessageID,
+			text,
+		)
+		edit.ParseMode = "MarkdownV2"
+		if keyboard != nil {
+			edit.ReplyMarkup = keyboard
+		}
+		if _, err := app.bot.Request(edit); err != nil {
+			log.E("Failed to edit chat message", logging.InnerError, err)
+		}
+	} else {
+		log.E("CallbackQuery has neither Message nor InlineMessageID")
+	}
+}
+
+// generateSeasonPageText генерирует текст для одной страницы сезона из API-данных
+func generateSeasonPageText(locMgr *localization.LocalizationManager, localizer *i18n.Localizer, season api.SeasonWithWinners, showDescription bool) string {
+	startDate := EscapeMarkdownV2(datetime.FormatDateMSK(season.StartDate))
+	endDate := EscapeMarkdownV2(datetime.FormatDateMSK(season.EndDate))
+
+	var winnerLines []string
+	for _, winner := range season.Winners {
+		medal := GetMedalByPosition(winner.Place - 1)
+		line := NewMsgCockSeasonWinnerTemplate(
+			locMgr,
+			localizer,
+			medal,
+			winner.Nickname,
+			FormatDickSize(winner.TotalSize),
+		)
+		winnerLines = append(winnerLines, line)
+	}
+
+	winnersText := strings.Join(winnerLines, "\n")
+
+	if season.IsActive {
+		seasonBlock := NewMsgCockSeasonTemplate(locMgr, localizer, winnersText, startDate, endDate, season.SeasonNum)
+		if showDescription {
+			footer := NewMsgCockSeasonTemplateFooter(locMgr, localizer)
+			return seasonBlock + "\n\n" + footer
+		}
+		return seasonBlock
+	}
+
+	return NewMsgCockSeasonWithWinnersTemplate(locMgr, localizer, winnersText, startDate, endDate, season.SeasonNum)
 }
