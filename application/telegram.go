@@ -2,7 +2,6 @@ package application
 
 import (
 	"dickobrazz/application/logging"
-	"os"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
@@ -11,13 +10,13 @@ const (
 	DefaultAPIEndpoint = "https://api.telegram.org/bot%s/%s"
 )
 
-func InitializeTelegramBot(log *logging.Logger) *tgbotapi.BotAPI {
-	token, exist := os.LookupEnv("TELEGRAM_TOKEN")
-	if !exist || token == "" {
+func InitializeTelegramBot(log *logging.Logger, cfg *Configuration) *tgbotapi.BotAPI {
+	token := cfg.Bot.Tg.Token
+	if token == "" {
 		log.F("Telegram token must be set and non-empty")
 	}
 
-	telegramEnv := os.Getenv("TELEGRAM_ENV")
+	telegramEnv := cfg.Bot.Tg.Env
 	if telegramEnv == "" {
 		telegramEnv = "production"
 	}
