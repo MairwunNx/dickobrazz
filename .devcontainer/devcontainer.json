@@ -7,19 +7,9 @@
   "workspaceFolder": "/workspace",
   "remoteUser": "devuser",
   "forwardPorts": [
-    6379,
-    27017,
     8090
   ],
   "portsAttributes": {
-    "6379": {
-      "label": "Redis",
-      "onAutoForward": "notify"
-    },
-    "27017": {
-      "label": "MongoDB",
-      "onAutoForward": "notify"
-    },
     "8090": {
       "label": "Dickobrazz API",
       "onAutoForward": "notify"
@@ -30,10 +20,8 @@
       "extensions": [
         "golang.go",
         "ms-azuretools.vscode-docker",
-        "mongodb.mongodb-vscode",
         "editorconfig.editorconfig",
-        "k--kato.intellij-idea-keybindings",
-        "redis.redis-for-vscode"
+        "k--kato.intellij-idea-keybindings"
       ],
       "settings": {
         "go.gopath": "/go",
