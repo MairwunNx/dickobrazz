@@ -10,7 +10,7 @@ import (
 const metricsNamespace = "dickobrazz"
 
 var (
-	appRegistry = prometheus.NewRegistry()
+	appRegistry     = prometheus.NewRegistry()
 	messagesHandled = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
 			Namespace: metricsNamespace,
@@ -36,27 +36,6 @@ var (
 		},
 		[]string{"type"},
 	)
-	totalUsers = prometheus.NewGauge(
-		prometheus.GaugeOpts{
-			Namespace: metricsNamespace,
-			Name:      "total_users",
-			Help:      "Total number of unique users",
-		},
-	)
-	statsDAU = prometheus.NewGauge(
-		prometheus.GaugeOpts{
-			Namespace: metricsNamespace,
-			Name:      "stats_dau",
-			Help:      "Daily Active Users (last 24h)",
-		},
-	)
-	statsMAU = prometheus.NewGauge(
-		prometheus.GaugeOpts{
-			Namespace: metricsNamespace,
-			Name:      "stats_mau",
-			Help:      "Monthly Active Users (last 30d)",
-		},
-	)
 	detectedLanguages = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
 			Namespace: metricsNamespace,
@@ -79,14 +58,6 @@ var (
 			Help:      "Service availability in percent",
 		},
 	)
-	sizeDistribution = prometheus.NewGaugeVec(
-		prometheus.GaugeOpts{
-			Namespace: metricsNamespace,
-			Name:      "size_distribution",
-			Help:      "Distribution of sizes",
-		},
-		[]string{"bucket"},
-	)
 	registerOnce sync.Once
 )
 
@@ -97,13 +68,9 @@ func Register() error {
 			messagesHandled,
 			messagesIgnored,
 			updateDuration,
-			totalUsers,
-			statsDAU,
-			statsMAU,
 			detectedLanguages,
 			uptimeSeconds,
 			availabilityPercent,
-			sizeDistribution,
 		}
 		for _, collector := range collectors {
 			if err := appRegistry.Register(collector); err != nil {
@@ -130,18 +97,6 @@ func ObserveUpdateDuration(updateType string, duration time.Duration) {
 	updateDuration.WithLabelValues(updateType).Observe(duration.Seconds())
 }
 
-func SetTotalUsers(value float64) {
-	totalUsers.Set(value)
-}
-
-func SetDAU(value float64) {
-	statsDAU.Set(value)
-}
-
-func SetMAU(value float64) {
-	statsMAU.Set(value)
-}
-
 func IncDetectedLanguage(language string) {
 	detectedLanguages.WithLabelValues(language).Inc()
 }
@@ -152,10 +107,6 @@ func SetUptimeSeconds(value float64) {
 
 func SetAvailabilityPercent(value float64) {
 	availabilityPercent.Set(value)
-}
-
-func SetSizeDistribution(bucket string, value float64) {
-	sizeDistribution.WithLabelValues(bucket).Set(value)
 }
 
 func Registry() *prometheus.Registry {
