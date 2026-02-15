@@ -4,7 +4,7 @@ import "go.uber.org/fx"
 
 var Module = fx.Module("app",
 	fx.Provide(
-		InitializeTelegramBot,
+		NewTelegramBot,
 		NewRouter,
 		NewApplication,
 	),

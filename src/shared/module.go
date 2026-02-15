@@ -12,7 +12,7 @@ import (
 var Module = fx.Module("shared",
 	fx.Provide(
 		logging.NewLogger,
-		config.LoadConfiguration,
+		config.NewConfiguration,
 		localization.NewLocalizationManager,
 		func(cfg *config.Configuration) *api.APIClient {
 			return api.NewAPIClient(cfg.Bot.Server.BaseURL, cfg.Bot.CSOT)
