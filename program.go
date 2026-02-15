@@ -1,15 +1,23 @@
 package main
 
 import (
-	"dickobrazz/application"
+	"dickobrazz/src/app"
+	"dickobrazz/src/entities"
+	"dickobrazz/src/features"
+	"dickobrazz/src/shared"
+
+	"go.uber.org/fx"
 )
 
 func main() {
-	app := application.NewApplication()
-
-	defer func() {
-		app.Shutdown()
-	}()
-
-	app.Run()
+	fx.New(
+		shared.Module,
+		entities.Module,
+		features.Module,
+		app.Module,
+		fx.Invoke(func(a *app.Application) {
+			defer a.Shutdown()
+			a.Run()
+		}),
+	).Run()
 }
