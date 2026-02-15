@@ -1,5 +1,7 @@
 package api
 
+import "dickobrazz/application/datetime"
+
 // DataResponse — обёртка ответов API.
 // Все успешные ответы возвращают данные в поле data.
 // Соответствует паттерну { data: T } в OpenAPI spec.
@@ -72,9 +74,9 @@ type RaceNeighborhood struct {
 // RaceSeasonInfo — информация о текущем сезоне гонки.
 // season_num — номер сезона, start_date/end_date — границы сезона (ISO 8601).
 type RaceSeasonInfo struct {
-	SeasonNum int    `json:"season_num"`
-	StartDate string `json:"start_date"`
-	EndDate   string `json:"end_date"`
+	SeasonNum int                    `json:"season_num"`
+	StartDate datetime.LocalDateTime `json:"start_date"`
+	EndDate   datetime.LocalDateTime `json:"end_date"`
 }
 
 // CockRaceData — ответ GET /api/v1/cock/race (лидерборд сезона).
@@ -130,8 +132,8 @@ type CockDynamicPercentile struct {
 // CockDynamicGlobalRecord — глобальный рекорд (максимальный total за один день).
 // requested_at — дата рекорда (nullable).
 type CockDynamicGlobalRecord struct {
-	RequestedAt *string `json:"requested_at"`
-	Total       int     `json:"total"`
+	RequestedAt *datetime.LocalDateTime `json:"requested_at"`
+	Total       int                     `json:"total"`
 }
 
 // CockDynamicGlobalData — ответ GET /api/v1/cock/dynamic/global.
@@ -163,8 +165,8 @@ type CockDynamicFiveCocksDynamics struct {
 // CockDynamicPersonalRecord — персональный рекорд пользователя.
 // requested_at — дата рекорда (nullable), size — максимальный размер.
 type CockDynamicPersonalRecord struct {
-	RequestedAt *string `json:"requested_at"`
-	Size        int     `json:"size"`
+	RequestedAt *datetime.LocalDateTime `json:"requested_at"`
+	Size        int                     `json:"size"`
 }
 
 // CockDynamicPersonalData — ответ GET /api/v1/cock/dynamic/personal.
@@ -180,7 +182,7 @@ type CockDynamicPersonalData struct {
 	DailyDynamics      CockDynamicDailyDynamics     `json:"daily_dynamics"`
 	FiveCocksDynamics  CockDynamicFiveCocksDynamics `json:"five_cocks_dynamics"`
 	GrowthSpeed        float64                      `json:"growth_speed"`
-	FirstCockDate      *string                      `json:"first_cock_date"`
+	FirstCockDate      *datetime.LocalDateTime      `json:"first_cock_date"`
 	LuckCoefficient    float64                      `json:"luck_coefficient"`
 	Volatility         float64                      `json:"volatility"`
 	CocksCount         int                          `json:"cocks_count"`
@@ -226,14 +228,14 @@ type SeasonNeighborhood struct {
 // SeasonWithWinners — сезон с победителями (SeasonInfo + winners в spec).
 // is_active — текущий сезон. user_position/neighborhood — при user-контексте.
 type SeasonWithWinners struct {
-	SeasonNum         int                `json:"season_num"`
-	StartDate         string             `json:"start_date"`
-	EndDate           string             `json:"end_date"`
-	IsActive          bool               `json:"is_active"`
-	Winners           []SeasonWinner     `json:"winners"`
-	TotalParticipants int                `json:"total_participants"`
-	UserPosition      *int               `json:"user_position"`
-	Neighborhood      SeasonNeighborhood `json:"neighborhood"`
+	SeasonNum         int                    `json:"season_num"`
+	StartDate         datetime.LocalDateTime `json:"start_date"`
+	EndDate           datetime.LocalDateTime `json:"end_date"`
+	IsActive          bool                   `json:"is_active"`
+	Winners           []SeasonWinner         `json:"winners"`
+	TotalParticipants int                    `json:"total_participants"`
+	UserPosition      *int                   `json:"user_position"`
+	Neighborhood      SeasonNeighborhood     `json:"neighborhood"`
 }
 
 // CockSeasonsData — ответ GET /api/v1/cock/seasons.
@@ -261,8 +263,8 @@ type UpdatePrivacyPayload struct {
 // UserProfile — профиль пользователя (GET /api/v1/me, PATCH /api/v1/me/privacy).
 // created_at — nullable. is_hidden — скрыт ли в лидербордах.
 type UserProfile struct {
-	ID        int64   `json:"id"`
-	Username  string  `json:"username"`
-	IsHidden  bool    `json:"is_hidden"`
-	CreatedAt *string `json:"created_at"`
+	ID        int64                   `json:"id"`
+	Username  string                  `json:"username"`
+	IsHidden  bool                    `json:"is_hidden"`
+	CreatedAt *datetime.LocalDateTime `json:"created_at"`
 }

@@ -329,14 +329,13 @@ func (app *Application) GenerateCockRaceScoreboard(log *logging.Logger, localize
 	}
 
 	// Footer
-	seasonStart := EscapeMarkdownV2(datetime.FormatDateMSK(data.Season.StartDate))
-	seasonEnd := EscapeMarkdownV2(datetime.FormatDateMSK(data.Season.EndDate))
+	seasonStart := EscapeMarkdownV2(data.Season.StartDate.FormatDateMSK())
+	seasonEnd := EscapeMarkdownV2(data.Season.EndDate.FormatDateMSK())
 	seasonNum := data.Season.SeasonNum
 	seasonWord := app.localization.Localize(localizer, UnitSeasonGenitive, map[string]any{"Count": seasonNum})
 
 	now := datetime.NowTime()
-	endDate, _ := datetime.ParseUTC(data.Season.EndDate)
-	timeRemaining := FormatTimeRemaining(app.localization, localizer, endDate, now)
+	timeRemaining := FormatTimeRemaining(app.localization, localizer, data.Season.EndDate.Time, now)
 
 	footerLine := app.localization.Localize(localizer, MsgCockRaceFooterActiveSeason, map[string]any{
 		"SeasonNum": seasonNum,

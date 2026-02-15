@@ -30,12 +30,7 @@ func (app *Application) shouldShowDescription(log *logging.Logger, userID int64,
 		return true
 	}
 
-	createdAt, err := datetime.ParseUTC(*profile.CreatedAt)
-	if err != nil {
-		return true
-	}
-
-	if time.Since(createdAt).Hours()/24 > 32 {
+	if time.Since(profile.CreatedAt.Time).Hours()/24 > 32 {
 		return false
 	}
 
@@ -293,28 +288,20 @@ func (app *Application) InlineQueryCockDynamic(log *logging.Logger, update *tgbo
 	individualRecordTotal := personal.Record.Size
 	individualRecordDate := datetime.NowTime()
 	if personal.Record.RequestedAt != nil {
-		if t, err := datetime.ParseUTC(*personal.Record.RequestedAt); err == nil {
-			individualRecordDate = t
-		}
+		individualRecordDate = personal.Record.RequestedAt.Time
 	}
 
 	// Общий рекорд
 	overallRecordTotal := global.Record.Total
 	overallRecordDate := datetime.NowTime()
 	if global.Record.RequestedAt != nil {
-		if t, err := datetime.ParseUTC(*global.Record.RequestedAt); err == nil {
-			overallRecordDate = t
-		}
+		overallRecordDate = global.Record.RequestedAt.Time
 	}
 
 	// Период дёргания кока
 	var userPullingPeriod string
 	if personal.FirstCockDate != nil {
-		if firstDate, err := datetime.ParseUTC(*personal.FirstCockDate); err == nil {
-			userPullingPeriod = FormatUserPullingPeriod(app.localization, localizer, firstDate, datetime.NowTime())
-		} else {
-			userPullingPeriod = app.localization.Localize(localizer, MsgUserPullingRecently, nil)
-		}
+		userPullingPeriod = FormatUserPullingPeriod(app.localization, localizer, personal.FirstCockDate.Time, datetime.NowTime())
 	} else {
 		userPullingPeriod = app.localization.Localize(localizer, MsgUserPullingRecently, nil)
 	}
@@ -932,8 +919,8 @@ func (app *Application) editCallbackMessage(log *logging.Logger, callback *tgbot
 
 // generateSeasonPageText генерирует текст для одной страницы сезона из API-данных
 func generateSeasonPageText(locMgr *localization.LocalizationManager, localizer *i18n.Localizer, season api.SeasonWithWinners, showDescription bool) string {
-	startDate := EscapeMarkdownV2(datetime.FormatDateMSK(season.StartDate))
-	endDate := EscapeMarkdownV2(datetime.FormatDateMSK(season.EndDate))
+	startDate := EscapeMarkdownV2(season.StartDate.FormatDateMSK())
+	endDate := EscapeMarkdownV2(season.EndDate.FormatDateMSK())
 
 	var winnerLines []string
 	for _, winner := range season.Winners {
