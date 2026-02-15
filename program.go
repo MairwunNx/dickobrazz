@@ -2,7 +2,6 @@ package main
 
 import (
 	"dickobrazz/src/app"
-	"dickobrazz/src/entities"
 	"dickobrazz/src/features"
 	"dickobrazz/src/shared"
 
@@ -12,7 +11,6 @@ import (
 func main() {
 	fx.New(
 		shared.Module,
-		entities.Module,
 		features.Module,
 		app.Module,
 		fx.Invoke(func(a *app.Application) {
