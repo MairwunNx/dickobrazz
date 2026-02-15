@@ -44,7 +44,6 @@ type Router struct {
 }
 
 type RouterParams struct {
-	Ctx context.Context
 	Bot *tgbotapi.BotAPI
 	Log *logging.Logger
 	Loc *localization.LocalizationManager
@@ -65,7 +64,6 @@ type RouterParams struct {
 
 func NewRouter(p RouterParams) *Router {
 	return &Router{
-		ctx:                  p.Ctx,
 		bot:                  p.Bot,
 		log:                  p.Log,
 		loc:                  p.Loc,
