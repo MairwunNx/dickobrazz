@@ -1,0 +1,1082 @@
+[CommonDots]
+other = "\\.\\.\\."
+
+[MsgCockScoreboardNotFound]
+other = "\n🥀 *Nos condoléances\\.\\.\\. parce que t'as pas checké ta bite\\!*"
+
+[MsgCockSize]
+other = "Ma bite: *{{.Size}}cm* {{.Emoji}}"
+
+[MsgCockRulerScoreboardDefault]
+other = "{{.PlaceEmoji}} @{{.Username}} *{{.Size}}cm* {{.SizeEmoji}}"
+
+[MsgCockRulerScoreboardSelected]
+other = "{{.PlaceEmoji}} *@{{.Username}} {{.Size}}cm* {{.SizeEmoji}}"
+
+[MsgCockRaceScoreboardDefault]
+other = "{{.PlaceEmoji}} @{{.Username}} *{{.Size}}cm*"
+
+[MsgCockRaceScoreboardSelected]
+other = "{{.PlaceEmoji}} *@{{.Username}} {{.Size}}cm*"
+
+[MsgCockLadderScoreboardDefault]
+other = "{{.PlaceEmoji}} @{{.Username}} *{{.Size}}cm*"
+
+[MsgCockLadderScoreboardSelected]
+other = "{{.PlaceEmoji}} *@{{.Username}} {{.Size}}cm*"
+
+[MsgCockRulerContextDefault]
+other = "{{.PlaceEmoji}} @{{.Username}} *{{.Size}}cm* {{.SizeEmoji}}"
+
+[MsgCockRulerContextSelected]
+other = "{{.PlaceEmoji}} *@{{.Username}} {{.Size}}cm* {{.SizeEmoji}}"
+
+[MsgCockRaceContextDefault]
+other = "{{.PlaceEmoji}} @{{.Username}} *{{.Size}}cm*"
+
+[MsgCockRaceContextSelected]
+other = "{{.PlaceEmoji}} *@{{.Username}} {{.Size}}cm*"
+
+[MsgCockLadderContextDefault]
+other = "{{.PlaceEmoji}} @{{.Username}} *{{.Size}}cm*"
+
+[MsgCockLadderContextSelected]
+other = "{{.PlaceEmoji}} *@{{.Username}} {{.Size}}cm*"
+
+[MsgCockRulerScoreboardTemplate]
+other = """*Règle des bites:*
+👥 Participants: *{{.Participants}}*
+
+🏆 Gagnants par catégorie:
+
+{{.Winners}}
+
+🥀 Condoléances au reste:
+
+{{.Others}}
+
+>📖 À propos de la règle des bites:
+>
+>La règle des bites est un classement daily 100% random\\. Les tailles sont générées au hasard chaque jour \\(de 0 à 61 cm\\) et reset à minuit MSK\\. Pas d'accumulation — juste la chance ici et maintenant\\!
+>
+>🎲 Aujourd'hui t'es top, demain t'es au fond — le random décide qui a la chance\\!||"""
+
+[MsgCockRulerScoreboardWinnersTemplate]
+other = """*Règle des bites:*
+👥 Participants: *{{.Participants}}*
+
+🏆 Gagnants par catégorie:
+
+{{.Winners}}
+
+>📖 À propos de la règle des bites:
+>
+>La règle des bites est un classement daily 100% random\\. Les tailles sont générées au hasard chaque jour \\(de 0 à 61 cm\\) et reset à minuit MSK\\. Pas d'accumulation — juste la chance ici et maintenant\\!
+>
+>🎲 Aujourd'hui t'es top, demain t'es au fond — le random décide qui a la chance\\!||"""
+
+[MsgCockRulerScoreboardTemplateNoDesc]
+other = """*Règle des bites:*
+👥 Participants: *{{.Participants}}*
+
+🏆 Gagnants par catégorie:
+
+{{.Winners}}
+
+🥀 Condoléances au reste:
+
+{{.Others}}"""
+
+[MsgCockRulerScoreboardWinnersTemplateNoDesc]
+other = """*Règle des bites:*
+👥 Participants: *{{.Participants}}*
+
+🏆 Gagnants par catégorie:
+
+{{.Winners}}"""
+
+[MsgCockRaceScoreboardTemplate]
+other = """*Participants de la course des bites {{.SeasonNum}} {{.SeasonWord}}:*
+👥 Participants de la saison: *{{.Participants}}*
+
+🏆 Gagnants par catégorie:
+
+{{.Winners}}
+
+🥀 Condoléances au reste:
+
+{{.Others}}
+
+>📖 À propos de la course des bites:
+>
+>La course des bites est une compétition saisonnière de 3 mois\\. Mesure ta bite chaque jour, tous les résultats sont additionnés automatiquement\\. Gagnent les trois participants avec la taille cumulée max sur toute la saison\\.
+>
+>Au début d'une nouvelle saison, toutes les bites sont reset, et la course recommence pour tout le monde\\.
+>
+>💡 Conseil: mesure ta bite tous les jours pour maximiser tes chances de win\\!||
+
+{{.Footer}}"""
+
+[MsgCockRaceScoreboardWinnersTemplate]
+other = """*Participants de la course des bites {{.SeasonNum}} {{.SeasonWord}}:*
+👥 Participants de la saison: *{{.Participants}}*
+
+🏆 Gagnants par catégorie:
+
+{{.Winners}}
+
+>📖 À propos de la course des bites:
+>
+>La course des bites est une compétition saisonnière de 3 mois\\. Mesure ta bite chaque jour, tous les résultats sont additionnés automatiquement\\. Gagnent les trois participants avec la taille cumulée max sur toute la saison\\.
+>
+>Au début d'une nouvelle saison, toutes les bites sont reset, et la course recommence pour tout le monde\\.
+>
+>💡 Conseil: mesure ta bite tous les jours pour maximiser tes chances de win\\!||
+
+{{.Footer}}"""
+
+[MsgCockRaceScoreboardTemplateNoDesc]
+other = """*Participants de la course des bites {{.SeasonNum}} {{.SeasonWord}}:*
+👥 Participants de la saison: *{{.Participants}}*
+
+🏆 Gagnants par catégorie:
+
+{{.Winners}}
+
+🥀 Condoléances au reste:
+
+{{.Others}}
+
+{{.Footer}}"""
+
+[MsgCockRaceScoreboardWinnersTemplateNoDesc]
+other = """*Participants de la course des bites {{.SeasonNum}} {{.SeasonWord}}:*
+👥 Participants de la saison: *{{.Participants}}*
+
+🏆 Gagnants par catégorie:
+
+{{.Winners}}
+
+{{.Footer}}"""
+
+[MsgCockLadderScoreboardTemplate]
+other = """*Échelle des bites:*
+👥 Participants totaux: *{{.Participants}}*
+
+🏆 Leaders de l'échelle des bites:
+
+{{.Winners}}
+
+🥀 Montent lentement mais sûrement:
+
+{{.Others}}
+
+>📖 À propos de l'échelle des bites:
+>
+>L'échelle des bites, c'est ton chemin éternel vers la gloire\\. Ici, chaque bite est cumulée sur toute ton histoire dans le bot\\. Contrairement à la règle daily et la course saisonnière, l'échelle ne reset jamais\\.
+>
+>🔥 Le top de l'échelle, ce sont des légendes qui mesurent depuis le premier jour\\. Deviens l'un d'eux\\!||"""
+
+[MsgCockLadderScoreboardWinnersTemplate]
+other = """*Échelle des bites:*
+👥 Participants totaux: *{{.Participants}}*
+
+🏆 Leaders de l'échelle des bites:
+
+{{.Winners}}
+
+>📖 À propos de l'échelle des bites:
+>
+>L'échelle des bites, c'est ton chemin éternel vers la gloire\\. Ici, chaque bite est cumulée sur toute ton histoire dans le bot\\. Contrairement à la règle daily et la course saisonnière, l'échelle ne reset jamais\\.
+>
+>🔥 Le top de l'échelle, ce sont des légendes qui mesurent depuis le premier jour\\. Deviens l'un d'eux\\!||"""
+
+[MsgCockLadderScoreboardTemplateNoDesc]
+other = """*Échelle des bites:*
+👥 Participants totaux: *{{.Participants}}*
+
+🏆 Leaders de l'échelle des bites:
+
+{{.Winners}}
+
+🥀 Montent lentement mais sûrement:
+
+{{.Others}}"""
+
+[MsgCockLadderScoreboardWinnersTemplateNoDesc]
+other = """*Échelle des bites:*
+👥 Participants totaux: *{{.Participants}}*
+
+🏆 Leaders de l'échelle des bites:
+
+{{.Winners}}"""
+
+[MsgCockRaceFooterActiveSeason]
+other = "🚀 Saison de bites en cours: *{{.SeasonNum}}*, du *{{.StartDate}}* au *{{.EndDate}}*\\. Reste: *{{.Remaining}}*\\."
+
+[MsgCockRaceFooterNoSeason]
+other = "🚀 La saison actuelle de la course des bites a commencé *{{.StartDate}}*"
+
+[MsgCockDynamicsTemplate]
+other = """
+📊 *Dynamique globale des bites*
+
+Bite totale mesurée: *{{.TotalCock}} cm* 🤭
+Total de biteux: *{{.TotalUsers}}* 🫡
+Total de tirages de bite: *{{.TotalCocksCount}}* ✊🏻
+
+Jour de la plus grosse bite: *{{.TotalMaxCockDate}}*, montée de ouf *{{.TotalMaxCock}} cm* 🍾
+
+Bite moyenne du système _(5 jours)_: *{{.TotalAvgCock}} cm* {{.TotalAvgEmoji}}
+Médiane de bite du système _(5 jours)_: *{{.TotalMedianCock}} cm* {{.TotalMedianEmoji}}
+
+Ratio de bites _(5 jours)_: 💪 *{{.TotalBigCockRatio}}%* 🤏 *{{.TotalSmallCockRatio}}%*
+Vitesse de croissance de bite _(5 jours)_: *{{.OverallGrowthSpeed}} cm/jour*
+
+📊 *Dynamique perso de la bite*
+
+Tire ta bite depuis: *{{.UserPullingPeriod}}*
+Bite totale mesurée: *{{.UserTotalCock}} cm* 🤯
+Total de tirages de bite: *{{.UserCocksCount}}* ✊🏻
+
+IRK (Indice de Taille de Bite): __*{{.UserIrk}}*__ _({{.UserIrkLabel}})_
+Taille moyenne de bite _(5 bites)_: *{{.UserAvgCock}} cm* {{.UserAvgEmoji}}
+Plus grosse bite: *{{.UserMaxCock}} cm* {{.UserMaxEmoji}} (*{{.UserMaxDate}}*)
+
+Coef de chance _(5 bites)_: *{{.UserLuckCoefficient}}* {{.UserLuckDisplay}}
+Volatilité de bite _(5 bites)_: *{{.UserVolatility}}* {{.UserVolatilityDisplay}}
+
+Pourcentage de dominance: *{{.UserDominancePercent}}%* 👑
+Vitesse de croissance de bite _(5 jours)_: *{{.UserGrowthSpeed}} cm/jour* {{.UserGrowthSpeedDisplay}}
+
+🏆 *Succès de saison*
+
+Victoires en saisons: *{{.UserSeasonWins}}* 🎖️
+Respect-bite: *{{.UserCockRespect}}* 🚀
+
+📈 *Actifs de bite*
+
+{{.UserYesterdayChangeEmoji}} Dynamique journalière: *{{.UserYesterdayChangePercent}}%* (*{{.UserYesterdayChangeSize}} cm*)
+{{.UserFiveCocksEmoji}} Dynamique sur 5 bites: *{{.UserFiveCocksChangePercent}}%* (*{{.UserFiveCocksChangeSize}} cm*)"""
+
+[MsgCockSeasonTemplate]
+other = """*Saison de bites {{.SeasonNum}}* \\(🟡 En cours\\)
+⏱️ Période: *{{.StartDate}} \\- {{.EndDate}}*
+
+🔮 Prétendants de la saison:
+
+{{.Pretenders}}"""
+
+[MsgCockSeasonWithWinnersTemplate]
+other = """*Saison de bites {{.SeasonNum}}* \\(🟢 Terminée\\)
+⏱️ Période: *{{.StartDate}} \\- {{.EndDate}}*
+
+🎖 Gagnants de la saison:
+
+{{.Winners}}"""
+
+[MsgCockSeasonTemplateFooter]
+other = """>📖 À propos des saisons de bites:
+>
+>Les saisons de bites sont une bataille de 3\\-mois pour le titre du meilleur biteur\\. Mesure chaque jour, additionne, et vise le top\\-3\\. Les gagnants reçoivent des respect\\-bites™ légendaires, échangeables contre du merch\\!
+>
+>🔥 L'histoire ne retient que les gagnants — deviens l'un d'eux\\!||"""
+
+[MsgCockSeasonWinnerTemplate]
+other = "{{.Medal}} *@{{.Nickname}}* avec une bite de *{{.Size}} cm*"
+
+[MsgCockSeasonNoSeasonsTemplate]
+other = """*Saisons de bites*
+
+Pas de saisons actives pour le moment\\. Reste branché\\!"""
+
+[MsgCockAchievementsTemplate]
+other = """🏆 *Succès de bite*
+Complété: *{{.Completed}}/{{.Total}}* _\\({{.Percent}}%\\)_ • 🌟 Respects: *{{.Respects}}*
+
+💡 _Chaque succès de bite te donne des respect\\-bites™, bientôt échangeables contre du merch dans la boutique officielle\\!_
+
+{{.Achievements}}"""
+
+[MsgCockAchievementsTemplateOtherPages]
+other = """🏆 *Succès de bite*
+Complété: *{{.Completed}}/{{.Total}}* _\\({{.Percent}}%\\)_ • 🌟 Respects: *{{.Respects}}*
+
+{{.Achievements}}"""
+
+[InlineTitleCockSize]
+other = "Taille de bite"
+
+[InlineTitleCockRuler]
+other = "Règle des bites"
+
+[InlineTitleCockLadder]
+other = "Échelle des bites"
+
+[InlineTitleCockRace]
+other = "Course des bites"
+
+[InlineTitleCockDynamic]
+other = "Dynamique de bite"
+
+[InlineTitleCockSeason]
+other = "Saisons de bites"
+
+[InlineTitleCockAchievements]
+other = "Succès de bite"
+
+[DescCockSize]
+other = "📏 Check ta taille d'aujourd'hui (0-61 cm)"
+
+[DescCockRuler]
+other = "👑 Top-13 daily par taille de bite aujourd'hui"
+
+[DescCockLadder]
+other = "🪜 Classement éternel des tailles cumulées"
+
+[DescCockRace]
+other = "🏁 Course saisonnière de 3 mois"
+
+[DescCockDynamic]
+other = "📈 Stats, dynamique, records et comparaisons"
+
+[DescCockSeason]
+other = "📅 Historique des saisons et gagnants"
+
+[DescCockAchievements]
+other = "🏅 Succès et respect-bites™"
+
+[MsgCockDynamicNoData]
+other = "🤔 *Pas assez de données pour la dynamique*\n\n_D'abord, tire ta bite au moins une fois\\!_"
+
+[MsgSeasonUnknownStartDate]
+other = "on sait pas quand"
+
+[MsgSeasonButton]
+other = "{{.Arrow}} Saison {{.SeasonNum}}"
+
+[MsgSeasonNotFound]
+other = "Saison introuvable"
+
+[MsgCallbackInvalidFormat]
+other = "Format de données invalide"
+
+[MsgCallbackParseError]
+other = "Erreur de parsing des données"
+
+[MsgUserPullingRecently]
+other = "récemment"
+
+[MsgUserPullingSince]
+other = "{{.Period}} (depuis {{.Date}})"
+
+[MsgListSeparator]
+other = ", "
+
+[MsgListSeparatorLast]
+other = " et "
+
+[UnitDay]
+one = "{{.Count}} jour"
+few = "{{.Count}} jours"
+many = "{{.Count}} jours"
+other = "{{.Count}} jours"
+
+[UnitMonth]
+one = "{{.Count}} mois"
+few = "{{.Count}} mois"
+many = "{{.Count}} mois"
+other = "{{.Count}} mois"
+
+[UnitYear]
+one = "{{.Count}} an"
+few = "{{.Count}} ans"
+many = "{{.Count}} ans"
+other = "{{.Count}} ans"
+
+[UnitSeason]
+one = "{{.Count}} saison"
+few = "{{.Count}} saisons"
+many = "{{.Count}} saisons"
+other = "{{.Count}} saisons"
+
+[UnitSeasonGenitive]
+one = "saison"
+few = "saison"
+many = "saison"
+other = "saison"
+
+[UnitHour]
+one = "{{.Count}} heure"
+few = "{{.Count}} heures"
+many = "{{.Count}} heures"
+other = "{{.Count}} heures"
+
+[UnitMinute]
+one = "{{.Count}} minute"
+few = "{{.Count}} minutes"
+many = "{{.Count}} minutes"
+other = "{{.Count}} minutes"
+
+[UptimeDayShort]
+one = "{{.Count}}j"
+few = "{{.Count}}j"
+many = "{{.Count}}j"
+other = "{{.Count}}j"
+
+[UptimeHourShort]
+one = "{{.Count}}h"
+few = "{{.Count}}h"
+many = "{{.Count}}h"
+other = "{{.Count}}h"
+
+[UptimeMinuteShort]
+one = "{{.Count}}m"
+few = "{{.Count}}m"
+many = "{{.Count}}m"
+other = "{{.Count}}m"
+
+[MsgUnknownValue]
+other = "inconnu"
+
+[AnonymousNameTemplate]
+other = "Anonym{{.Number}}"
+
+[MsgHelpText]
+other = "🧭 Commandes\n\n/help — liste des commandes\n/hide — masquer ou afficher ton pseudo en compétition"
+
+[MsgHidePrompt]
+other = "🙈 *Masquer le pseudo*\n\nTu peux masquer ton pseudo aux autres participants\\. Tes succès personnels restent liés à ton profil\\.\n\nAprès masquage, ton pseudo sera *@{{.Anon}}*.\n\n>Le masquage n'est pas instantané à cause du cache des requêtes inline de Telegram\\. Garanti après quelques minutes\\.\n\nAppuie sur le bouton ci-dessous pour le masquer\\."
+
+[MsgHideStatusHidden]
+other = "🙊 *Pseudo masqué*\n\nLa participation est entièrement anonyme\\.\n\nTu es affiché comme *@{{.Anon}}*. Si tu le révèles, il deviendra *@{{.Real}}* et les autres verront tes succès\\.\n\n>Le masquage n'est pas instantané à cause du cache des requêtes inline de Telegram\\. Garanti après quelques minutes\\."
+
+[MsgHideButtonHide]
+other = "🙈 Masquer mon pseudo"
+
+[MsgHideButtonShow]
+other = "👀 Afficher mon pseudo"
+
+[MsgCallbackNotForYou]
+other = "⛔ Ce bouton est réservé à l'utilisateur d'origine."
+
+[MsgAchievementCompleted]
+other = "✅ {{.Emoji}} *{{.Name}}* \\- {{.Description}}"
+
+[MsgAchievementInProgress]
+other = "🔄 {{.Emoji}} *{{.Name}}* \\({{.Progress}}/{{.Max}}\\) \\- {{.Description}}"
+
+[MsgAchievementNotCompleted]
+other = "⭕️ {{.Emoji}} *{{.Name}}* \\- {{.Description}}"
+
+[LuckLabelGodRandom]
+other = "dieu du random"
+
+[LuckLabelCosmicLuck]
+other = "chance cosmique"
+
+[LuckLabelFairyLuck]
+other = "chance féerique"
+
+[LuckLabelSuperLuck]
+other = "super chance"
+
+[LuckLabelIncredibleLuck]
+other = "chance de malade"
+
+[LuckLabelVeryLucky]
+other = "très chanceux"
+
+[LuckLabelLucky]
+other = "chanceux"
+
+[LuckLabelBalanced]
+other = "équilibré"
+
+[LuckLabelUnlucky]
+other = "pas de chance"
+
+[LuckLabelBad]
+other = "nul"
+
+[LuckLabelGloom]
+other = "sombre"
+
+[LuckLabelHellTilt]
+other = "tilt infernal"
+
+[LuckLabelBurningInHell]
+other = "brûle en enfer"
+
+[VolatilityLabelStone]
+other = "pierre"
+
+[VolatilityLabelStable]
+other = "stable"
+
+[VolatilityLabelModerate]
+other = "modéré"
+
+[VolatilityLabelLivelySpread]
+other = "écart vivant"
+
+[VolatilityLabelUneven]
+other = "irrégulier"
+
+[VolatilityLabelChaotic]
+other = "chaotique"
+
+[VolatilityLabelRandom]
+other = "random total"
+
+[IrkLabelZero]
+other = "zéro"
+
+[IrkLabelMinimal]
+other = "minimal"
+
+[IrkLabelVerySmall]
+other = "très petit"
+
+[IrkLabelSmall]
+other = "petit"
+
+[IrkLabelReduced]
+other = "réduit"
+
+[IrkLabelAverage]
+other = "moyen"
+
+[IrkLabelIncreased]
+other = "augmenté"
+
+[IrkLabelLarge]
+other = "grand"
+
+[IrkLabelVeryLarge]
+other = "très grand"
+
+[IrkLabelMaximum]
+other = "maximum"
+
+[IrkLabelUltimate]
+other = "ultime"
+
+[GrowthSpeedLabelCosmic]
+other = "cosmique"
+
+[GrowthSpeedLabelExtreme]
+other = "extrême"
+
+[GrowthSpeedLabelVeryFast]
+other = "très rapide"
+
+[GrowthSpeedLabelFast]
+other = "rapide"
+
+[GrowthSpeedLabelModerate]
+other = "modérée"
+
+[GrowthSpeedLabelAverage]
+other = "moyenne"
+
+[GrowthSpeedLabelSlow]
+other = "lente"
+
+[GrowthSpeedLabelVerySlow]
+other = "très lente"
+
+[GrowthSpeedLabelTurtle]
+other = "tortue"
+
+[GrowthSpeedLabelStalled]
+other = "à l'arrêt"
+
+[AchievementNameNotRubbedYet]
+other = "Pas encore frotté"
+
+[AchievementDescNotRubbedYet]
+other = "tirer sa bite 10 fois"
+
+[AchievementNameHalfHundred]
+other = "Demi-cent"
+
+[AchievementDescHalfHundred]
+other = "avoir une bite de 50cm"
+
+[AchievementNameDiary]
+other = "Journal"
+
+[AchievementDescDiary]
+other = "tirer sa bite 31 fois"
+
+[AchievementNameGoldenHundred]
+other = "Cent doré"
+
+[AchievementDescGoldenHundred]
+other = "faire 100cm au total"
+
+[AchievementNameSkillfulHands]
+other = "Mains habiles"
+
+[AchievementDescSkillfulHands]
+other = "tirer sa bite 100 fois"
+
+[AchievementNameEarlyBird]
+other = "Lève-tôt"
+
+[AchievementDescEarlyBird]
+other = "tirer sa bite avant 6:00 MSK vingt fois"
+
+[AchievementNameLightning]
+other = "Éclair"
+
+[AchievementDescLightning]
+other = "faire pousser la bite de 50cm par rapport à la précédente"
+
+[AchievementNameSniper]
+other = "Sniper"
+
+[AchievementDescSniper]
+other = "obtenir exactement 30cm cinq fois"
+
+[AchievementNameDejaVu]
+other = "Déjà vu"
+
+[AchievementDescDejaVu]
+other = "obtenir la même bite deux jours d'affilée"
+
+[AchievementNameSpeedrunner]
+other = "Speedrunner"
+
+[AchievementDescSpeedrunner]
+other = "tirer sa bite dans les 30 secondes après minuit cinq fois"
+
+[AchievementNameMidnightPuller]
+other = "Sur le fil"
+
+[AchievementDescMidnightPuller]
+other = "tirer sa bite après 23:00 MSK dix fois"
+
+[AchievementNameRounder]
+other = "Arrondisseur"
+
+[AchievementDescRounder]
+other = "obtenir tous les nombres ronds (10, 20, 30, 40, 50, 60) sur les 31 dernières bites"
+
+[AchievementNameEverest]
+other = "Everest"
+
+[AchievementDescEverest]
+other = "obtenir la bite maximale parmi tous"
+
+[AchievementNameMarianaTrench]
+other = "Fosse des Mariannes"
+
+[AchievementDescMarianaTrench]
+other = "obtenir la bite minimale parmi tous"
+
+[AchievementNameNumberCollector]
+other = "Collectionneur de nombres"
+
+[AchievementDescNumberCollector]
+other = "obtenir tous les beaux nombres (11, 22, 33, 44, 55)"
+
+[AchievementNameDayEqualsSize]
+other = "Jour = Taille"
+
+[AchievementDescDayEqualsSize]
+other = "obtenir une bite égale au jour du mois"
+
+[AchievementNameSolidThousand]
+other = "Mille solide"
+
+[AchievementDescSolidThousand]
+other = "faire 1000cm au total"
+
+[AchievementNameBullTrend]
+other = "Tendance haussière"
+
+[AchievementDescBullTrend]
+other = "croissance de bite 5 jours d'affilée"
+
+[AchievementNameBearMarket]
+other = "Marché baissier"
+
+[AchievementDescBearMarket]
+other = "baisse de bite 5 jours d'affilée"
+
+[AchievementNameTraveler]
+other = "Voyageur"
+
+[AchievementDescTraveler]
+other = "obtenir toutes les 61 tailles de bite (0-60cm) sur toute l'histoire"
+
+[AchievementNameFreeze]
+other = "Frissons"
+
+[AchievementDescFreeze]
+other = "5 bites d'affilée de moins de 20cm"
+
+[AchievementNameFiveK]
+other = "Cinq mille"
+
+[AchievementDescFiveK]
+other = "faire 5000cm au total"
+
+[AchievementNameOldtimer]
+other = "Ancien"
+
+[AchievementDescOldtimer]
+other = "participer à 3 saisons"
+
+[AchievementNameAnniversary]
+other = "Anniversaire"
+
+[AchievementDescAnniversary]
+other = "tirer sa bite 365 fois"
+
+[AchievementNameContrastShower]
+other = "Douche contrastée"
+
+[AchievementDescContrastShower]
+other = "obtenir 0-3cm juste après 60+cm"
+
+[AchievementNamePythagoras]
+other = "Pythagore"
+
+[AchievementDescPythagoras]
+other = "obtenir trois bites d'affilée formant un triplet de Pythagore (3-4-5, 5-12-13, 8-15-17, etc.)"
+
+[AchievementNameLeetSpeak]
+other = "Leet speak"
+
+[AchievementDescLeetSpeak]
+other = "obtenir 13cm et 37cm d'affilée"
+
+[AchievementNameMoscovite]
+other = "Moscovite"
+
+[AchievementDescMoscovite]
+other = "obtenir une bite de 50cm cinq fois en un mois"
+
+[AchievementNameHourPrecision]
+other = "Précision horaire"
+
+[AchievementDescHourPrecision]
+other = "obtenir une bite égale à l'heure"
+
+[AchievementNameWonderStranger]
+other = "Miracle inconnu"
+
+[AchievementDescWonderStranger]
+other = "tirer sa bite 500 fois"
+
+[AchievementNameValentine]
+other = "Saint-Valentin"
+
+[AchievementDescValentine]
+other = "obtenir une bite de 14cm à la Saint-Valentin"
+
+[AchievementNameNewYearGift]
+other = "Cadeau du Nouvel An"
+
+[AchievementDescNewYearGift]
+other = "obtenir 60cm+ au Nouvel An"
+
+[AchievementNameMensSolidarity]
+other = "Solidarité masculine"
+
+[AchievementDescMensSolidarity]
+other = "obtenir une bite de 19cm à la Journée internationale des hommes (19 novembre)"
+
+[AchievementNameFriday13th]
+other = "Vendredi 13"
+
+[AchievementDescFriday13th]
+other = "obtenir une bite de 0cm un vendredi 13"
+
+[AchievementNameLeapCock]
+other = "Bite bissextile"
+
+[AchievementDescLeapCock]
+other = "obtenir n'importe quelle bite le 29 février"
+
+[AchievementNameTurtle]
+other = "Tortue"
+
+[AchievementDescTurtle]
+other = "10 bites d'affilée avec un changement de moins de 5cm"
+
+[AchievementNameGoldenCock]
+other = "Bite dorée"
+
+[AchievementDescGoldenCock]
+other = "faire 10000cm au total"
+
+[AchievementNameSumOfPrevious]
+other = "Somme des précédentes"
+
+[AchievementDescSumOfPrevious]
+other = "obtenir une bite égale à la somme des deux précédentes"
+
+[AchievementNameBazookaHands]
+other = "Mains bazooka"
+
+[AchievementDescBazookaHands]
+other = "tirer sa bite 1000 fois"
+
+[AchievementNameTriple]
+other = "Triplé"
+
+[AchievementDescTriple]
+other = "obtenir la même taille 3 fois d'affilée"
+
+[AchievementNameVeteran]
+other = "Vétéran"
+
+[AchievementDescVeteran]
+other = "participer à 5 saisons"
+
+[AchievementNameMinutePrecision]
+other = "Précision minute"
+
+[AchievementDescMinutePrecision]
+other = "obtenir une bite égale aux minutes"
+
+[AchievementNamePoker]
+other = "Poker"
+
+[AchievementDescPoker]
+other = "obtenir la même taille 4 fois d'affilée"
+
+[AchievementNameKeeper]
+other = "Gardien"
+
+[AchievementDescKeeper]
+other = "participer à 10 saisons"
+
+[AchievementNameCosmicCock]
+other = "Bite cosmique"
+
+[AchievementDescCosmicCock]
+other = "faire 20000cm au total"
+
+[AchievementNameMaximalist]
+other = "Maximaliste"
+
+[AchievementDescMaximalist]
+other = "obtenir 61cm dix fois"
+
+[AchievementNameDiamondHands]
+other = "Mains en diamant"
+
+[AchievementDescDiamondHands]
+other = "7 bites d'affilée à partir de 40cm"
+
+[AchievementNameDiamondEye]
+other = "Œil de diamant"
+
+[AchievementDescDiamondEye]
+other = "obtenir la même taille 5 fois d'affilée"
+
+[AchievementNameGreekMyth]
+other = "Mythe grec"
+
+[AchievementDescGreekMyth]
+other = "faire 30000cm au total"
+
+[AchievementNameFibonacciFather]
+other = "Père de Fibonacci"
+
+[AchievementDescFibonacciFather]
+other = "obtenir la suite de Fibonacci (1, 2, 3, 5, 8, 13, 21, 34, 55) sur les 31 dernières bites"
+
+[AchievementNameAnnihilatorCannon]
+other = "Canon annihilateur"
+
+[AchievementDescAnnihilatorCannon]
+other = "tirer sa bite 5000 fois"
+
+[RegionSize0]
+other = "Квантовый писюль 🤭"
+
+[RegionSize1]
+other = "Адыгейский пиксель"
+
+[RegionSize2]
+other = "Башкирская крошка"
+
+[RegionSize3]
+other = "Бурятская клёпка"
+
+[RegionSize4]
+other = "Алтайский орешек"
+
+[RegionSize5]
+other = "Дагестанский кинжал"
+
+[RegionSize6]
+other = "Ингушский леденец"
+
+[RegionSize7]
+other = "Кабардинский сучок"
+
+[RegionSize8]
+other = "Калмыцкий сухарик"
+
+[RegionSize9]
+other = "Карачаевский фитиль"
+
+[RegionSize10]
+other = "Карельская пипетка"
+
+[RegionSize11]
+other = "Коми-спичка"
+
+[RegionSize12]
+other = "Марийский скрепыш"
+
+[RegionSize13]
+other = "Мордовский обрубок"
+
+[RegionSize14]
+other = "Якутский крепыш"
+
+[RegionSize15]
+other = "Осетинская клюшка"
+
+[RegionSize16]
+other = "Татарский стержень"
+
+[RegionSize17]
+other = "Тувинский шуруп"
+
+[RegionSize18]
+other = "Удмуртский ствол"
+
+[RegionSize19]
+other = "Сибирская жердина"
+
+[RegionSize21]
+other = "Чувашский, крепкий"
+
+[RegionSize22]
+other = "Алтайский брус"
+
+[RegionSize23]
+other = "Краснодарская бита"
+
+[RegionSize24]
+other = "Красноярский валун"
+
+[RegionSize25]
+other = "Приморский хлыст"
+
+[RegionSize26]
+other = "Ставропольская палка"
+
+[RegionSize27]
+other = "Хабаровский посох"
+
+[RegionSize28]
+other = "Амурская палка"
+
+[RegionSize29]
+other = "Архангельский корабельный якорь"
+
+[RegionSize30]
+other = "Астраханская шпала"
+
+[RegionSize31]
+other = "Белгородский, по ГОСТу"
+
+[RegionSize32]
+other = "Брянский глушитель"
+
+[RegionSize33]
+other = "Владимирский, арматурный"
+
+[RegionSize34]
+other = "Волгоградский стояк"
+
+[RegionSize35]
+other = "Вологодская дубина"
+
+[RegionSize36]
+other = "Воронежская трость"
+
+[RegionSize37]
+other = "Ивановская колотушка"
+
+[RegionSize38]
+other = "Иркутский столп"
+
+[RegionSize39]
+other = "Калининградский маяк"
+
+[RegionSize40]
+other = "Калужский хуец"
+
+[RegionSize41]
+other = "Камчатская скала"
+
+[RegionSize42]
+other = "Кемеровский Эверест"
+
+[RegionSize43]
+other = "Кировская глыба"
+
+[RegionSize44]
+other = "Костромской истукан"
+
+[RegionSize45]
+other = "Курганский небоскрёб"
+
+[RegionSize46]
+other = "Курский богатырь"
+
+[RegionSize47]
+other = "Ленинградский болт"
+
+[RegionSize48]
+other = "Липецкий молот"
+
+[RegionSize49]
+other = "Магаданская высотка"
+
+[RegionSize50]
+other = "Московская Останкинская башня"
+
+[RegionSize51]
+other = "Мурманский айсберг"
+
+[RegionSize52]
+other = "Нижегородский Эльбрус"
+
+[RegionSize53]
+other = "Новгородская валына"
+
+[RegionSize54]
+other = "Новосибирский бивень"
+
+[RegionSize55]
+other = "Омский монумент"
+
+[RegionSize56]
+other = "Оренбургский дуб"
+
+[RegionSize57]
+other = "Орловский исполин"
+
+[RegionSize58]
+other = "Пензенский столп"
+
+[RegionSize59]
+other = "Пермский, галактический"
+
+[RegionSize60]
+other = "Псковская балымба"
+
+[RegionSizeUnknown]
+other = "Пиздец... 🥀"

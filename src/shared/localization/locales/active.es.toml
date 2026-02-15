@@ -1,0 +1,1082 @@
+[CommonDots]
+other = "\\.\\.\\."
+
+[MsgCockScoreboardNotFound]
+other = "\n🥀 *Condolencias\\.\\.\\. porque no miraste tu polla\\!*"
+
+[MsgCockSize]
+other = "Mi polla: *{{.Size}}cm* {{.Emoji}}"
+
+[MsgCockRulerScoreboardDefault]
+other = "{{.PlaceEmoji}} @{{.Username}} *{{.Size}}cm* {{.SizeEmoji}}"
+
+[MsgCockRulerScoreboardSelected]
+other = "{{.PlaceEmoji}} *@{{.Username}} {{.Size}}cm* {{.SizeEmoji}}"
+
+[MsgCockRaceScoreboardDefault]
+other = "{{.PlaceEmoji}} @{{.Username}} *{{.Size}}cm*"
+
+[MsgCockRaceScoreboardSelected]
+other = "{{.PlaceEmoji}} *@{{.Username}} {{.Size}}cm*"
+
+[MsgCockLadderScoreboardDefault]
+other = "{{.PlaceEmoji}} @{{.Username}} *{{.Size}}cm*"
+
+[MsgCockLadderScoreboardSelected]
+other = "{{.PlaceEmoji}} *@{{.Username}} {{.Size}}cm*"
+
+[MsgCockRulerContextDefault]
+other = "{{.PlaceEmoji}} @{{.Username}} *{{.Size}}cm* {{.SizeEmoji}}"
+
+[MsgCockRulerContextSelected]
+other = "{{.PlaceEmoji}} *@{{.Username}} {{.Size}}cm* {{.SizeEmoji}}"
+
+[MsgCockRaceContextDefault]
+other = "{{.PlaceEmoji}} @{{.Username}} *{{.Size}}cm*"
+
+[MsgCockRaceContextSelected]
+other = "{{.PlaceEmoji}} *@{{.Username}} {{.Size}}cm*"
+
+[MsgCockLadderContextDefault]
+other = "{{.PlaceEmoji}} @{{.Username}} *{{.Size}}cm*"
+
+[MsgCockLadderContextSelected]
+other = "{{.PlaceEmoji}} *@{{.Username}} {{.Size}}cm*"
+
+[MsgCockRulerScoreboardTemplate]
+other = """*Regla de pollas:*
+👥 Participantes: *{{.Participants}}*
+
+🏆 Ganadores por categoría:
+
+{{.Winners}}
+
+🥀 Condolencias al resto:
+
+{{.Others}}
+
+>📖 Sobre la regla de pollas:
+>
+>La regla de pollas es un ranking daily de puro random\\. Los tamaños se generan al azar cada día \\(de 0 a 61 cm\\) y se reinician a medianoche MSK\\. No hay acumulación — solo suerte aquí y ahora\\!
+>
+>🎲 Hoy eres top, mañana eres fondo — el random decide a quién le toca\\!||"""
+
+[MsgCockRulerScoreboardWinnersTemplate]
+other = """*Regla de pollas:*
+👥 Participantes: *{{.Participants}}*
+
+🏆 Ganadores por categoría:
+
+{{.Winners}}
+
+>📖 Sobre la regla de pollas:
+>
+>La regla de pollas es un ranking daily de puro random\\. Los tamaños se generan al azar cada día \\(de 0 a 61 cm\\) y se reinician a medianoche MSK\\. No hay acumulación — solo suerte aquí y ahora\\!
+>
+>🎲 Hoy eres top, mañana eres fondo — el random decide a quién le toca\\!||"""
+
+[MsgCockRulerScoreboardTemplateNoDesc]
+other = """*Regla de pollas:*
+👥 Participantes: *{{.Participants}}*
+
+🏆 Ganadores por categoría:
+
+{{.Winners}}
+
+🥀 Condolencias al resto:
+
+{{.Others}}"""
+
+[MsgCockRulerScoreboardWinnersTemplateNoDesc]
+other = """*Regla de pollas:*
+👥 Participantes: *{{.Participants}}*
+
+🏆 Ganadores por categoría:
+
+{{.Winners}}"""
+
+[MsgCockRaceScoreboardTemplate]
+other = """*Participantes de la carrera de pollas {{.SeasonNum}} {{.SeasonWord}}:*
+👥 Participantes en la temporada: *{{.Participants}}*
+
+🏆 Ganadores por categoría:
+
+{{.Winners}}
+
+🥀 Condolencias al resto:
+
+{{.Others}}
+
+>📖 Sobre la carrera de pollas:
+>
+>La carrera de pollas es una competencia estacional de 3 meses\\. Mide tu polla a diario, todos los resultados se suman automáticamente\\. Ganan los tres participantes con el tamaño acumulado máximo en toda la temporada\\.
+>
+>Con el inicio de una nueva temporada todas las pollas se reinician, y la carrera empieza de nuevo para todos\\.
+>
+>💡 Consejo: Mide tu polla cada día para maximizar tus chances de ganar\\!||
+
+{{.Footer}}"""
+
+[MsgCockRaceScoreboardWinnersTemplate]
+other = """*Participantes de la carrera de pollas {{.SeasonNum}} {{.SeasonWord}}:*
+👥 Participantes en la temporada: *{{.Participants}}*
+
+🏆 Ganadores por categoría:
+
+{{.Winners}}
+
+>📖 Sobre la carrera de pollas:
+>
+>La carrera de pollas es una competencia estacional de 3 meses\\. Mide tu polla a diario, todos los resultados se suman automáticamente\\. Ganan los tres participantes con el tamaño acumulado máximo en toda la temporada\\.
+>
+>Con el inicio de una nueva temporada todas las pollas se reinician, y la carrera empieza de nuevo para todos\\.
+>
+>💡 Consejo: Mide tu polla cada día para maximizar tus chances de ganar\\!||
+
+{{.Footer}}"""
+
+[MsgCockRaceScoreboardTemplateNoDesc]
+other = """*Participantes de la carrera de pollas {{.SeasonNum}} {{.SeasonWord}}:*
+👥 Participantes en la temporada: *{{.Participants}}*
+
+🏆 Ganadores por categoría:
+
+{{.Winners}}
+
+🥀 Condolencias al resto:
+
+{{.Others}}
+
+{{.Footer}}"""
+
+[MsgCockRaceScoreboardWinnersTemplateNoDesc]
+other = """*Participantes de la carrera de pollas {{.SeasonNum}} {{.SeasonWord}}:*
+👥 Participantes en la temporada: *{{.Participants}}*
+
+🏆 Ganadores por categoría:
+
+{{.Winners}}
+
+{{.Footer}}"""
+
+[MsgCockLadderScoreboardTemplate]
+other = """*Escalera de pollas:*
+👥 Participantes totales: *{{.Participants}}*
+
+🏆 Líderes de la escalera de pollas:
+
+{{.Winners}}
+
+🥀 Suben lento pero seguro:
+
+{{.Others}}
+
+>📖 Sobre la escalera de pollas:
+>
+>La escalera de pollas es tu camino eterno a la gloria\\. Aquí se suma cada polla de toda tu historia en el bot\\. A diferencia de la regla diaria y la carrera estacional, la escalera nunca se reinicia\\.
+>
+>🔥 El top de la escalera son leyendas, midiendo pollas desde el primer día\\. Sé uno de ellos\\!||"""
+
+[MsgCockLadderScoreboardWinnersTemplate]
+other = """*Escalera de pollas:*
+👥 Participantes totales: *{{.Participants}}*
+
+🏆 Líderes de la escalera de pollas:
+
+{{.Winners}}
+
+>📖 Sobre la escalera de pollas:
+>
+>La escalera de pollas es tu camino eterno a la gloria\\. Aquí se suma cada polla de toda tu historia en el bot\\. A diferencia de la regla diaria y la carrera estacional, la escalera nunca se reinicia\\.
+>
+>🔥 El top de la escalera son leyendas, midiendo pollas desde el primer día\\. Sé uno de ellos\\!||"""
+
+[MsgCockLadderScoreboardTemplateNoDesc]
+other = """*Escalera de pollas:*
+👥 Participantes totales: *{{.Participants}}*
+
+🏆 Líderes de la escalera de pollas:
+
+{{.Winners}}
+
+🥀 Suben lento pero seguro:
+
+{{.Others}}"""
+
+[MsgCockLadderScoreboardWinnersTemplateNoDesc]
+other = """*Escalera de pollas:*
+👥 Participantes totales: *{{.Participants}}*
+
+🏆 Líderes de la escalera de pollas:
+
+{{.Winners}}"""
+
+[MsgCockRaceFooterActiveSeason]
+other = "🚀 Temporada actual de pollas: *{{.SeasonNum}}*, del *{{.StartDate}}* al *{{.EndDate}}*\\. Queda: *{{.Remaining}}*\\."
+
+[MsgCockRaceFooterNoSeason]
+other = "🚀 La temporada actual de la carrera de pollas empezó *{{.StartDate}}*"
+
+[MsgCockDynamicsTemplate]
+other = """
+📊 *Dinámica general de pollas*
+
+Polla total medida: *{{.TotalCock}} cm* 🤭
+Total de pajeros: *{{.TotalUsers}}* 🫡
+Total de tiradas de polla: *{{.TotalCocksCount}}* ✊🏻
+
+Día de la polla más grande: *{{.TotalMaxCockDate}}*, creció un brutal *{{.TotalMaxCock}} cm* 🍾
+
+Polla promedio del sistema _(5 días)_: *{{.TotalAvgCock}} cm* {{.TotalAvgEmoji}}
+Mediana de polla del sistema _(5 días)_: *{{.TotalMedianCock}} cm* {{.TotalMedianEmoji}}
+
+Ratio de pollas _(5 días)_: 💪 *{{.TotalBigCockRatio}}%* 🤏 *{{.TotalSmallCockRatio}}%*
+Velocidad de crecimiento de polla _(5 días)_: *{{.OverallGrowthSpeed}} cm/día*
+
+📊 *Dinámica personal de polla*
+
+Tirando la polla desde: *{{.UserPullingPeriod}}*
+Polla total medida: *{{.UserTotalCock}} cm* 🤯
+Total de tiradas de polla: *{{.UserCocksCount}}* ✊🏻
+
+IRK (Índice de Tamaño de Polla): __*{{.UserIrk}}*__ _({{.UserIrkLabel}})_
+Tamaño promedio de polla _(5 pollas)_: *{{.UserAvgCock}} cm* {{.UserAvgEmoji}}
+La polla más grande fue: *{{.UserMaxCock}} cm* {{.UserMaxEmoji}} (*{{.UserMaxDate}}*)
+
+Coeficiente de suerte _(5 pollas)_: *{{.UserLuckCoefficient}}* {{.UserLuckDisplay}}
+Volatilidad de polla _(5 pollas)_: *{{.UserVolatility}}* {{.UserVolatilityDisplay}}
+
+Porcentaje de dominancia: *{{.UserDominancePercent}}%* 👑
+Velocidad de crecimiento de polla _(5 días)_: *{{.UserGrowthSpeed}} cm/día* {{.UserGrowthSpeedDisplay}}
+
+🏆 *Logros de temporada*
+
+Victorias en temporadas: *{{.UserSeasonWins}}* 🎖️
+Polla-respeto: *{{.UserCockRespect}}* 🚀
+
+📈 *Activos de polla*
+
+{{.UserYesterdayChangeEmoji}} Dinámica diaria: *{{.UserYesterdayChangePercent}}%* (*{{.UserYesterdayChangeSize}} cm*)
+{{.UserFiveCocksEmoji}} Dinámica en 5 pollas: *{{.UserFiveCocksChangePercent}}%* (*{{.UserFiveCocksChangeSize}} cm*)"""
+
+[MsgCockSeasonTemplate]
+other = """*Temporada de pollas {{.SeasonNum}}* \\(🟡 Actual\\)
+⏱️ Período: *{{.StartDate}} \\- {{.EndDate}}*
+
+🔮 Aspirantes de la temporada:
+
+{{.Pretenders}}"""
+
+[MsgCockSeasonWithWinnersTemplate]
+other = """*Temporada de pollas {{.SeasonNum}}* \\(🟢 Finalizada\\)
+⏱️ Período: *{{.StartDate}} \\- {{.EndDate}}*
+
+🎖 Ganadores de la temporada:
+
+{{.Winners}}"""
+
+[MsgCockSeasonTemplateFooter]
+other = """>📖 Sobre las temporadas de pollas:
+>
+>Las temporadas de pollas son una batalla de 3\\-meses por el título del mejor pajero\\. Mide cada día, suma resultados y pelea por el top\\-3\\. Los ganadores reciben los legendarios polla\\-respetos™, que puedes cambiar por merch\\!
+>
+>🔥 La historia solo recuerda a los ganadores — conviértete en uno\\!||"""
+
+[MsgCockSeasonWinnerTemplate]
+other = "{{.Medal}} *@{{.Nickname}}* con polla *{{.Size}} cm*"
+
+[MsgCockSeasonNoSeasonsTemplate]
+other = """*Temporadas de pollas*
+
+Ahora no hay temporadas activas\\. ¡Atento a las novedades\\!"""
+
+[MsgCockAchievementsTemplate]
+other = """🏆 *Polla\\-logros*
+Completado: *{{.Completed}}/{{.Total}}* _\\({{.Percent}}%\\)_ • 🌟 Respetos: *{{.Respects}}*
+
+💡 _Por cada polla\\-logro recibes polla\\-respetos™, que pronto podrás cambiar por merch en la tienda oficial\\!_
+
+{{.Achievements}}"""
+
+[MsgCockAchievementsTemplateOtherPages]
+other = """🏆 *Polla\\-logros*
+Completado: *{{.Completed}}/{{.Total}}* _\\({{.Percent}}%\\)_ • 🌟 Respetos: *{{.Respects}}*
+
+{{.Achievements}}"""
+
+[InlineTitleCockSize]
+other = "Tamaño de polla"
+
+[InlineTitleCockRuler]
+other = "Regla de pollas"
+
+[InlineTitleCockLadder]
+other = "Escalera de pollas"
+
+[InlineTitleCockRace]
+other = "Carrera de pollas"
+
+[InlineTitleCockDynamic]
+other = "Dinámica de polla"
+
+[InlineTitleCockSeason]
+other = "Temporadas de pollas"
+
+[InlineTitleCockAchievements]
+other = "Polla-logros"
+
+[DescCockSize]
+other = "📏 Mira tu tamaño de hoy (0-61 cm)"
+
+[DescCockRuler]
+other = "👑 Top-13 daily por tamaño de polla de hoy"
+
+[DescCockLadder]
+other = "🪜 Ranking eterno de tamaños acumulados"
+
+[DescCockRace]
+other = "🏁 Carrera estacional de 3 meses"
+
+[DescCockDynamic]
+other = "📈 Stats, dinámica, récords y comparación"
+
+[DescCockSeason]
+other = "📅 Historia de temporadas y ganadores"
+
+[DescCockAchievements]
+other = "🏅 Logros y polla-respetos™"
+
+[MsgCockDynamicNoData]
+other = "🤔 *No hay datos suficientes para la dinámica*\n\n_¡Primero tira la polla al menos una vez\\!_"
+
+[MsgSeasonUnknownStartDate]
+other = "ni puta idea cuándo"
+
+[MsgSeasonButton]
+other = "{{.Arrow}} Temporada {{.SeasonNum}}"
+
+[MsgSeasonNotFound]
+other = "Temporada no encontrada"
+
+[MsgCallbackInvalidFormat]
+other = "Formato de datos inválido"
+
+[MsgCallbackParseError]
+other = "Error al parsear datos"
+
+[MsgUserPullingRecently]
+other = "recientemente"
+
+[MsgUserPullingSince]
+other = "{{.Period}} (desde {{.Date}})"
+
+[MsgListSeparator]
+other = ", "
+
+[MsgListSeparatorLast]
+other = " y "
+
+[UnitDay]
+one = "{{.Count}} día"
+few = "{{.Count}} días"
+many = "{{.Count}} días"
+other = "{{.Count}} días"
+
+[UnitMonth]
+one = "{{.Count}} mes"
+few = "{{.Count}} meses"
+many = "{{.Count}} meses"
+other = "{{.Count}} meses"
+
+[UnitYear]
+one = "{{.Count}} año"
+few = "{{.Count}} años"
+many = "{{.Count}} años"
+other = "{{.Count}} años"
+
+[UnitSeason]
+one = "{{.Count}} temporada"
+few = "{{.Count}} temporadas"
+many = "{{.Count}} temporadas"
+other = "{{.Count}} temporadas"
+
+[UnitSeasonGenitive]
+one = "temporada"
+few = "temporada"
+many = "temporada"
+other = "temporada"
+
+[UnitHour]
+one = "{{.Count}} hora"
+few = "{{.Count}} horas"
+many = "{{.Count}} horas"
+other = "{{.Count}} horas"
+
+[UnitMinute]
+one = "{{.Count}} minuto"
+few = "{{.Count}} minutos"
+many = "{{.Count}} minutos"
+other = "{{.Count}} minutos"
+
+[UptimeDayShort]
+one = "{{.Count}}d"
+few = "{{.Count}}d"
+many = "{{.Count}}d"
+other = "{{.Count}}d"
+
+[UptimeHourShort]
+one = "{{.Count}}h"
+few = "{{.Count}}h"
+many = "{{.Count}}h"
+other = "{{.Count}}h"
+
+[UptimeMinuteShort]
+one = "{{.Count}}m"
+few = "{{.Count}}m"
+many = "{{.Count}}m"
+other = "{{.Count}}m"
+
+[MsgUnknownValue]
+other = "desconocido"
+
+[AnonymousNameTemplate]
+other = "Anonym{{.Number}}"
+
+[MsgHelpText]
+other = "🧭 Comandos\n\n/help — lista de comandos\n/hide — ocultar o mostrar tu apodo en concursos"
+
+[MsgHidePrompt]
+other = "🙈 *Ocultar apodo*\n\nPuedes ocultar tu apodo a otros participantes\\. Tus logros personales seguirán vinculados a tu perfil\\.\n\nDespués de ocultarlo, tu apodo será *@{{.Anon}}*.\n\n>El ocultado no es inmediato por el caché de consultas inline de Telegram\\. Se garantiza después de unos minutos\\.\n\nPulsa el botón de abajo para ocultar tu apodo\\."
+
+[MsgHideStatusHidden]
+other = "🙊 *Apodo oculto*\n\nLa participación *es completamente* anónima\\.\n\nAhora se muestra como *@{{.Anon}}*. Si lo revelas, será *@{{.Real}}* y otros verán tus logros\\.\n\n>El ocultado no es inmediato por el caché de consultas inline de Telegram\\. Se garantiza después de unos minutos\\."
+
+[MsgHideButtonHide]
+other = "🙈 Ocultar mi apodo"
+
+[MsgHideButtonShow]
+other = "👀 Mostrar mi apodo"
+
+[MsgCallbackNotForYou]
+other = "⛔ Este botón solo está disponible para el usuario original."
+
+[MsgAchievementCompleted]
+other = "✅ {{.Emoji}} *{{.Name}}* \\- {{.Description}}"
+
+[MsgAchievementInProgress]
+other = "🔄 {{.Emoji}} *{{.Name}}* \\({{.Progress}}/{{.Max}}\\) \\- {{.Description}}"
+
+[MsgAchievementNotCompleted]
+other = "⭕️ {{.Emoji}} *{{.Name}}* \\- {{.Description}}"
+
+[LuckLabelGodRandom]
+other = "dios del random"
+
+[LuckLabelCosmicLuck]
+other = "suerte cósmica"
+
+[LuckLabelFairyLuck]
+other = "suerte de hada"
+
+[LuckLabelSuperLuck]
+other = "súper suerte"
+
+[LuckLabelIncredibleLuck]
+other = "suerte brutal"
+
+[LuckLabelVeryLucky]
+other = "muy afortunado"
+
+[LuckLabelLucky]
+other = "afortunado"
+
+[LuckLabelBalanced]
+other = "equilibrado"
+
+[LuckLabelUnlucky]
+other = "sin suerte"
+
+[LuckLabelBad]
+other = "mal"
+
+[LuckLabelGloom]
+other = "oscuridad"
+
+[LuckLabelHellTilt]
+other = "tilt infernal"
+
+[LuckLabelBurningInHell]
+other = "ardiendo en el infierno"
+
+[VolatilityLabelStone]
+other = "piedra"
+
+[VolatilityLabelStable]
+other = "estable"
+
+[VolatilityLabelModerate]
+other = "moderado"
+
+[VolatilityLabelLivelySpread]
+other = "dispersión viva"
+
+[VolatilityLabelUneven]
+other = "irregular"
+
+[VolatilityLabelChaotic]
+other = "caótico"
+
+[VolatilityLabelRandom]
+other = "random total"
+
+[IrkLabelZero]
+other = "cero"
+
+[IrkLabelMinimal]
+other = "mínimo"
+
+[IrkLabelVerySmall]
+other = "muy pequeño"
+
+[IrkLabelSmall]
+other = "pequeño"
+
+[IrkLabelReduced]
+other = "reducido"
+
+[IrkLabelAverage]
+other = "medio"
+
+[IrkLabelIncreased]
+other = "aumentado"
+
+[IrkLabelLarge]
+other = "grande"
+
+[IrkLabelVeryLarge]
+other = "muy grande"
+
+[IrkLabelMaximum]
+other = "máximo"
+
+[IrkLabelUltimate]
+other = "tope"
+
+[GrowthSpeedLabelCosmic]
+other = "cósmica"
+
+[GrowthSpeedLabelExtreme]
+other = "extrema"
+
+[GrowthSpeedLabelVeryFast]
+other = "muy rápida"
+
+[GrowthSpeedLabelFast]
+other = "rápida"
+
+[GrowthSpeedLabelModerate]
+other = "moderada"
+
+[GrowthSpeedLabelAverage]
+other = "media"
+
+[GrowthSpeedLabelSlow]
+other = "lenta"
+
+[GrowthSpeedLabelVerySlow]
+other = "muy lenta"
+
+[GrowthSpeedLabelTurtle]
+other = "de tortuga"
+
+[GrowthSpeedLabelStalled]
+other = "parada"
+
+[AchievementNameNotRubbedYet]
+other = "Aún no rozó"
+
+[AchievementDescNotRubbedYet]
+other = "tirar la polla 10 veces"
+
+[AchievementNameHalfHundred]
+other = "Medio centenar"
+
+[AchievementDescHalfHundred]
+other = "sacar una polla de 50cm"
+
+[AchievementNameDiary]
+other = "Diario"
+
+[AchievementDescDiary]
+other = "tirar la polla 31 veces"
+
+[AchievementNameGoldenHundred]
+other = "Cien dorado"
+
+[AchievementDescGoldenHundred]
+other = "sumar 100cm en total"
+
+[AchievementNameSkillfulHands]
+other = "Manos hábiles"
+
+[AchievementDescSkillfulHands]
+other = "tirar la polla 100 veces"
+
+[AchievementNameEarlyBird]
+other = "Madrugador"
+
+[AchievementDescEarlyBird]
+other = "tirar la polla antes de las 6:00 MSK veinte veces"
+
+[AchievementNameLightning]
+other = "Rayo"
+
+[AchievementDescLightning]
+other = "subir la polla 50cm respecto a la anterior"
+
+[AchievementNameSniper]
+other = "Francotirador"
+
+[AchievementDescSniper]
+other = "sacar exactamente 30cm cinco veces"
+
+[AchievementNameDejaVu]
+other = "Deja vu"
+
+[AchievementDescDejaVu]
+other = "sacar la misma polla dos días seguidos"
+
+[AchievementNameSpeedrunner]
+other = "Speedrunner"
+
+[AchievementDescSpeedrunner]
+other = "tirar la polla 30 segundos después de medianoche cinco veces"
+
+[AchievementNameMidnightPuller]
+other = "Al borde de la muerte"
+
+[AchievementDescMidnightPuller]
+other = "tirar la polla después de las 23:00 MSK diez veces"
+
+[AchievementNameRounder]
+other = "Redondeador"
+
+[AchievementDescRounder]
+other = "sacar todos los números redondos (10, 20, 30, 40, 50, 60) en las últimas 31 pollas"
+
+[AchievementNameEverest]
+other = "Everest"
+
+[AchievementDescEverest]
+other = "sacar la polla máxima entre todos"
+
+[AchievementNameMarianaTrench]
+other = "Fosa de las Marianas"
+
+[AchievementDescMarianaTrench]
+other = "sacar la polla mínima entre todos"
+
+[AchievementNameNumberCollector]
+other = "Coleccionista de números"
+
+[AchievementDescNumberCollector]
+other = "sacar todos los números bonitos (11, 22, 33, 44, 55)"
+
+[AchievementNameDayEqualsSize]
+other = "Día = Tamaño"
+
+[AchievementDescDayEqualsSize]
+other = "sacar una polla igual al día del mes"
+
+[AchievementNameSolidThousand]
+other = "Mil sólido"
+
+[AchievementDescSolidThousand]
+other = "sumar 1000cm en total"
+
+[AchievementNameBullTrend]
+other = "Tendencia alcista"
+
+[AchievementDescBullTrend]
+other = "crecimiento de polla 5 días seguidos"
+
+[AchievementNameBearMarket]
+other = "Mercado bajista"
+
+[AchievementDescBearMarket]
+other = "caída de polla 5 días seguidos"
+
+[AchievementNameTraveler]
+other = "Viajero"
+
+[AchievementDescTraveler]
+other = "sacar los 61 tamaños de polla (0-60cm) en todo el tiempo"
+
+[AchievementNameFreeze]
+other = "Piel de gallina"
+
+[AchievementDescFreeze]
+other = "5 pollas seguidas de menos de 20cm"
+
+[AchievementNameFiveK]
+other = "Cinco mil"
+
+[AchievementDescFiveK]
+other = "sumar 5000cm en total"
+
+[AchievementNameOldtimer]
+other = "Veterano"
+
+[AchievementDescOldtimer]
+other = "participar en 3 temporadas"
+
+[AchievementNameAnniversary]
+other = "Aniversario"
+
+[AchievementDescAnniversary]
+other = "tirar la polla 365 veces"
+
+[AchievementNameContrastShower]
+other = "Ducha contraste"
+
+[AchievementDescContrastShower]
+other = "sacar 0-3cm justo después de 60+cm"
+
+[AchievementNamePythagoras]
+other = "Pitágoras"
+
+[AchievementDescPythagoras]
+other = "sacar tres pollas seguidas que formen un triple pitagórico (3-4-5, 5-12-13, 8-15-17, etc.)"
+
+[AchievementNameLeetSpeak]
+other = "Leet speak"
+
+[AchievementDescLeetSpeak]
+other = "sacar 13cm y 37cm seguidos"
+
+[AchievementNameMoscovite]
+other = "Moscovita"
+
+[AchievementDescMoscovite]
+other = "sacar una polla de 50cm cinco veces en un mes"
+
+[AchievementNameHourPrecision]
+other = "Precisión horaria"
+
+[AchievementDescHourPrecision]
+other = "sacar una polla igual a la hora del reloj"
+
+[AchievementNameWonderStranger]
+other = "Milagro desconocido"
+
+[AchievementDescWonderStranger]
+other = "tirar la polla 500 veces"
+
+[AchievementNameValentine]
+other = "San Valentín"
+
+[AchievementDescValentine]
+other = "sacar una polla de 14cm en San Valentín"
+
+[AchievementNameNewYearGift]
+other = "Regalo de Año Nuevo"
+
+[AchievementDescNewYearGift]
+other = "sacar 60cm+ en Año Nuevo"
+
+[AchievementNameMensSolidarity]
+other = "Solidaridad masculina"
+
+[AchievementDescMensSolidarity]
+other = "sacar una polla de 19cm en el Día Internacional del Hombre (19 de noviembre)"
+
+[AchievementNameFriday13th]
+other = "Viernes 13"
+
+[AchievementDescFriday13th]
+other = "sacar una polla de 0cm en viernes 13"
+
+[AchievementNameLeapCock]
+other = "Polla bisiesta"
+
+[AchievementDescLeapCock]
+other = "sacar cualquier polla el 29 de febrero"
+
+[AchievementNameTurtle]
+other = "Tortuga"
+
+[AchievementDescTurtle]
+other = "10 pollas seguidas con cambio menor a 5cm"
+
+[AchievementNameGoldenCock]
+other = "Polla dorada"
+
+[AchievementDescGoldenCock]
+other = "sumar 10000cm en total"
+
+[AchievementNameSumOfPrevious]
+other = "Suma de las anteriores"
+
+[AchievementDescSumOfPrevious]
+other = "sacar una polla igual a la suma de las dos anteriores"
+
+[AchievementNameBazookaHands]
+other = "Manos bazuca"
+
+[AchievementDescBazookaHands]
+other = "tirar la polla 1000 veces"
+
+[AchievementNameTriple]
+other = "Triple"
+
+[AchievementDescTriple]
+other = "sacar el mismo tamaño 3 veces seguidas"
+
+[AchievementNameVeteran]
+other = "Veterano"
+
+[AchievementDescVeteran]
+other = "participar en 5 temporadas"
+
+[AchievementNameMinutePrecision]
+other = "Precisión de minuto"
+
+[AchievementDescMinutePrecision]
+other = "sacar una polla igual a los minutos del reloj"
+
+[AchievementNamePoker]
+other = "Póker"
+
+[AchievementDescPoker]
+other = "sacar el mismo tamaño 4 veces seguidas"
+
+[AchievementNameKeeper]
+other = "Guardián"
+
+[AchievementDescKeeper]
+other = "participar en 10 temporadas"
+
+[AchievementNameCosmicCock]
+other = "Polla cósmica"
+
+[AchievementDescCosmicCock]
+other = "sumar 20000cm en total"
+
+[AchievementNameMaximalist]
+other = "Maximalista"
+
+[AchievementDescMaximalist]
+other = "sacar 61cm diez veces"
+
+[AchievementNameDiamondHands]
+other = "Manos de diamante"
+
+[AchievementDescDiamondHands]
+other = "7 pollas seguidas desde 40cm"
+
+[AchievementNameDiamondEye]
+other = "Ojo de diamante"
+
+[AchievementDescDiamondEye]
+other = "sacar el mismo tamaño 5 veces seguidas"
+
+[AchievementNameGreekMyth]
+other = "Mito griego"
+
+[AchievementDescGreekMyth]
+other = "sumar 30000cm en total"
+
+[AchievementNameFibonacciFather]
+other = "Padre de Fibonacci"
+
+[AchievementDescFibonacciFather]
+other = "sacar la secuencia de Fibonacci (1, 2, 3, 5, 8, 13, 21, 34, 55) en las últimas 31 pollas"
+
+[AchievementNameAnnihilatorCannon]
+other = "Cañón aniquilador"
+
+[AchievementDescAnnihilatorCannon]
+other = "tirar la polla 5000 veces"
+
+[RegionSize0]
+other = "Квантовый писюль 🤭"
+
+[RegionSize1]
+other = "Адыгейский пиксель"
+
+[RegionSize2]
+other = "Башкирская крошка"
+
+[RegionSize3]
+other = "Бурятская клёпка"
+
+[RegionSize4]
+other = "Алтайский орешек"
+
+[RegionSize5]
+other = "Дагестанский кинжал"
+
+[RegionSize6]
+other = "Ингушский леденец"
+
+[RegionSize7]
+other = "Кабардинский сучок"
+
+[RegionSize8]
+other = "Калмыцкий сухарик"
+
+[RegionSize9]
+other = "Карачаевский фитиль"
+
+[RegionSize10]
+other = "Карельская пипетка"
+
+[RegionSize11]
+other = "Коми-спичка"
+
+[RegionSize12]
+other = "Марийский скрепыш"
+
+[RegionSize13]
+other = "Мордовский обрубок"
+
+[RegionSize14]
+other = "Якутский крепыш"
+
+[RegionSize15]
+other = "Осетинская клюшка"
+
+[RegionSize16]
+other = "Татарский стержень"
+
+[RegionSize17]
+other = "Тувинский шуруп"
+
+[RegionSize18]
+other = "Удмуртский ствол"
+
+[RegionSize19]
+other = "Сибирская жердина"
+
+[RegionSize21]
+other = "Чувашский, крепкий"
+
+[RegionSize22]
+other = "Алтайский брус"
+
+[RegionSize23]
+other = "Краснодарская бита"
+
+[RegionSize24]
+other = "Красноярский валун"
+
+[RegionSize25]
+other = "Приморский хлыст"
+
+[RegionSize26]
+other = "Ставропольская палка"
+
+[RegionSize27]
+other = "Хабаровский посох"
+
+[RegionSize28]
+other = "Амурская палка"
+
+[RegionSize29]
+other = "Архангельский корабельный якорь"
+
+[RegionSize30]
+other = "Астраханская шпала"
+
+[RegionSize31]
+other = "Белгородский, по ГОСТу"
+
+[RegionSize32]
+other = "Брянский глушитель"
+
+[RegionSize33]
+other = "Владимирский, арматурный"
+
+[RegionSize34]
+other = "Волгоградский стояк"
+
+[RegionSize35]
+other = "Вологодская дубина"
+
+[RegionSize36]
+other = "Воронежская трость"
+
+[RegionSize37]
+other = "Ивановская колотушка"
+
+[RegionSize38]
+other = "Иркутский столп"
+
+[RegionSize39]
+other = "Калининградский маяк"
+
+[RegionSize40]
+other = "Калужский хуец"
+
+[RegionSize41]
+other = "Камчатская скала"
+
+[RegionSize42]
+other = "Кемеровский Эверест"
+
+[RegionSize43]
+other = "Кировская глыба"
+
+[RegionSize44]
+other = "Костромской истукан"
+
+[RegionSize45]
+other = "Курганский небоскрёб"
+
+[RegionSize46]
+other = "Курский богатырь"
+
+[RegionSize47]
+other = "Ленинградский болт"
+
+[RegionSize48]
+other = "Липецкий молот"
+
+[RegionSize49]
+other = "Магаданская высотка"
+
+[RegionSize50]
+other = "Московская Останкинская башня"
+
+[RegionSize51]
+other = "Мурманский айсберг"
+
+[RegionSize52]
+other = "Нижегородский Эльбрус"
+
+[RegionSize53]
+other = "Новгородская валына"
+
+[RegionSize54]
+other = "Новосибирский бивень"
+
+[RegionSize55]
+other = "Омский монумент"
+
+[RegionSize56]
+other = "Оренбургский дуб"
+
+[RegionSize57]
+other = "Орловский исполин"
+
+[RegionSize58]
+other = "Пензенский столп"
+
+[RegionSize59]
+other = "Пермский, галактический"
+
+[RegionSize60]
+other = "Псковская балымба"
+
+[RegionSizeUnknown]
+other = "Пиздец... 🥀"

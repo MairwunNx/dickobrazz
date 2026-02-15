@@ -1,0 +1,1082 @@
+[CommonDots]
+other = "\\.\\.\\."
+
+[MsgCockScoreboardNotFound]
+other = "\n🥀 *Condolences\\.\\.\\. because you didn't check your cock\\!*"
+
+[MsgCockSize]
+other = "My cock: *{{.Size}}cm* {{.Emoji}}"
+
+[MsgCockRulerScoreboardDefault]
+other = "{{.PlaceEmoji}} @{{.Username}} *{{.Size}}cm* {{.SizeEmoji}}"
+
+[MsgCockRulerScoreboardSelected]
+other = "{{.PlaceEmoji}} *@{{.Username}} {{.Size}}cm* {{.SizeEmoji}}"
+
+[MsgCockRaceScoreboardDefault]
+other = "{{.PlaceEmoji}} @{{.Username}} *{{.Size}}cm*"
+
+[MsgCockRaceScoreboardSelected]
+other = "{{.PlaceEmoji}} *@{{.Username}} {{.Size}}cm*"
+
+[MsgCockLadderScoreboardDefault]
+other = "{{.PlaceEmoji}} @{{.Username}} *{{.Size}}cm*"
+
+[MsgCockLadderScoreboardSelected]
+other = "{{.PlaceEmoji}} *@{{.Username}} {{.Size}}cm*"
+
+[MsgCockRulerContextDefault]
+other = "{{.PlaceEmoji}} @{{.Username}} *{{.Size}}cm* {{.SizeEmoji}}"
+
+[MsgCockRulerContextSelected]
+other = "{{.PlaceEmoji}} *@{{.Username}} {{.Size}}cm* {{.SizeEmoji}}"
+
+[MsgCockRaceContextDefault]
+other = "{{.PlaceEmoji}} @{{.Username}} *{{.Size}}cm*"
+
+[MsgCockRaceContextSelected]
+other = "{{.PlaceEmoji}} *@{{.Username}} {{.Size}}cm*"
+
+[MsgCockLadderContextDefault]
+other = "{{.PlaceEmoji}} @{{.Username}} *{{.Size}}cm*"
+
+[MsgCockLadderContextSelected]
+other = "{{.PlaceEmoji}} *@{{.Username}} {{.Size}}cm*"
+
+[MsgCockRulerScoreboardTemplate]
+other = """*Cock Ruler:*
+👥 Participants: *{{.Participants}}*
+
+🏆 Winners by category:
+
+{{.Winners}}
+
+🥀 Condolences to the rest:
+
+{{.Others}}
+
+>📖 About Cock Ruler:
+>
+>Cock Ruler is a daily pure\\-random ranking\\. Sizes are generated randomly every day \\(0 to 61 cm\\) and reset at midnight MSK\\. No stacking — only luck here and now\\!
+>
+>🎲 Today you're top, tomorrow you're bottom — random decides who gets lucky\\!||"""
+
+[MsgCockRulerScoreboardWinnersTemplate]
+other = """*Cock Ruler:*
+👥 Participants: *{{.Participants}}*
+
+🏆 Winners by category:
+
+{{.Winners}}
+
+>📖 About Cock Ruler:
+>
+>Cock Ruler is a daily pure\\-random ranking\\. Sizes are generated randomly every day \\(0 to 61 cm\\) and reset at midnight MSK\\. No stacking — only luck here and now\\!
+>
+>🎲 Today you're top, tomorrow you're bottom — random decides who gets lucky\\!||"""
+
+[MsgCockRulerScoreboardTemplateNoDesc]
+other = """*Cock Ruler:*
+👥 Participants: *{{.Participants}}*
+
+🏆 Winners by category:
+
+{{.Winners}}
+
+🥀 Condolences to the rest:
+
+{{.Others}}"""
+
+[MsgCockRulerScoreboardWinnersTemplateNoDesc]
+other = """*Cock Ruler:*
+👥 Participants: *{{.Participants}}*
+
+🏆 Winners by category:
+
+{{.Winners}}"""
+
+[MsgCockRaceScoreboardTemplate]
+other = """*Cock Race participants {{.SeasonNum}} {{.SeasonWord}}:*
+👥 Participants this season: *{{.Participants}}*
+
+🏆 Winners by category:
+
+{{.Winners}}
+
+🥀 Condolences to the rest:
+
+{{.Others}}
+
+>📖 About Cock Race:
+>
+>Cock Race is a seasonal competition lasting 3 months\\. Measure your cock daily, all results are summed automatically\\. The winners are the three participants with the maximum accumulated size for the whole season\\.
+>
+>With the start of a new season all cocks reset, and the race starts over for everyone\\.
+>
+>💡 Tip: Measure your cock every day to maximize your chances to win\\!||
+
+{{.Footer}}"""
+
+[MsgCockRaceScoreboardWinnersTemplate]
+other = """*Cock Race participants {{.SeasonNum}} {{.SeasonWord}}:*
+👥 Participants this season: *{{.Participants}}*
+
+🏆 Winners by category:
+
+{{.Winners}}
+
+>📖 About Cock Race:
+>
+>Cock Race is a seasonal competition lasting 3 months\\. Measure your cock daily, all results are summed automatically\\. The winners are the three participants with the maximum accumulated size for the whole season\\.
+>
+>With the start of a new season all cocks reset, and the race starts over for everyone\\.
+>
+>💡 Tip: Measure your cock every day to maximize your chances to win\\!||
+
+{{.Footer}}"""
+
+[MsgCockRaceScoreboardTemplateNoDesc]
+other = """*Cock Race participants {{.SeasonNum}} {{.SeasonWord}}:*
+👥 Participants this season: *{{.Participants}}*
+
+🏆 Winners by category:
+
+{{.Winners}}
+
+🥀 Condolences to the rest:
+
+{{.Others}}
+
+{{.Footer}}"""
+
+[MsgCockRaceScoreboardWinnersTemplateNoDesc]
+other = """*Cock Race participants {{.SeasonNum}} {{.SeasonWord}}:*
+👥 Participants this season: *{{.Participants}}*
+
+🏆 Winners by category:
+
+{{.Winners}}
+
+{{.Footer}}"""
+
+[MsgCockLadderScoreboardTemplate]
+other = """*Cock Ladder:*
+👥 Total participants: *{{.Participants}}*
+
+🏆 Cock\\-ladder leaders:
+
+{{.Winners}}
+
+🥀 Slowly but surely climbing:
+
+{{.Others}}
+
+>📖 About Cock Ladder:
+>
+>Cock Ladder is your endless path to glory\\. Every cock is summed over your whole history in the bot\\. Unlike the daily ruler and the seasonal race, the ladder never resets\\.
+>
+>🔥 Ladder top are legends, measuring cocks since day one\\. Become one of them\\!||"""
+
+[MsgCockLadderScoreboardWinnersTemplate]
+other = """*Cock Ladder:*
+👥 Total participants: *{{.Participants}}*
+
+🏆 Cock\\-ladder leaders:
+
+{{.Winners}}
+
+>📖 About Cock Ladder:
+>
+>Cock Ladder is your endless path to glory\\. Every cock is summed over your whole history in the bot\\. Unlike the daily ruler and the seasonal race, the ladder never resets\\.
+>
+>🔥 Ladder top are legends, measuring cocks since day one\\. Become one of them\\!||"""
+
+[MsgCockLadderScoreboardTemplateNoDesc]
+other = """*Cock Ladder:*
+👥 Total participants: *{{.Participants}}*
+
+🏆 Cock\\-ladder leaders:
+
+{{.Winners}}
+
+🥀 Slowly but surely climbing:
+
+{{.Others}}"""
+
+[MsgCockLadderScoreboardWinnersTemplateNoDesc]
+other = """*Cock Ladder:*
+👥 Total participants: *{{.Participants}}*
+
+🏆 Cock\\-ladder leaders:
+
+{{.Winners}}"""
+
+[MsgCockRaceFooterActiveSeason]
+other = "🚀 Current cock season: *{{.SeasonNum}}*, running from *{{.StartDate}}* to *{{.EndDate}}*\\. Left: *{{.Remaining}}*\\."
+
+[MsgCockRaceFooterNoSeason]
+other = "🚀 Current cock race season started *{{.StartDate}}*"
+
+[MsgCockDynamicsTemplate]
+other = """
+📊 *Overall cock dynamics*
+
+Total measured cock: *{{.TotalCock}} cm* 🤭
+Total cockers: *{{.TotalUsers}}* 🫡
+Total cock pulls: *{{.TotalCocksCount}}* ✊🏻
+
+Day of the biggest cock: *{{.TotalMaxCockDate}}*, grew a whopping *{{.TotalMaxCock}} cm* 🍾
+
+System average cock _(5 days)_: *{{.TotalAvgCock}} cm* {{.TotalAvgEmoji}}
+System median cock _(5 days)_: *{{.TotalMedianCock}} cm* {{.TotalMedianEmoji}}
+
+Cock ratio _(5 days)_: 💪 *{{.TotalBigCockRatio}}%* 🤏 *{{.TotalSmallCockRatio}}%*
+Cock growth speed _(5 days)_: *{{.OverallGrowthSpeed}} cm/day*
+
+📊 *Personal cock dynamics*
+
+Pulling cock for: *{{.UserPullingPeriod}}*
+Total measured cock: *{{.UserTotalCock}} cm* 🤯
+Total cock pulls: *{{.UserCocksCount}}* ✊🏻
+
+IRC (Cock Size Index): __*{{.UserIrk}}*__ _({{.UserIrkLabel}})_
+Average cock size _(5 cocks)_: *{{.UserAvgCock}} cm* {{.UserAvgEmoji}}
+Biggest cock was: *{{.UserMaxCock}} cm* {{.UserMaxEmoji}} (*{{.UserMaxDate}}*)
+
+Luck coefficient _(5 cocks)_: *{{.UserLuckCoefficient}}* {{.UserLuckDisplay}}
+Cock volatility _(5 cocks)_: *{{.UserVolatility}}* {{.UserVolatilityDisplay}}
+
+Dominance percent: *{{.UserDominancePercent}}%* 👑
+Cock growth speed _(5 days)_: *{{.UserGrowthSpeed}} cm/day* {{.UserGrowthSpeedDisplay}}
+
+🏆 *Season achievements*
+
+Season wins: *{{.UserSeasonWins}}* 🎖️
+Cock-respect: *{{.UserCockRespect}}* 🚀
+
+📈 *Cock assets*
+
+{{.UserYesterdayChangeEmoji}} Daily dynamics: *{{.UserYesterdayChangePercent}}%* (*{{.UserYesterdayChangeSize}} cm*)
+{{.UserFiveCocksEmoji}} Dynamics over 5 cocks: *{{.UserFiveCocksChangePercent}}%* (*{{.UserFiveCocksChangeSize}} cm*)"""
+
+[MsgCockSeasonTemplate]
+other = """*Cock season {{.SeasonNum}}* \\(🟡 Current\\)
+⏱️ Period: *{{.StartDate}} \\- {{.EndDate}}*
+
+🔮 Season contenders:
+
+{{.Pretenders}}"""
+
+[MsgCockSeasonWithWinnersTemplate]
+other = """*Cock season {{.SeasonNum}}* \\(🟢 Finished\\)
+⏱️ Period: *{{.StartDate}} \\- {{.EndDate}}*
+
+🎖 Season winners:
+
+{{.Winners}}"""
+
+[MsgCockSeasonTemplateFooter]
+other = """>📖 About cock seasons:
+>
+>Cock seasons are a 3\\-month battle for the title of the best cocker\\. Measure every day, sum results, and fight for the top\\-3\\. Winners get legendary cock\\-respects™, which you can trade for merch\\!
+>
+>🔥 History remembers only winners — become one of them\\!||"""
+
+[MsgCockSeasonWinnerTemplate]
+other = "{{.Medal}} *@{{.Nickname}}* with cock *{{.Size}} cm*"
+
+[MsgCockSeasonNoSeasonsTemplate]
+other = """*Cock seasons*
+
+No active seasons right now\\. Stay tuned\\!"""
+
+[MsgCockAchievementsTemplate]
+other = """🏆 *Cock\\-achievements*
+Completed: *{{.Completed}}/{{.Total}}* _\\({{.Percent}}%\\)_ • 🌟 Respects: *{{.Respects}}*
+
+💡 _For each cock\\-achievement you get cock\\-respects™, which you can soon trade for merch in the official store\\!_
+
+{{.Achievements}}"""
+
+[MsgCockAchievementsTemplateOtherPages]
+other = """🏆 *Cock\\-achievements*
+Completed: *{{.Completed}}/{{.Total}}* _\\({{.Percent}}%\\)_ • 🌟 Respects: *{{.Respects}}*
+
+{{.Achievements}}"""
+
+[InlineTitleCockSize]
+other = "Cock size"
+
+[InlineTitleCockRuler]
+other = "Cock ruler"
+
+[InlineTitleCockLadder]
+other = "Cock ladder"
+
+[InlineTitleCockRace]
+other = "Cock race"
+
+[InlineTitleCockDynamic]
+other = "Cock dynamics"
+
+[InlineTitleCockSeason]
+other = "Cock seasons"
+
+[InlineTitleCockAchievements]
+other = "Cock achievements"
+
+[DescCockSize]
+other = "📏 Check your size for today (0-61 cm)"
+
+[DescCockRuler]
+other = "👑 Daily top-13 by cock size for today"
+
+[DescCockLadder]
+other = "🪜 Eternal ranking of total sizes for all time"
+
+[DescCockRace]
+other = "🏁 Seasonal race lasting 3 months"
+
+[DescCockDynamic]
+other = "📈 Stats, dynamics, records and comparison"
+
+[DescCockSeason]
+other = "📅 Season history and winners"
+
+[DescCockAchievements]
+other = "🏅 Achievements and cock-respects™"
+
+[MsgCockDynamicNoData]
+other = "🤔 *Not enough data for dynamics*\n\n_First, jerk your cock at least once\\!_"
+
+[MsgSeasonUnknownStartDate]
+other = "fuck knows when"
+
+[MsgSeasonButton]
+other = "{{.Arrow}} Season {{.SeasonNum}}"
+
+[MsgSeasonNotFound]
+other = "Season not found"
+
+[MsgCallbackInvalidFormat]
+other = "Invalid data format"
+
+[MsgCallbackParseError]
+other = "Data parsing error"
+
+[MsgUserPullingRecently]
+other = "recently"
+
+[MsgUserPullingSince]
+other = "{{.Period}} (since {{.Date}})"
+
+[MsgListSeparator]
+other = ", "
+
+[MsgListSeparatorLast]
+other = " and "
+
+[UnitDay]
+one = "{{.Count}} day"
+few = "{{.Count}} days"
+many = "{{.Count}} days"
+other = "{{.Count}} days"
+
+[UnitMonth]
+one = "{{.Count}} month"
+few = "{{.Count}} months"
+many = "{{.Count}} months"
+other = "{{.Count}} months"
+
+[UnitYear]
+one = "{{.Count}} year"
+few = "{{.Count}} years"
+many = "{{.Count}} years"
+other = "{{.Count}} years"
+
+[UnitSeason]
+one = "{{.Count}} season"
+few = "{{.Count}} seasons"
+many = "{{.Count}} seasons"
+other = "{{.Count}} seasons"
+
+[UnitSeasonGenitive]
+one = "season"
+few = "season"
+many = "season"
+other = "season"
+
+[UnitHour]
+one = "{{.Count}} hour"
+few = "{{.Count}} hours"
+many = "{{.Count}} hours"
+other = "{{.Count}} hours"
+
+[UnitMinute]
+one = "{{.Count}} minute"
+few = "{{.Count}} minutes"
+many = "{{.Count}} minutes"
+other = "{{.Count}} minutes"
+
+[UptimeDayShort]
+one = "{{.Count}}d"
+few = "{{.Count}}d"
+many = "{{.Count}}d"
+other = "{{.Count}}d"
+
+[UptimeHourShort]
+one = "{{.Count}}h"
+few = "{{.Count}}h"
+many = "{{.Count}}h"
+other = "{{.Count}}h"
+
+[UptimeMinuteShort]
+one = "{{.Count}}m"
+few = "{{.Count}}m"
+many = "{{.Count}}m"
+other = "{{.Count}}m"
+
+[MsgUnknownValue]
+other = "unknown"
+
+[AnonymousNameTemplate]
+other = "Anonym{{.Number}}"
+
+[MsgHelpText]
+other = "🧭 Commands\n\n/help — command list\n/hide — hide or reveal your nickname in contests"
+
+[MsgHidePrompt]
+other = "🙈 *Hide nickname*\n\nYou can hide your nickname from other participants\\. Your personal achievements will *still be tied* to your profile\\.\n\nAfter hiding, your nickname will be *@{{.Anon}}*\\.\n\n>Nickname hiding is not instant because of Telegram inline query caches\\. It is guaranteed after a few minutes\\.\n\nTap the button below to *hide* your nickname\\."
+
+[MsgHideStatusHidden]
+other = "🙊 *Nickname hidden*\n\nParticipation is *fully* anonymous\\.\n\nYou are shown as *@{{.Anon}}*\\. If you reveal it, it will become *@{{.Real}}* and others will see your achievements\\.\n\n>Nickname hiding is not instant because of Telegram inline query caches\\. It is guaranteed after a few minutes\\."
+
+[MsgHideButtonHide]
+other = "🙈 Hide my nickname"
+
+[MsgHideButtonShow]
+other = "👀 Reveal my nickname"
+
+[MsgCallbackNotForYou]
+other = "⛔ This button is only for the original user."
+
+[MsgAchievementCompleted]
+other = "✅ {{.Emoji}} *{{.Name}}* \\- {{.Description}}"
+
+[MsgAchievementInProgress]
+other = "🔄 {{.Emoji}} *{{.Name}}* \\({{.Progress}}/{{.Max}}\\) \\- {{.Description}}"
+
+[MsgAchievementNotCompleted]
+other = "⭕️ {{.Emoji}} *{{.Name}}* \\- {{.Description}}"
+
+[LuckLabelGodRandom]
+other = "god of random"
+
+[LuckLabelCosmicLuck]
+other = "cosmic luck"
+
+[LuckLabelFairyLuck]
+other = "fairy luck"
+
+[LuckLabelSuperLuck]
+other = "super luck"
+
+[LuckLabelIncredibleLuck]
+other = "insane luck"
+
+[LuckLabelVeryLucky]
+other = "very lucky"
+
+[LuckLabelLucky]
+other = "lucky"
+
+[LuckLabelBalanced]
+other = "balanced"
+
+[LuckLabelUnlucky]
+other = "unlucky"
+
+[LuckLabelBad]
+other = "bad"
+
+[LuckLabelGloom]
+other = "gloom"
+
+[LuckLabelHellTilt]
+other = "hell tilt"
+
+[LuckLabelBurningInHell]
+other = "burning in hell"
+
+[VolatilityLabelStone]
+other = "stone"
+
+[VolatilityLabelStable]
+other = "stable"
+
+[VolatilityLabelModerate]
+other = "moderate"
+
+[VolatilityLabelLivelySpread]
+other = "lively spread"
+
+[VolatilityLabelUneven]
+other = "uneven"
+
+[VolatilityLabelChaotic]
+other = "chaotic"
+
+[VolatilityLabelRandom]
+other = "pure random"
+
+[IrkLabelZero]
+other = "zero"
+
+[IrkLabelMinimal]
+other = "minimal"
+
+[IrkLabelVerySmall]
+other = "very small"
+
+[IrkLabelSmall]
+other = "small"
+
+[IrkLabelReduced]
+other = "reduced"
+
+[IrkLabelAverage]
+other = "average"
+
+[IrkLabelIncreased]
+other = "increased"
+
+[IrkLabelLarge]
+other = "large"
+
+[IrkLabelVeryLarge]
+other = "very large"
+
+[IrkLabelMaximum]
+other = "maximum"
+
+[IrkLabelUltimate]
+other = "ultimate"
+
+[GrowthSpeedLabelCosmic]
+other = "cosmic"
+
+[GrowthSpeedLabelExtreme]
+other = "extreme"
+
+[GrowthSpeedLabelVeryFast]
+other = "very fast"
+
+[GrowthSpeedLabelFast]
+other = "fast"
+
+[GrowthSpeedLabelModerate]
+other = "moderate"
+
+[GrowthSpeedLabelAverage]
+other = "average"
+
+[GrowthSpeedLabelSlow]
+other = "slow"
+
+[GrowthSpeedLabelVerySlow]
+other = "very slow"
+
+[GrowthSpeedLabelTurtle]
+other = "turtle"
+
+[GrowthSpeedLabelStalled]
+other = "stalled"
+
+[AchievementNameNotRubbedYet]
+other = "Not rubbed yet"
+
+[AchievementDescNotRubbedYet]
+other = "jerk your cock 10 times"
+
+[AchievementNameHalfHundred]
+other = "Half a hundred"
+
+[AchievementDescHalfHundred]
+other = "get a 50cm cock"
+
+[AchievementNameDiary]
+other = "Diary"
+
+[AchievementDescDiary]
+other = "jerk your cock 31 times"
+
+[AchievementNameGoldenHundred]
+other = "Golden hundred"
+
+[AchievementDescGoldenHundred]
+other = "grow 100cm total"
+
+[AchievementNameSkillfulHands]
+other = "Skillful hands"
+
+[AchievementDescSkillfulHands]
+other = "jerk your cock 100 times"
+
+[AchievementNameEarlyBird]
+other = "Early bird"
+
+[AchievementDescEarlyBird]
+other = "jerk your cock before 6:00 MSK twenty times"
+
+[AchievementNameLightning]
+other = "Lightning"
+
+[AchievementDescLightning]
+other = "grow your cock by 50cm compared to the previous cock"
+
+[AchievementNameSniper]
+other = "Sniper"
+
+[AchievementDescSniper]
+other = "get exactly 30cm five times"
+
+[AchievementNameDejaVu]
+other = "Deja vu"
+
+[AchievementDescDejaVu]
+other = "get the same cock two days in a row"
+
+[AchievementNameSpeedrunner]
+other = "Speedrunner"
+
+[AchievementDescSpeedrunner]
+other = "jerk your cock within 30 seconds after midnight five times"
+
+[AchievementNameMidnightPuller]
+other = "On the edge of death"
+
+[AchievementDescMidnightPuller]
+other = "jerk your cock after 23:00 MSK ten times"
+
+[AchievementNameRounder]
+other = "Rounder"
+
+[AchievementDescRounder]
+other = "get all round numbers (10, 20, 30, 40, 50, 60) over the last 31 cocks"
+
+[AchievementNameEverest]
+other = "Everest"
+
+[AchievementDescEverest]
+other = "get the maximum cock among everyone"
+
+[AchievementNameMarianaTrench]
+other = "Mariana Trench"
+
+[AchievementDescMarianaTrench]
+other = "get the minimum cock among everyone"
+
+[AchievementNameNumberCollector]
+other = "Number collector"
+
+[AchievementDescNumberCollector]
+other = "get all pretty numbers (11, 22, 33, 44, 55)"
+
+[AchievementNameDayEqualsSize]
+other = "Day = Size"
+
+[AchievementDescDayEqualsSize]
+other = "get a cock equal to the day of the month"
+
+[AchievementNameSolidThousand]
+other = "Solid grand"
+
+[AchievementDescSolidThousand]
+other = "grow 1000cm total"
+
+[AchievementNameBullTrend]
+other = "Bull trend"
+
+[AchievementDescBullTrend]
+other = "cock growth 5 days in a row"
+
+[AchievementNameBearMarket]
+other = "Bear market"
+
+[AchievementDescBearMarket]
+other = "cock decline 5 days in a row"
+
+[AchievementNameTraveler]
+other = "Traveler"
+
+[AchievementDescTraveler]
+other = "get all 61 cock sizes (0-60cm) of all time"
+
+[AchievementNameFreeze]
+other = "Goosebumps"
+
+[AchievementDescFreeze]
+other = "5 cocks in a row less than 20cm"
+
+[AchievementNameFiveK]
+other = "Five grand"
+
+[AchievementDescFiveK]
+other = "grow 5000cm total"
+
+[AchievementNameOldtimer]
+other = "Old timer"
+
+[AchievementDescOldtimer]
+other = "participate in 3 seasons"
+
+[AchievementNameAnniversary]
+other = "Anniversary"
+
+[AchievementDescAnniversary]
+other = "jerk your cock 365 times"
+
+[AchievementNameContrastShower]
+other = "Contrast shower"
+
+[AchievementDescContrastShower]
+other = "get 0-3cm right after 60+cm"
+
+[AchievementNamePythagoras]
+other = "Pythagoras"
+
+[AchievementDescPythagoras]
+other = "get three cocks in a row forming a Pythagorean triple (3-4-5, 5-12-13, 8-15-17, etc.)"
+
+[AchievementNameLeetSpeak]
+other = "Leet speak"
+
+[AchievementDescLeetSpeak]
+other = "get 13cm and 37cm in a row"
+
+[AchievementNameMoscovite]
+other = "Muscovite"
+
+[AchievementDescMoscovite]
+other = "get a 50cm cock five times in a month"
+
+[AchievementNameHourPrecision]
+other = "Hour precision"
+
+[AchievementDescHourPrecision]
+other = "get a cock equal to the hour of time"
+
+[AchievementNameWonderStranger]
+other = "Wonder stranger"
+
+[AchievementDescWonderStranger]
+other = "jerk your cock 500 times"
+
+[AchievementNameValentine]
+other = "Valentine"
+
+[AchievementDescValentine]
+other = "get a 14cm cock on Valentine's Day"
+
+[AchievementNameNewYearGift]
+other = "New Year gift"
+
+[AchievementDescNewYearGift]
+other = "get 60cm+ cock on New Year"
+
+[AchievementNameMensSolidarity]
+other = "Men's solidarity"
+
+[AchievementDescMensSolidarity]
+other = "get a 19cm cock on International Men's Day (Nov 19)"
+
+[AchievementNameFriday13th]
+other = "Friday the 13th"
+
+[AchievementDescFriday13th]
+other = "get a 0cm cock on Friday the 13th"
+
+[AchievementNameLeapCock]
+other = "Leap cock"
+
+[AchievementDescLeapCock]
+other = "get any cock on February 29"
+
+[AchievementNameTurtle]
+other = "Turtle"
+
+[AchievementDescTurtle]
+other = "10 cocks in a row with a change under 5cm"
+
+[AchievementNameGoldenCock]
+other = "Golden cock"
+
+[AchievementDescGoldenCock]
+other = "grow 10000cm total"
+
+[AchievementNameSumOfPrevious]
+other = "Sum of previous"
+
+[AchievementDescSumOfPrevious]
+other = "get a cock equal to the sum of the previous two"
+
+[AchievementNameBazookaHands]
+other = "Bazooka hands"
+
+[AchievementDescBazookaHands]
+other = "jerk your cock 1000 times"
+
+[AchievementNameTriple]
+other = "Triple"
+
+[AchievementDescTriple]
+other = "get the same size 3 times in a row"
+
+[AchievementNameVeteran]
+other = "Veteran"
+
+[AchievementDescVeteran]
+other = "participate in 5 seasons"
+
+[AchievementNameMinutePrecision]
+other = "Minute precision"
+
+[AchievementDescMinutePrecision]
+other = "get a cock equal to the minutes of time"
+
+[AchievementNamePoker]
+other = "Poker"
+
+[AchievementDescPoker]
+other = "get the same size 4 times in a row"
+
+[AchievementNameKeeper]
+other = "Keeper"
+
+[AchievementDescKeeper]
+other = "participate in 10 seasons"
+
+[AchievementNameCosmicCock]
+other = "Cosmic cock"
+
+[AchievementDescCosmicCock]
+other = "grow 20000cm total"
+
+[AchievementNameMaximalist]
+other = "Maximalist"
+
+[AchievementDescMaximalist]
+other = "get 61cm ten times"
+
+[AchievementNameDiamondHands]
+other = "Diamond hands"
+
+[AchievementDescDiamondHands]
+other = "7 cocks in a row from 40cm"
+
+[AchievementNameDiamondEye]
+other = "Diamond eye"
+
+[AchievementDescDiamondEye]
+other = "get the same size 5 times in a row"
+
+[AchievementNameGreekMyth]
+other = "Ancient Greek myth"
+
+[AchievementDescGreekMyth]
+other = "grow 30000cm total"
+
+[AchievementNameFibonacciFather]
+other = "Father of Fibonacci"
+
+[AchievementDescFibonacciFather]
+other = "get the Fibonacci sequence (1, 2, 3, 5, 8, 13, 21, 34, 55) over the last 31 cocks"
+
+[AchievementNameAnnihilatorCannon]
+other = "Annihilator cannon"
+
+[AchievementDescAnnihilatorCannon]
+other = "jerk your cock 5000 times"
+
+[RegionSize0]
+other = "Квантовый писюль 🤭"
+
+[RegionSize1]
+other = "Адыгейский пиксель"
+
+[RegionSize2]
+other = "Башкирская крошка"
+
+[RegionSize3]
+other = "Бурятская клёпка"
+
+[RegionSize4]
+other = "Алтайский орешек"
+
+[RegionSize5]
+other = "Дагестанский кинжал"
+
+[RegionSize6]
+other = "Ингушский леденец"
+
+[RegionSize7]
+other = "Кабардинский сучок"
+
+[RegionSize8]
+other = "Калмыцкий сухарик"
+
+[RegionSize9]
+other = "Карачаевский фитиль"
+
+[RegionSize10]
+other = "Карельская пипетка"
+
+[RegionSize11]
+other = "Коми-спичка"
+
+[RegionSize12]
+other = "Марийский скрепыш"
+
+[RegionSize13]
+other = "Мордовский обрубок"
+
+[RegionSize14]
+other = "Якутский крепыш"
+
+[RegionSize15]
+other = "Осетинская клюшка"
+
+[RegionSize16]
+other = "Татарский стержень"
+
+[RegionSize17]
+other = "Тувинский шуруп"
+
+[RegionSize18]
+other = "Удмуртский ствол"
+
+[RegionSize19]
+other = "Сибирская жердина"
+
+[RegionSize21]
+other = "Чувашский, крепкий"
+
+[RegionSize22]
+other = "Алтайский брус"
+
+[RegionSize23]
+other = "Краснодарская бита"
+
+[RegionSize24]
+other = "Красноярский валун"
+
+[RegionSize25]
+other = "Приморский хлыст"
+
+[RegionSize26]
+other = "Ставропольская палка"
+
+[RegionSize27]
+other = "Хабаровский посох"
+
+[RegionSize28]
+other = "Амурская палка"
+
+[RegionSize29]
+other = "Архангельский корабельный якорь"
+
+[RegionSize30]
+other = "Астраханская шпала"
+
+[RegionSize31]
+other = "Белгородский, по ГОСТу"
+
+[RegionSize32]
+other = "Брянский глушитель"
+
+[RegionSize33]
+other = "Владимирский, арматурный"
+
+[RegionSize34]
+other = "Волгоградский стояк"
+
+[RegionSize35]
+other = "Вологодская дубина"
+
+[RegionSize36]
+other = "Воронежская трость"
+
+[RegionSize37]
+other = "Ивановская колотушка"
+
+[RegionSize38]
+other = "Иркутский столп"
+
+[RegionSize39]
+other = "Калининградский маяк"
+
+[RegionSize40]
+other = "Калужский хуец"
+
+[RegionSize41]
+other = "Камчатская скала"
+
+[RegionSize42]
+other = "Кемеровский Эверест"
+
+[RegionSize43]
+other = "Кировская глыба"
+
+[RegionSize44]
+other = "Костромской истукан"
+
+[RegionSize45]
+other = "Курганский небоскрёб"
+
+[RegionSize46]
+other = "Курский богатырь"
+
+[RegionSize47]
+other = "Ленинградский болт"
+
+[RegionSize48]
+other = "Липецкий молот"
+
+[RegionSize49]
+other = "Магаданская высотка"
+
+[RegionSize50]
+other = "Московская Останкинская башня"
+
+[RegionSize51]
+other = "Мурманский айсберг"
+
+[RegionSize52]
+other = "Нижегородский Эльбрус"
+
+[RegionSize53]
+other = "Новгородская валына"
+
+[RegionSize54]
+other = "Новосибирский бивень"
+
+[RegionSize55]
+other = "Омский монумент"
+
+[RegionSize56]
+other = "Оренбургский дуб"
+
+[RegionSize57]
+other = "Орловский исполин"
+
+[RegionSize58]
+other = "Пензенский столп"
+
+[RegionSize59]
+other = "Пермский, галактический"
+
+[RegionSize60]
+other = "Псковская балымба"
+
+[RegionSizeUnknown]
+other = "Пиздец... 🥀"

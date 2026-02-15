@@ -1,0 +1,1082 @@
+[CommonDots]
+other = "\\.\\.\\."
+
+[MsgCockScoreboardNotFound]
+other = "\n🥀 *Mein Beileid\\.\\.\\. weil du deinen Schwanz nicht gecheckt hast\\!*"
+
+[MsgCockSize]
+other = "Mein Schwanz: *{{.Size}}cm* {{.Emoji}}"
+
+[MsgCockRulerScoreboardDefault]
+other = "{{.PlaceEmoji}} @{{.Username}} *{{.Size}}cm* {{.SizeEmoji}}"
+
+[MsgCockRulerScoreboardSelected]
+other = "{{.PlaceEmoji}} *@{{.Username}} {{.Size}}cm* {{.SizeEmoji}}"
+
+[MsgCockRaceScoreboardDefault]
+other = "{{.PlaceEmoji}} @{{.Username}} *{{.Size}}cm*"
+
+[MsgCockRaceScoreboardSelected]
+other = "{{.PlaceEmoji}} *@{{.Username}} {{.Size}}cm*"
+
+[MsgCockLadderScoreboardDefault]
+other = "{{.PlaceEmoji}} @{{.Username}} *{{.Size}}cm*"
+
+[MsgCockLadderScoreboardSelected]
+other = "{{.PlaceEmoji}} *@{{.Username}} {{.Size}}cm*"
+
+[MsgCockRulerContextDefault]
+other = "{{.PlaceEmoji}} @{{.Username}} *{{.Size}}cm* {{.SizeEmoji}}"
+
+[MsgCockRulerContextSelected]
+other = "{{.PlaceEmoji}} *@{{.Username}} {{.Size}}cm* {{.SizeEmoji}}"
+
+[MsgCockRaceContextDefault]
+other = "{{.PlaceEmoji}} @{{.Username}} *{{.Size}}cm*"
+
+[MsgCockRaceContextSelected]
+other = "{{.PlaceEmoji}} *@{{.Username}} {{.Size}}cm*"
+
+[MsgCockLadderContextDefault]
+other = "{{.PlaceEmoji}} @{{.Username}} *{{.Size}}cm*"
+
+[MsgCockLadderContextSelected]
+other = "{{.PlaceEmoji}} *@{{.Username}} {{.Size}}cm*"
+
+[MsgCockRulerScoreboardTemplate]
+other = """*Schwanz\\-Lineal:*
+👥 Teilnehmer: *{{.Participants}}*
+
+🏆 Gewinner nach Kategorie:
+
+{{.Winners}}
+
+🥀 Beileid an den Rest:
+
+{{.Others}}
+
+>📖 Über das Schwanz\\-Lineal:
+>
+>Das Schwanz\\-Lineal ist ein daily Ranking aus purem Random\\. Größen werden jeden Tag zufällig generiert \\(0 bis 61 cm\\) und um Mitternacht MSK zurückgesetzt\\. Keine Stacking — nur Glück hier und jetzt\\!
+>
+>🎲 Heute bist du top, morgen bist du unten — der Random entscheidet, wer Glück hat\\!||"""
+
+[MsgCockRulerScoreboardWinnersTemplate]
+other = """*Schwanz\\-Lineal:*
+👥 Teilnehmer: *{{.Participants}}*
+
+🏆 Gewinner nach Kategorie:
+
+{{.Winners}}
+
+>📖 Über das Schwanz\\-Lineal:
+>
+>Das Schwanz\\-Lineal ist ein daily Ranking aus purem Random\\. Größen werden jeden Tag zufällig generiert \\(0 bis 61 cm\\) und um Mitternacht MSK zurückgesetzt\\. Keine Stacking — nur Glück hier und jetzt\\!
+>
+>🎲 Heute bist du top, morgen bist du unten — der Random entscheidet, wer Glück hat\\!||"""
+
+[MsgCockRulerScoreboardTemplateNoDesc]
+other = """*Schwanz\\-Lineal:*
+👥 Teilnehmer: *{{.Participants}}*
+
+🏆 Gewinner nach Kategorie:
+
+{{.Winners}}
+
+🥀 Beileid an den Rest:
+
+{{.Others}}"""
+
+[MsgCockRulerScoreboardWinnersTemplateNoDesc]
+other = """*Schwanz\\-Lineal:*
+👥 Teilnehmer: *{{.Participants}}*
+
+🏆 Gewinner nach Kategorie:
+
+{{.Winners}}"""
+
+[MsgCockRaceScoreboardTemplate]
+other = """*Teilnehmer der Schwanz\\-Rallye {{.SeasonNum}} {{.SeasonWord}}:*
+👥 Teilnehmer dieser Saison: *{{.Participants}}*
+
+🏆 Gewinner nach Kategorie:
+
+{{.Winners}}
+
+🥀 Beileid an den Rest:
+
+{{.Others}}
+
+>📖 Über die Schwanz\\-Rallye:
+>
+>Die Schwanz\\-Rallye ist ein saisonaler Wettbewerb über 3 Monate\\. Miss deinen Schwanz täglich, alle Ergebnisse werden automatisch summiert\\. Es gewinnen die drei Teilnehmer mit dem größten kumulierten Maß über die ganze Saison\\.
+>
+>Mit dem Start einer neuen Saison werden alle Schwänze zurückgesetzt, und die Rallye startet für alle neu\\.
+>
+>💡 Tipp: Miss deinen Schwanz jeden Tag, um deine Siegchancen zu maximieren\\!||
+
+{{.Footer}}"""
+
+[MsgCockRaceScoreboardWinnersTemplate]
+other = """*Teilnehmer der Schwanz\\-Rallye {{.SeasonNum}} {{.SeasonWord}}:*
+👥 Teilnehmer dieser Saison: *{{.Participants}}*
+
+🏆 Gewinner nach Kategorie:
+
+{{.Winners}}
+
+>📖 Über die Schwanz\\-Rallye:
+>
+>Die Schwanz\\-Rallye ist ein saisonaler Wettbewerb über 3 Monate\\. Miss deinen Schwanz täglich, alle Ergebnisse werden automatisch summiert\\. Es gewinnen die drei Teilnehmer mit dem größten kumulierten Maß über die ganze Saison\\.
+>
+>Mit dem Start einer neuen Saison werden alle Schwänze zurückgesetzt, und die Rallye startet für alle neu\\.
+>
+>💡 Tipp: Miss deinen Schwanz jeden Tag, um deine Siegchancen zu maximieren\\!||
+
+{{.Footer}}"""
+
+[MsgCockRaceScoreboardTemplateNoDesc]
+other = """*Teilnehmer der Schwanz\\-Rallye {{.SeasonNum}} {{.SeasonWord}}:*
+👥 Teilnehmer dieser Saison: *{{.Participants}}*
+
+🏆 Gewinner nach Kategorie:
+
+{{.Winners}}
+
+🥀 Beileid an den Rest:
+
+{{.Others}}
+
+{{.Footer}}"""
+
+[MsgCockRaceScoreboardWinnersTemplateNoDesc]
+other = """*Teilnehmer der Schwanz\\-Rallye {{.SeasonNum}} {{.SeasonWord}}:*
+👥 Teilnehmer dieser Saison: *{{.Participants}}*
+
+🏆 Gewinner nach Kategorie:
+
+{{.Winners}}
+
+{{.Footer}}"""
+
+[MsgCockLadderScoreboardTemplate]
+other = """*Schwanz\\-Ladder:*
+👥 Teilnehmer insgesamt: *{{.Participants}}*
+
+🏆 Leader der Schwanz\\-Ladder:
+
+{{.Winners}}
+
+🥀 Langsam aber sicher am Aufsteigen:
+
+{{.Others}}
+
+>📖 Über die Schwanz\\-Ladder:
+>
+>Die Schwanz\\-Ladder ist dein ewiger Weg zum Ruhm\\. Hier wird jeder Schwanz über deine ganze Bot\\-Historie summiert\\. Anders als Lineal und Saison-Rallye wird die Ladder nie zurückgesetzt\\.
+>
+>🔥 Die Ladder\\-Top sind Legenden, die seit Tag 1 messen\\. Werde einer davon\\!||"""
+
+[MsgCockLadderScoreboardWinnersTemplate]
+other = """*Schwanz\\-Ladder:*
+👥 Teilnehmer insgesamt: *{{.Participants}}*
+
+🏆 Leader der Schwanz\\-Ladder:
+
+{{.Winners}}
+
+>📖 Über die Schwanz\\-Ladder:
+>
+>Die Schwanz\\-Ladder ist dein ewiger Weg zum Ruhm\\. Hier wird jeder Schwanz über deine ganze Bot\\-Historie summiert\\. Anders als Lineal und Saison\\-Rallye wird die Ladder nie zurückgesetzt\\.
+>
+>🔥 Die Ladder\\-Top sind Legenden, die seit Tag 1 messen\\. Werde einer davon\\!||"""
+
+[MsgCockLadderScoreboardTemplateNoDesc]
+other = """*Schwanz\\-Ladder:*
+👥 Teilnehmer insgesamt: *{{.Participants}}*
+
+🏆 Leader der Schwanz\\-Ladder:
+
+{{.Winners}}
+
+🥀 Langsam aber sicher am Aufsteigen:
+
+{{.Others}}"""
+
+[MsgCockLadderScoreboardWinnersTemplateNoDesc]
+other = """*Schwanz\\-Ladder:*
+👥 Teilnehmer insgesamt: *{{.Participants}}*
+
+🏆 Leader der Schwanz\\-Ladder:
+
+{{.Winners}}"""
+
+[MsgCockRaceFooterActiveSeason]
+other = "🚀 Aktuelle Schwanz\\-Saison: *{{.SeasonNum}}*, von *{{.StartDate}}* bis *{{.EndDate}}*\\. Übrig: *{{.Remaining}}*\\."
+
+[MsgCockRaceFooterNoSeason]
+other = "🚀 Aktuelle Schwanz\\-Rallye\\-Saison startete *{{.StartDate}}*"
+
+[MsgCockDynamicsTemplate]
+other = """
+📊 *Gesamte Schwanz-Dynamik*
+
+Gesamt gemessener Schwanz: *{{.TotalCock}} cm* 🤭
+Gesamtzahl der Schwanzler: *{{.TotalUsers}}* 🫡
+Gesamtzahl der Schwanz-Züge: *{{.TotalCocksCount}}* ✊🏻
+
+Tag des größten Schwanzes: *{{.TotalMaxCockDate}}*, gewachsen um satte *{{.TotalMaxCock}} cm* 🍾
+
+System-Durchschnittsschwanz _(5 Tage)_: *{{.TotalAvgCock}} cm* {{.TotalAvgEmoji}}
+System-Median-Schwanz _(5 Tage)_: *{{.TotalMedianCock}} cm* {{.TotalMedianEmoji}}
+
+Schwanz-Verhältnis _(5 Tage)_: 💪 *{{.TotalBigCockRatio}}%* 🤏 *{{.TotalSmallCockRatio}}%*
+Schwanz-Wachstum _(5 Tage)_: *{{.OverallGrowthSpeed}} cm/Tag*
+
+📊 *Persönliche Schwanz-Dynamik*
+
+Schwanzziehen seit: *{{.UserPullingPeriod}}*
+Gesamt gemessener Schwanz: *{{.UserTotalCock}} cm* 🤯
+Gesamtzahl der Schwanz-Züge: *{{.UserCocksCount}}* ✊🏻
+
+IRK (Index der Schwanzgröße): __*{{.UserIrk}}*__ _({{.UserIrkLabel}})_
+Durchschnittliche Schwanzgröße _(5 Schwänze)_: *{{.UserAvgCock}} cm* {{.UserAvgEmoji}}
+Größter Schwanz: *{{.UserMaxCock}} cm* {{.UserMaxEmoji}} (*{{.UserMaxDate}}*)
+
+Glücks-Koeffizient _(5 Schwänze)_: *{{.UserLuckCoefficient}}* {{.UserLuckDisplay}}
+Schwanz-Volatilität _(5 Schwänze)_: *{{.UserVolatility}}* {{.UserVolatilityDisplay}}
+
+Dominanz-Prozent: *{{.UserDominancePercent}}%* 👑
+Schwanz-Wachstum _(5 Tage)_: *{{.UserGrowthSpeed}} cm/Tag* {{.UserGrowthSpeedDisplay}}
+
+🏆 *Saison-Erfolge*
+
+Saison-Siege: *{{.UserSeasonWins}}* 🎖️
+Schwanz-Respekt: *{{.UserCockRespect}}* 🚀
+
+📈 *Schwanz-Assets*
+
+{{.UserYesterdayChangeEmoji}} Tagesdynamik: *{{.UserYesterdayChangePercent}}%* (*{{.UserYesterdayChangeSize}} cm*)
+{{.UserFiveCocksEmoji}} Dynamik über 5 Schwänze: *{{.UserFiveCocksChangePercent}}%* (*{{.UserFiveCocksChangeSize}} cm*)"""
+
+[MsgCockSeasonTemplate]
+other = """*Schwanz\\-Saison {{.SeasonNum}}* \\(🟡 Aktuell\\)
+⏱️ Zeitraum: *{{.StartDate}} \\- {{.EndDate}}*
+
+🔮 Anwärter der Saison:
+
+{{.Pretenders}}"""
+
+[MsgCockSeasonWithWinnersTemplate]
+other = """*Schwanz\\-Saison {{.SeasonNum}}* \\(🟢 Abgeschlossen\\)
+⏱️ Zeitraum: *{{.StartDate}} \\- {{.EndDate}}*
+
+🎖 Saison\\-Gewinner:
+
+{{.Winners}}"""
+
+[MsgCockSeasonTemplateFooter]
+other = """>📖 Über Schwanz\\-Saisons:
+>
+>Schwanz\\-Saisons sind eine 3\\-monatige Schlacht um den Titel des besten Schwanzlers\\. Miss jeden Tag, summiere die Ergebnisse und fight um die Top\\-3\\. Gewinner bekommen legendäre Schwanz\\-Respekts™, die du gegen Merch tauschen kannst\\!
+>
+>🔥 Die Geschichte erinnert sich nur an Gewinner — werd einer davon\\!||"""
+
+[MsgCockSeasonWinnerTemplate]
+other = "{{.Medal}} *@{{.Nickname}}* mit Schwanz *{{.Size}} cm*"
+
+[MsgCockSeasonNoSeasonsTemplate]
+other = """*Schwanz\\-Saisons*
+
+Aktuell gibt es keine aktiven Saisons\\. Stay tuned\\!"""
+
+[MsgCockAchievementsTemplate]
+other = """🏆 *Schwanz\\-Achievements*
+Erledigt: *{{.Completed}}/{{.Total}}* _\\({{.Percent}}%\\)_ • 🌟 Respekt: *{{.Respects}}*
+
+💡 _Für jedes Schwanz\\-Achievement bekommst du Schwanz\\-Respekts™, die du bald gegen Merch im offiziellen Store tauschen kannst\\!_
+
+{{.Achievements}}"""
+
+[MsgCockAchievementsTemplateOtherPages]
+other = """🏆 *Schwanz\\-Achievements*
+Erledigt: *{{.Completed}}/{{.Total}}* _\\({{.Percent}}%\\)_ • 🌟 Respekt: *{{.Respects}}*
+
+{{.Achievements}}"""
+
+[InlineTitleCockSize]
+other = "Schwanzgröße"
+
+[InlineTitleCockRuler]
+other = "Schwanz-Lineal"
+
+[InlineTitleCockLadder]
+other = "Schwanz-Ladder"
+
+[InlineTitleCockRace]
+other = "Schwanz-Rallye"
+
+[InlineTitleCockDynamic]
+other = "Schwanz-Dynamik"
+
+[InlineTitleCockSeason]
+other = "Schwanz-Saisons"
+
+[InlineTitleCockAchievements]
+other = "Schwanz-Achievements"
+
+[DescCockSize]
+other = "📏 Check deine Größe für heute (0-61 cm)"
+
+[DescCockRuler]
+other = "👑 Daily Top-13 nach Schwanzgröße heute"
+
+[DescCockLadder]
+other = "🪜 Ewiges Ranking der Gesamtsummen"
+
+[DescCockRace]
+other = "🏁 Saison-Rallye über 3 Monate"
+
+[DescCockDynamic]
+other = "📈 Stats, Dynamik, Rekorde und Vergleich"
+
+[DescCockSeason]
+other = "📅 Saison-Historie und Gewinner"
+
+[DescCockAchievements]
+other = "🏅 Achievements und Schwanz-Respekts™"
+
+[MsgCockDynamicNoData]
+other = "🤔 *Nicht genug Daten für Dynamik*\n\n_Erstmal den Schwanz mindestens einmal ziehen\\!_"
+
+[MsgSeasonUnknownStartDate]
+other = "keine Ahnung wann"
+
+[MsgSeasonButton]
+other = "{{.Arrow}} Saison {{.SeasonNum}}"
+
+[MsgSeasonNotFound]
+other = "Saison nicht gefunden"
+
+[MsgCallbackInvalidFormat]
+other = "Ungültiges Datenformat"
+
+[MsgCallbackParseError]
+other = "Fehler beim Parsen der Daten"
+
+[MsgUserPullingRecently]
+other = "kürzlich"
+
+[MsgUserPullingSince]
+other = "{{.Period}} (seit {{.Date}})"
+
+[MsgListSeparator]
+other = ", "
+
+[MsgListSeparatorLast]
+other = " und "
+
+[UnitDay]
+one = "{{.Count}} Tag"
+few = "{{.Count}} Tage"
+many = "{{.Count}} Tage"
+other = "{{.Count}} Tage"
+
+[UnitMonth]
+one = "{{.Count}} Monat"
+few = "{{.Count}} Monate"
+many = "{{.Count}} Monate"
+other = "{{.Count}} Monate"
+
+[UnitYear]
+one = "{{.Count}} Jahr"
+few = "{{.Count}} Jahre"
+many = "{{.Count}} Jahre"
+other = "{{.Count}} Jahre"
+
+[UnitSeason]
+one = "{{.Count}} Saison"
+few = "{{.Count}} Saisons"
+many = "{{.Count}} Saisons"
+other = "{{.Count}} Saisons"
+
+[UnitSeasonGenitive]
+one = "Saison"
+few = "Saison"
+many = "Saison"
+other = "Saison"
+
+[UnitHour]
+one = "{{.Count}} Stunde"
+few = "{{.Count}} Stunden"
+many = "{{.Count}} Stunden"
+other = "{{.Count}} Stunden"
+
+[UnitMinute]
+one = "{{.Count}} Minute"
+few = "{{.Count}} Minuten"
+many = "{{.Count}} Minuten"
+other = "{{.Count}} Minuten"
+
+[UptimeDayShort]
+one = "{{.Count}}t"
+few = "{{.Count}}t"
+many = "{{.Count}}t"
+other = "{{.Count}}t"
+
+[UptimeHourShort]
+one = "{{.Count}}h"
+few = "{{.Count}}h"
+many = "{{.Count}}h"
+other = "{{.Count}}h"
+
+[UptimeMinuteShort]
+one = "{{.Count}}m"
+few = "{{.Count}}m"
+many = "{{.Count}}m"
+other = "{{.Count}}m"
+
+[MsgUnknownValue]
+other = "unbekannt"
+
+[AnonymousNameTemplate]
+other = "Anonym{{.Number}}"
+
+[MsgHelpText]
+other = "🧭 Befehle\n\n/help — Befehlsliste\n/hide — Nickname in Wettbewerben verbergen oder anzeigen"
+
+[MsgHidePrompt]
+other = "🙈 *Nickname verbergen*\n\nDu kannst deinen Nickname vor anderen Teilnehmern verbergen\\. Deine persönlichen Erfolge bleiben mit deinem Profil verknüpft\\.\n\nNach dem Verbergen lautet dein Nickname *@{{.Anon}}*\\.\n\n>Das Verbergen ist nicht sofort, da Telegram Inline-Query-Caches nutzt\\. Garantiert nach ein paar Minuten\\.\n\nDrücke die Taste unten, um deinen Nickname zu verbergen\\."
+
+[MsgHideStatusHidden]
+other = "🙊 *Nickname verborgen*\n\nDie Teilnahme *ist vollständig* anonym\\.\n\nDu wirst als *@{{.Anon}}* angezeigt\\. Wenn du ihn wieder sichtbar machst, wird es *@{{.Real}}* und andere sehen deine Erfolge\\.\n\n>Das Verbergen ist nicht sofort, da Telegram Inline-Query-Caches nutzt\\. Garantiert nach ein paar Minuten\\."
+
+[MsgHideButtonHide]
+other = "🙈 Meinen Nickname verbergen"
+
+[MsgHideButtonShow]
+other = "👀 Meinen Nickname anzeigen"
+
+[MsgCallbackNotForYou]
+other = "⛔ Diese Schaltfläche ist nur für den ursprünglichen Nutzer."
+
+[MsgAchievementCompleted]
+other = "✅ {{.Emoji}} *{{.Name}}* \\- {{.Description}}"
+
+[MsgAchievementInProgress]
+other = "🔄 {{.Emoji}} *{{.Name}}* \\({{.Progress}}/{{.Max}}\\) \\- {{.Description}}"
+
+[MsgAchievementNotCompleted]
+other = "⭕️ {{.Emoji}} *{{.Name}}* \\- {{.Description}}"
+
+[LuckLabelGodRandom]
+other = "Gott des Random"
+
+[LuckLabelCosmicLuck]
+other = "kosmisches Glück"
+
+[LuckLabelFairyLuck]
+other = "Feen-Glück"
+
+[LuckLabelSuperLuck]
+other = "Super-Glück"
+
+[LuckLabelIncredibleLuck]
+other = "abnormes Glück"
+
+[LuckLabelVeryLucky]
+other = "sehr glücklich"
+
+[LuckLabelLucky]
+other = "glücklich"
+
+[LuckLabelBalanced]
+other = "ausbalanciert"
+
+[LuckLabelUnlucky]
+other = "unglücklich"
+
+[LuckLabelBad]
+other = "schlecht"
+
+[LuckLabelGloom]
+other = "düster"
+
+[LuckLabelHellTilt]
+other = "Höllen-Tilt"
+
+[LuckLabelBurningInHell]
+other = "brenne in der Hölle"
+
+[VolatilityLabelStone]
+other = "steinern"
+
+[VolatilityLabelStable]
+other = "stabil"
+
+[VolatilityLabelModerate]
+other = "moderat"
+
+[VolatilityLabelLivelySpread]
+other = "lebendige Streuung"
+
+[VolatilityLabelUneven]
+other = "uneben"
+
+[VolatilityLabelChaotic]
+other = "chaotisch"
+
+[VolatilityLabelRandom]
+other = "reiner Random"
+
+[IrkLabelZero]
+other = "null"
+
+[IrkLabelMinimal]
+other = "minimal"
+
+[IrkLabelVerySmall]
+other = "sehr klein"
+
+[IrkLabelSmall]
+other = "klein"
+
+[IrkLabelReduced]
+other = "reduziert"
+
+[IrkLabelAverage]
+other = "durchschnittlich"
+
+[IrkLabelIncreased]
+other = "erhöht"
+
+[IrkLabelLarge]
+other = "groß"
+
+[IrkLabelVeryLarge]
+other = "sehr groß"
+
+[IrkLabelMaximum]
+other = "maximal"
+
+[IrkLabelUltimate]
+other = "ultimativ"
+
+[GrowthSpeedLabelCosmic]
+other = "kosmisch"
+
+[GrowthSpeedLabelExtreme]
+other = "extrem"
+
+[GrowthSpeedLabelVeryFast]
+other = "sehr schnell"
+
+[GrowthSpeedLabelFast]
+other = "schnell"
+
+[GrowthSpeedLabelModerate]
+other = "moderat"
+
+[GrowthSpeedLabelAverage]
+other = "durchschnittlich"
+
+[GrowthSpeedLabelSlow]
+other = "langsam"
+
+[GrowthSpeedLabelVerySlow]
+other = "sehr langsam"
+
+[GrowthSpeedLabelTurtle]
+other = "schildkrötenmäßig"
+
+[GrowthSpeedLabelStalled]
+other = "festgefahren"
+
+[AchievementNameNotRubbedYet]
+other = "Noch nicht aufgerieben"
+
+[AchievementDescNotRubbedYet]
+other = "Schwanz 10 Mal ziehen"
+
+[AchievementNameHalfHundred]
+other = "Halbe Hundert"
+
+[AchievementDescHalfHundred]
+other = "einen 50cm Schwanz bekommen"
+
+[AchievementNameDiary]
+other = "Tagebuch"
+
+[AchievementDescDiary]
+other = "Schwanz 31 Mal ziehen"
+
+[AchievementNameGoldenHundred]
+other = "Goldene Hundert"
+
+[AchievementDescGoldenHundred]
+other = "insgesamt 100cm wachsen"
+
+[AchievementNameSkillfulHands]
+other = "Geschickte Hände"
+
+[AchievementDescSkillfulHands]
+other = "Schwanz 100 Mal ziehen"
+
+[AchievementNameEarlyBird]
+other = "Früher Vogel"
+
+[AchievementDescEarlyBird]
+other = "Schwanz vor 6:00 MSK zwanzig Mal ziehen"
+
+[AchievementNameLightning]
+other = "Blitz"
+
+[AchievementDescLightning]
+other = "Schwanz um 50cm gegenüber dem letzten wachsen"
+
+[AchievementNameSniper]
+other = "Sniper"
+
+[AchievementDescSniper]
+other = "genau 30cm fünfmal bekommen"
+
+[AchievementNameDejaVu]
+other = "Déjà vu"
+
+[AchievementDescDejaVu]
+other = "denselben Schwanz zwei Tage in Folge bekommen"
+
+[AchievementNameSpeedrunner]
+other = "Speedrunner"
+
+[AchievementDescSpeedrunner]
+other = "Schwanz 30 Sekunden nach Mitternacht fünfmal ziehen"
+
+[AchievementNameMidnightPuller]
+other = "Am seidenen Faden"
+
+[AchievementDescMidnightPuller]
+other = "Schwanz nach 23:00 MSK zehnmal ziehen"
+
+[AchievementNameRounder]
+other = "Runder"
+
+[AchievementDescRounder]
+other = "alle runden Zahlen (10, 20, 30, 40, 50, 60) in den letzten 31 Schwänzen bekommen"
+
+[AchievementNameEverest]
+other = "Everest"
+
+[AchievementDescEverest]
+other = "den maximalen Schwanz unter allen bekommen"
+
+[AchievementNameMarianaTrench]
+other = "Marianengraben"
+
+[AchievementDescMarianaTrench]
+other = "den minimalen Schwanz unter allen bekommen"
+
+[AchievementNameNumberCollector]
+other = "Zahlensammler"
+
+[AchievementDescNumberCollector]
+other = "alle schönen Zahlen (11, 22, 33, 44, 55) bekommen"
+
+[AchievementNameDayEqualsSize]
+other = "Tag = Größe"
+
+[AchievementDescDayEqualsSize]
+other = "einen Schwanz gleich dem Tag des Monats bekommen"
+
+[AchievementNameSolidThousand]
+other = "Solider Tausender"
+
+[AchievementDescSolidThousand]
+other = "insgesamt 1000cm wachsen"
+
+[AchievementNameBullTrend]
+other = "Bullentrend"
+
+[AchievementDescBullTrend]
+other = "Schwanzwachstum 5 Tage in Folge"
+
+[AchievementNameBearMarket]
+other = "Bärenmarkt"
+
+[AchievementDescBearMarket]
+other = "Schwanzrückgang 5 Tage in Folge"
+
+[AchievementNameTraveler]
+other = "Reisender"
+
+[AchievementDescTraveler]
+other = "alle 61 Schwanzgrößen (0-60cm) jemals bekommen"
+
+[AchievementNameFreeze]
+other = "Gänsehaut"
+
+[AchievementDescFreeze]
+other = "5 Schwänze in Folge unter 20cm"
+
+[AchievementNameFiveK]
+other = "Fünf Riesen"
+
+[AchievementDescFiveK]
+other = "insgesamt 5000cm wachsen"
+
+[AchievementNameOldtimer]
+other = "Oldtimer"
+
+[AchievementDescOldtimer]
+other = "an 3 Saisons teilnehmen"
+
+[AchievementNameAnniversary]
+other = "Jubiläum"
+
+[AchievementDescAnniversary]
+other = "Schwanz 365 Mal ziehen"
+
+[AchievementNameContrastShower]
+other = "Wechseldusche"
+
+[AchievementDescContrastShower]
+other = "0-3cm direkt nach 60+cm bekommen"
+
+[AchievementNamePythagoras]
+other = "Pythagoras"
+
+[AchievementDescPythagoras]
+other = "drei Schwänze in Folge als pythagoreisches Tripel (3-4-5, 5-12-13, 8-15-17, usw.)"
+
+[AchievementNameLeetSpeak]
+other = "Leet speak"
+
+[AchievementDescLeetSpeak]
+other = "13cm und 37cm in Folge bekommen"
+
+[AchievementNameMoscovite]
+other = "Moskauer"
+
+[AchievementDescMoscovite]
+other = "50cm fünfmal in einem Monat bekommen"
+
+[AchievementNameHourPrecision]
+other = "Stundenpräzision"
+
+[AchievementDescHourPrecision]
+other = "einen Schwanz gleich der Uhrzeit-Stunde bekommen"
+
+[AchievementNameWonderStranger]
+other = "Wunderfremder"
+
+[AchievementDescWonderStranger]
+other = "Schwanz 500 Mal ziehen"
+
+[AchievementNameValentine]
+other = "Valentin"
+
+[AchievementDescValentine]
+other = "14cm am Valentinstag bekommen"
+
+[AchievementNameNewYearGift]
+other = "Neujahrsgeschenk"
+
+[AchievementDescNewYearGift]
+other = "60cm+ an Neujahr bekommen"
+
+[AchievementNameMensSolidarity]
+other = "Männersolidarität"
+
+[AchievementDescMensSolidarity]
+other = "19cm am Internationalen Männertag (19. November) bekommen"
+
+[AchievementNameFriday13th]
+other = "Freitag der 13."
+
+[AchievementDescFriday13th]
+other = "0cm an einem Freitag den 13. bekommen"
+
+[AchievementNameLeapCock]
+other = "Schalt-Schwanz"
+
+[AchievementDescLeapCock]
+other = "irgendeinen Schwanz am 29. Februar bekommen"
+
+[AchievementNameTurtle]
+other = "Schildkröte"
+
+[AchievementDescTurtle]
+other = "10 Schwänze in Folge mit Änderung unter 5cm"
+
+[AchievementNameGoldenCock]
+other = "Goldener Schwanz"
+
+[AchievementDescGoldenCock]
+other = "insgesamt 10000cm wachsen"
+
+[AchievementNameSumOfPrevious]
+other = "Summe der vorherigen"
+
+[AchievementDescSumOfPrevious]
+other = "einen Schwanz gleich der Summe der zwei vorherigen bekommen"
+
+[AchievementNameBazookaHands]
+other = "Bazooka-Hände"
+
+[AchievementDescBazookaHands]
+other = "Schwanz 1000 Mal ziehen"
+
+[AchievementNameTriple]
+other = "Triple"
+
+[AchievementDescTriple]
+other = "dieselbe Größe 3 Mal in Folge bekommen"
+
+[AchievementNameVeteran]
+other = "Veteran"
+
+[AchievementDescVeteran]
+other = "an 5 Saisons teilnehmen"
+
+[AchievementNameMinutePrecision]
+other = "Minutenpräzision"
+
+[AchievementDescMinutePrecision]
+other = "einen Schwanz gleich den Minuten bekommen"
+
+[AchievementNamePoker]
+other = "Poker"
+
+[AchievementDescPoker]
+other = "dieselbe Größe 4 Mal in Folge bekommen"
+
+[AchievementNameKeeper]
+other = "Keeper"
+
+[AchievementDescKeeper]
+other = "an 10 Saisons teilnehmen"
+
+[AchievementNameCosmicCock]
+other = "Kosmischer Schwanz"
+
+[AchievementDescCosmicCock]
+other = "insgesamt 20000cm wachsen"
+
+[AchievementNameMaximalist]
+other = "Maximalist"
+
+[AchievementDescMaximalist]
+other = "61cm zehnmal bekommen"
+
+[AchievementNameDiamondHands]
+other = "Diamanthände"
+
+[AchievementDescDiamondHands]
+other = "7 Schwänze in Folge ab 40cm"
+
+[AchievementNameDiamondEye]
+other = "Diamantauge"
+
+[AchievementDescDiamondEye]
+other = "dieselbe Größe 5 Mal in Folge bekommen"
+
+[AchievementNameGreekMyth]
+other = "Griechischer Mythos"
+
+[AchievementDescGreekMyth]
+other = "insgesamt 30000cm wachsen"
+
+[AchievementNameFibonacciFather]
+other = "Vater von Fibonacci"
+
+[AchievementDescFibonacciFather]
+other = "die Fibonacci-Folge (1, 2, 3, 5, 8, 13, 21, 34, 55) in den letzten 31 Schwänzen bekommen"
+
+[AchievementNameAnnihilatorCannon]
+other = "Annihilator-Kanone"
+
+[AchievementDescAnnihilatorCannon]
+other = "Schwanz 5000 Mal ziehen"
+
+[RegionSize0]
+other = "Квантовый писюль 🤭"
+
+[RegionSize1]
+other = "Адыгейский пиксель"
+
+[RegionSize2]
+other = "Башкирская крошка"
+
+[RegionSize3]
+other = "Бурятская клёпка"
+
+[RegionSize4]
+other = "Алтайский орешек"
+
+[RegionSize5]
+other = "Дагестанский кинжал"
+
+[RegionSize6]
+other = "Ингушский леденец"
+
+[RegionSize7]
+other = "Кабардинский сучок"
+
+[RegionSize8]
+other = "Калмыцкий сухарик"
+
+[RegionSize9]
+other = "Карачаевский фитиль"
+
+[RegionSize10]
+other = "Карельская пипетка"
+
+[RegionSize11]
+other = "Коми-спичка"
+
+[RegionSize12]
+other = "Марийский скрепыш"
+
+[RegionSize13]
+other = "Мордовский обрубок"
+
+[RegionSize14]
+other = "Якутский крепыш"
+
+[RegionSize15]
+other = "Осетинская клюшка"
+
+[RegionSize16]
+other = "Татарский стержень"
+
+[RegionSize17]
+other = "Тувинский шуруп"
+
+[RegionSize18]
+other = "Удмуртский ствол"
+
+[RegionSize19]
+other = "Сибирская жердина"
+
+[RegionSize21]
+other = "Чувашский, крепкий"
+
+[RegionSize22]
+other = "Алтайский брус"
+
+[RegionSize23]
+other = "Краснодарская бита"
+
+[RegionSize24]
+other = "Красноярский валун"
+
+[RegionSize25]
+other = "Приморский хлыст"
+
+[RegionSize26]
+other = "Ставропольская палка"
+
+[RegionSize27]
+other = "Хабаровский посох"
+
+[RegionSize28]
+other = "Амурская палка"
+
+[RegionSize29]
+other = "Архангельский корабельный якорь"
+
+[RegionSize30]
+other = "Астраханская шпала"
+
+[RegionSize31]
+other = "Белгородский, по ГОСТу"
+
+[RegionSize32]
+other = "Брянский глушитель"
+
+[RegionSize33]
+other = "Владимирский, арматурный"
+
+[RegionSize34]
+other = "Волгоградский стояк"
+
+[RegionSize35]
+other = "Вологодская дубина"
+
+[RegionSize36]
+other = "Воронежская трость"
+
+[RegionSize37]
+other = "Ивановская колотушка"
+
+[RegionSize38]
+other = "Иркутский столп"
+
+[RegionSize39]
+other = "Калининградский маяк"
+
+[RegionSize40]
+other = "Калужский хуец"
+
+[RegionSize41]
+other = "Камчатская скала"
+
+[RegionSize42]
+other = "Кемеровский Эверест"
+
+[RegionSize43]
+other = "Кировская глыба"
+
+[RegionSize44]
+other = "Костромской истукан"
+
+[RegionSize45]
+other = "Курганский небоскрёб"
+
+[RegionSize46]
+other = "Курский богатырь"
+
+[RegionSize47]
+other = "Ленинградский болт"
+
+[RegionSize48]
+other = "Липецкий молот"
+
+[RegionSize49]
+other = "Магаданская высотка"
+
+[RegionSize50]
+other = "Московская Останкинская башня"
+
+[RegionSize51]
+other = "Мурманский айсберг"
+
+[RegionSize52]
+other = "Нижегородский Эльбрус"
+
+[RegionSize53]
+other = "Новгородская валына"
+
+[RegionSize54]
+other = "Новосибирский бивень"
+
+[RegionSize55]
+other = "Омский монумент"
+
+[RegionSize56]
+other = "Оренбургский дуб"
+
+[RegionSize57]
+other = "Орловский исполин"
+
+[RegionSize58]
+other = "Пензенский столп"
+
+[RegionSize59]
+other = "Пермский, галактический"
+
+[RegionSize60]
+other = "Псковская балымба"
+
+[RegionSizeUnknown]
+other = "Пиздец... 🥀"

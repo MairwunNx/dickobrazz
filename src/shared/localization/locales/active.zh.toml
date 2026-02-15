@@ -1,0 +1,1082 @@
+[CommonDots]
+other = "\\.\\.\\."
+
+[MsgCockScoreboardNotFound]
+other = "\n🥀 *节哀\\.\\.\\. 因为你没看鸡巴\\!*"
+
+[MsgCockSize]
+other = "我的鸡巴: *{{.Size}}cm* {{.Emoji}}"
+
+[MsgCockRulerScoreboardDefault]
+other = "{{.PlaceEmoji}} @{{.Username}} *{{.Size}}cm* {{.SizeEmoji}}"
+
+[MsgCockRulerScoreboardSelected]
+other = "{{.PlaceEmoji}} *@{{.Username}} {{.Size}}cm* {{.SizeEmoji}}"
+
+[MsgCockRaceScoreboardDefault]
+other = "{{.PlaceEmoji}} @{{.Username}} *{{.Size}}cm*"
+
+[MsgCockRaceScoreboardSelected]
+other = "{{.PlaceEmoji}} *@{{.Username}} {{.Size}}cm*"
+
+[MsgCockLadderScoreboardDefault]
+other = "{{.PlaceEmoji}} @{{.Username}} *{{.Size}}cm*"
+
+[MsgCockLadderScoreboardSelected]
+other = "{{.PlaceEmoji}} *@{{.Username}} {{.Size}}cm*"
+
+[MsgCockRulerContextDefault]
+other = "{{.PlaceEmoji}} @{{.Username}} *{{.Size}}cm* {{.SizeEmoji}}"
+
+[MsgCockRulerContextSelected]
+other = "{{.PlaceEmoji}} *@{{.Username}} {{.Size}}cm* {{.SizeEmoji}}"
+
+[MsgCockRaceContextDefault]
+other = "{{.PlaceEmoji}} @{{.Username}} *{{.Size}}cm*"
+
+[MsgCockRaceContextSelected]
+other = "{{.PlaceEmoji}} *@{{.Username}} {{.Size}}cm*"
+
+[MsgCockLadderContextDefault]
+other = "{{.PlaceEmoji}} @{{.Username}} *{{.Size}}cm*"
+
+[MsgCockLadderContextSelected]
+other = "{{.PlaceEmoji}} *@{{.Username}} {{.Size}}cm*"
+
+[MsgCockRulerScoreboardTemplate]
+other = """*鸡巴尺:*
+👥 参与人数: *{{.Participants}}*
+
+🏆 各类冠军:
+
+{{.Winners}}
+
+🥀 其余的节哀:
+
+{{.Others}}
+
+>📖 关于鸡巴尺:
+>
+>鸡巴尺是每日纯随机排行\\. 尺寸每天随机生成 \\(0 到 61 cm\\) 并在 MSK 午夜重置\\. 不积累 — 只有此刻运气\\!
+>
+>🎲 今天你是顶，明天你是底 — 随机决定谁走运\\!||"""
+
+[MsgCockRulerScoreboardWinnersTemplate]
+other = """*鸡巴尺:*
+👥 参与人数: *{{.Participants}}*
+
+🏆 各类冠军:
+
+{{.Winners}}
+
+>📖 关于鸡巴尺:
+>
+>鸡巴尺是每日纯随机排行\\. 尺寸每天随机生成 \\(0 到 61 cm\\) 并在 MSK 午夜重置\\. 不积累 — 只有此刻运气\\!
+>
+>🎲 今天你是顶，明天你是底 — 随机决定谁走运\\!||"""
+
+[MsgCockRulerScoreboardTemplateNoDesc]
+other = """*鸡巴尺:*
+👥 参与人数: *{{.Participants}}*
+
+🏆 各类冠军:
+
+{{.Winners}}
+
+🥀 其余的节哀:
+
+{{.Others}}"""
+
+[MsgCockRulerScoreboardWinnersTemplateNoDesc]
+other = """*鸡巴尺:*
+👥 参与人数: *{{.Participants}}*
+
+🏆 各类冠军:
+
+{{.Winners}}"""
+
+[MsgCockRaceScoreboardTemplate]
+other = """*鸡巴竞速 {{.SeasonNum}} {{.SeasonWord}} 参与者:*
+👥 本季参与人数: *{{.Participants}}*
+
+🏆 各类冠军:
+
+{{.Winners}}
+
+🥀 其余的节哀:
+
+{{.Others}}
+
+>📖 关于鸡巴竞速:
+>
+>鸡巴竞速是 3 个月的赛季比赛\\. 每天测鸡巴，所有结果自动累加\\. 总积累尺寸最高的三人获胜\\.
+>
+>新赛季开始后所有鸡巴重置，竞速对所有人重新开始\\.
+>
+>💡 提示: 每天测鸡巴才能最大化赢的机会\\!||
+
+{{.Footer}}"""
+
+[MsgCockRaceScoreboardWinnersTemplate]
+other = """*鸡巴竞速 {{.SeasonNum}} {{.SeasonWord}} 参与者:*
+👥 本季参与人数: *{{.Participants}}*
+
+🏆 各类冠军:
+
+{{.Winners}}
+
+>📖 关于鸡巴竞速:
+>
+>鸡巴竞速是 3 个月的赛季比赛\\. 每天测鸡巴，所有结果自动累加\\. 总积累尺寸最高的三人获胜\\.
+>
+>新赛季开始后所有鸡巴重置，竞速对所有人重新开始\\.
+>
+>💡 提示: 每天测鸡巴才能最大化赢的机会\\!||
+
+{{.Footer}}"""
+
+[MsgCockRaceScoreboardTemplateNoDesc]
+other = """*鸡巴竞速 {{.SeasonNum}} {{.SeasonWord}} 参与者:*
+👥 本季参与人数: *{{.Participants}}*
+
+🏆 各类冠军:
+
+{{.Winners}}
+
+🥀 其余的节哀:
+
+{{.Others}}
+
+{{.Footer}}"""
+
+[MsgCockRaceScoreboardWinnersTemplateNoDesc]
+other = """*鸡巴竞速 {{.SeasonNum}} {{.SeasonWord}} 参与者:*
+👥 本季参与人数: *{{.Participants}}*
+
+🏆 各类冠军:
+
+{{.Winners}}
+
+{{.Footer}}"""
+
+[MsgCockLadderScoreboardTemplate]
+other = """*鸡巴天梯:*
+👥 总参与人数: *{{.Participants}}*
+
+🏆 鸡巴天梯领袖:
+
+{{.Winners}}
+
+🥀 慢慢往上爬的:
+
+{{.Others}}
+
+>📖 关于鸡巴天梯:
+>
+>鸡巴天梯是你通往荣耀的永久之路\\. 这里会累计你在 бот 里的所有鸡巴\\. 不同于每日尺子和赛季竞速，天梯永不重置\\.
+>
+>🔥 天梯顶端是从第一天就测鸡巴的传说\\. 成为其中一个吧\\!||"""
+
+[MsgCockLadderScoreboardWinnersTemplate]
+other = """*鸡巴天梯:*
+👥 总参与人数: *{{.Participants}}*
+
+🏆 鸡巴天梯领袖:
+
+{{.Winners}}
+
+>📖 关于鸡巴天梯:
+>
+>鸡巴天梯是你通往荣耀的永久之路\\. 这里会累计你在 бот 里的所有鸡巴\\. 不同于每日尺子和赛季竞速，天梯永不重置\\.
+>
+>🔥 天梯顶端是从第一天就测鸡巴的传说\\. 成为其中一个吧\\!||"""
+
+[MsgCockLadderScoreboardTemplateNoDesc]
+other = """*鸡巴天梯:*
+👥 总参与人数: *{{.Participants}}*
+
+🏆 鸡巴天梯领袖:
+
+{{.Winners}}
+
+🥀 慢慢往上爬的:
+
+{{.Others}}"""
+
+[MsgCockLadderScoreboardWinnersTemplateNoDesc]
+other = """*鸡巴天梯:*
+👥 总参与人数: *{{.Participants}}*
+
+🏆 鸡巴天梯领袖:
+
+{{.Winners}}"""
+
+[MsgCockRaceFooterActiveSeason]
+other = "🚀 当前鸡巴赛季: *{{.SeasonNum}}*, 时间 *{{.StartDate}}* 到 *{{.EndDate}}*\\. 剩余: *{{.Remaining}}*\\."
+
+[MsgCockRaceFooterNoSeason]
+other = "🚀 当前鸡巴竞速赛季开始于 *{{.StartDate}}*"
+
+[MsgCockDynamicsTemplate]
+other = """
+📊 *全局鸡巴动态*
+
+总计鸡巴: *{{.TotalCock}} cm* 🤭
+总鸡巴侠: *{{.TotalUsers}}* 🫡
+总撸鸡巴次数: *{{.TotalCocksCount}}* ✊🏻
+
+最大鸡巴日: *{{.TotalMaxCockDate}}*, 暴涨 *{{.TotalMaxCock}} cm* 🍾
+
+系统平均鸡巴 _(5 天)_: *{{.TotalAvgCock}} cm* {{.TotalAvgEmoji}}
+系统鸡巴中位数 _(5 天)_: *{{.TotalMedianCock}} cm* {{.TotalMedianEmoji}}
+
+鸡巴比例 _(5 天)_: 💪 *{{.TotalBigCockRatio}}%* 🤏 *{{.TotalSmallCockRatio}}%*
+鸡巴增长速度 _(5 天)_: *{{.OverallGrowthSpeed}} cm/天*
+
+📊 *个人鸡巴动态*
+
+撸鸡巴时长: *{{.UserPullingPeriod}}*
+总计鸡巴: *{{.UserTotalCock}} cm* 🤯
+总撸鸡巴次数: *{{.UserCocksCount}}* ✊🏻
+
+IRK (鸡巴尺寸指数): __*{{.UserIrk}}*__ _({{.UserIrkLabel}})_
+平均鸡巴尺寸 _(5 次)_: *{{.UserAvgCock}} cm* {{.UserAvgEmoji}}
+最大鸡巴: *{{.UserMaxCock}} cm* {{.UserMaxEmoji}} (*{{.UserMaxDate}}*)
+
+幸运系数 _(5 次)_: *{{.UserLuckCoefficient}}* {{.UserLuckDisplay}}
+鸡巴波动 _(5 次)_: *{{.UserVolatility}}* {{.UserVolatilityDisplay}}
+
+统治百分比: *{{.UserDominancePercent}}%* 👑
+鸡巴增长速度 _(5 天)_: *{{.UserGrowthSpeed}} cm/天* {{.UserGrowthSpeedDisplay}}
+
+🏆 *赛季成就*
+
+赛季胜利: *{{.UserSeasonWins}}* 🎖️
+鸡巴尊敬: *{{.UserCockRespect}}* 🚀
+
+📈 *鸡巴资产*
+
+{{.UserYesterdayChangeEmoji}} 日度动态: *{{.UserYesterdayChangePercent}}%* (*{{.UserYesterdayChangeSize}} cm*)
+{{.UserFiveCocksEmoji}} 5 次鸡巴动态: *{{.UserFiveCocksChangePercent}}%* (*{{.UserFiveCocksChangeSize}} cm*)"""
+
+[MsgCockSeasonTemplate]
+other = """*鸡巴赛季 {{.SeasonNum}}* \\(🟡 进行中\\)
+⏱️ 周期: *{{.StartDate}} \\- {{.EndDate}}*
+
+🔮 赛季候选人:
+
+{{.Pretenders}}"""
+
+[MsgCockSeasonWithWinnersTemplate]
+other = """*鸡巴赛季 {{.SeasonNum}}* \\(🟢 已结束\\)
+⏱️ 周期: *{{.StartDate}} \\- {{.EndDate}}*
+
+🎖 赛季冠军:
+
+{{.Winners}}"""
+
+[MsgCockSeasonTemplateFooter]
+other = """>📖 关于鸡巴赛季:
+>
+>鸡巴赛季是 3\\-个月的大战，争夺最强鸡巴侠\\. 每天测量、累计结果、冲 top\\-3\\. 胜者拿到传奇鸡巴\\-尊敬™，可兑换周边\\!
+>
+>🔥 历史只记住赢家 — 成为其中一个\\!||"""
+
+[MsgCockSeasonWinnerTemplate]
+other = "{{.Medal}} *@{{.Nickname}}* 鸡巴 *{{.Size}} cm*"
+
+[MsgCockSeasonNoSeasonsTemplate]
+other = """*鸡巴赛季*
+
+当前没有进行中的赛季\\. 关注更新\\!"""
+
+[MsgCockAchievementsTemplate]
+other = """🏆 *鸡巴成就*
+完成: *{{.Completed}}/{{.Total}}* _\\({{.Percent}}%\\)_ • 🌟 尊敬: *{{.Respects}}*
+
+💡 _每个鸡巴成就都会给你鸡巴尊敬™，很快可以在官方商店换周边\\!_
+
+{{.Achievements}}"""
+
+[MsgCockAchievementsTemplateOtherPages]
+other = """🏆 *鸡巴成就*
+完成: *{{.Completed}}/{{.Total}}* _\\({{.Percent}}%\\)_ • 🌟 尊敬: *{{.Respects}}*
+
+{{.Achievements}}"""
+
+[InlineTitleCockSize]
+other = "鸡巴尺寸"
+
+[InlineTitleCockRuler]
+other = "鸡巴尺"
+
+[InlineTitleCockLadder]
+other = "鸡巴天梯"
+
+[InlineTitleCockRace]
+other = "鸡巴竞速"
+
+[InlineTitleCockDynamic]
+other = "鸡巴动态"
+
+[InlineTitleCockSeason]
+other = "鸡巴赛季"
+
+[InlineTitleCockAchievements]
+other = "鸡巴成就"
+
+[DescCockSize]
+other = "📏 看看今天的尺寸 (0-61 cm)"
+
+[DescCockRuler]
+other = "👑 今日鸡巴尺寸 daily 前13"
+
+[DescCockLadder]
+other = "🪜 终身累计尺寸排行榜"
+
+[DescCockRace]
+other = "🏁 为期 3 个月的赛季竞速"
+
+[DescCockDynamic]
+other = "📈 统计、动态、记录与对比"
+
+[DescCockSeason]
+other = "📅 赛季历史和赢家"
+
+[DescCockAchievements]
+other = "🏅 成就与鸡巴尊敬™"
+
+[MsgCockDynamicNoData]
+other = "🤔 *数据不足，无法计算动态*\n\n_先撸一次鸡巴\\!_"
+
+[MsgSeasonUnknownStartDate]
+other = "鬼知道什么时候"
+
+[MsgSeasonButton]
+other = "{{.Arrow}} 赛季 {{.SeasonNum}}"
+
+[MsgSeasonNotFound]
+other = "赛季未找到"
+
+[MsgCallbackInvalidFormat]
+other = "数据格式无效"
+
+[MsgCallbackParseError]
+other = "数据解析错误"
+
+[MsgUserPullingRecently]
+other = "刚刚"
+
+[MsgUserPullingSince]
+other = "{{.Period}} (从 {{.Date}} 起)"
+
+[MsgListSeparator]
+other = ", "
+
+[MsgListSeparatorLast]
+other = " 和 "
+
+[UnitDay]
+one = "{{.Count}} 天"
+few = "{{.Count}} 天"
+many = "{{.Count}} 天"
+other = "{{.Count}} 天"
+
+[UnitMonth]
+one = "{{.Count}} 个月"
+few = "{{.Count}} 个月"
+many = "{{.Count}} 个月"
+other = "{{.Count}} 个月"
+
+[UnitYear]
+one = "{{.Count}} 年"
+few = "{{.Count}} 年"
+many = "{{.Count}} 年"
+other = "{{.Count}} 年"
+
+[UnitSeason]
+one = "{{.Count}} 赛季"
+few = "{{.Count}} 赛季"
+many = "{{.Count}} 赛季"
+other = "{{.Count}} 赛季"
+
+[UnitSeasonGenitive]
+one = "赛季"
+few = "赛季"
+many = "赛季"
+other = "赛季"
+
+[UnitHour]
+one = "{{.Count}} 小时"
+few = "{{.Count}} 小时"
+many = "{{.Count}} 小时"
+other = "{{.Count}} 小时"
+
+[UnitMinute]
+one = "{{.Count}} 分钟"
+few = "{{.Count}} 分钟"
+many = "{{.Count}} 分钟"
+other = "{{.Count}} 分钟"
+
+[UptimeDayShort]
+one = "{{.Count}}d"
+few = "{{.Count}}d"
+many = "{{.Count}}d"
+other = "{{.Count}}d"
+
+[UptimeHourShort]
+one = "{{.Count}}h"
+few = "{{.Count}}h"
+many = "{{.Count}}h"
+other = "{{.Count}}h"
+
+[UptimeMinuteShort]
+one = "{{.Count}}m"
+few = "{{.Count}}m"
+many = "{{.Count}}m"
+other = "{{.Count}}m"
+
+[MsgUnknownValue]
+other = "未知"
+
+[AnonymousNameTemplate]
+other = "匿名{{.Number}}"
+
+[MsgHelpText]
+other = "🧭 可用命令\n\n/help — 命令列表\n/hide — 隐藏或显示你的昵称（参与排行）"
+
+[MsgHidePrompt]
+other = "🙈 *隐藏昵称*\n\n你可以对其他参与者隐藏你的昵称。个人成就仍会绑定到你的资料。\n\n隐藏后，你的昵称将变为 *@{{.Anon}}*。\n\n>由于 Telegram inline 查询缓存，隐藏不会立即生效。几分钟后才会确保生效。\n\n点击下方按钮隐藏昵称。"
+
+[MsgHideStatusHidden]
+other = "🙊 *昵称已隐藏*\n\n参与完全匿名。\n\n当前显示为 *@{{.Anon}}*。如果你选择显示，它会变为 *@{{.Real}}*，其他人就能看到你的成就。\n\n>由于 Telegram inline 查询缓存，隐藏不会立即生效。几分钟后才会确保生效。"
+
+[MsgHideButtonHide]
+other = "🙈 隐藏我的昵称"
+
+[MsgHideButtonShow]
+other = "👀 显示我的昵称"
+
+[MsgCallbackNotForYou]
+other = "⛔ 这个按钮只对原用户可用。"
+
+[MsgAchievementCompleted]
+other = "✅ {{.Emoji}} *{{.Name}}* \\- {{.Description}}"
+
+[MsgAchievementInProgress]
+other = "🔄 {{.Emoji}} *{{.Name}}* \\({{.Progress}}/{{.Max}}\\) \\- {{.Description}}"
+
+[MsgAchievementNotCompleted]
+other = "⭕️ {{.Emoji}} *{{.Name}}* \\- {{.Description}}"
+
+[LuckLabelGodRandom]
+other = "随机之神"
+
+[LuckLabelCosmicLuck]
+other = "宇宙级好运"
+
+[LuckLabelFairyLuck]
+other = "童话级好运"
+
+[LuckLabelSuperLuck]
+other = "超级好运"
+
+[LuckLabelIncredibleLuck]
+other = "离谱好运"
+
+[LuckLabelVeryLucky]
+other = "很走运"
+
+[LuckLabelLucky]
+other = "走运"
+
+[LuckLabelBalanced]
+other = "平衡"
+
+[LuckLabelUnlucky]
+other = "倒霉"
+
+[LuckLabelBad]
+other = "很差"
+
+[LuckLabelGloom]
+other = "黑暗"
+
+[LuckLabelHellTilt]
+other = "地狱级 tilt"
+
+[LuckLabelBurningInHell]
+other = "在地狱里烧"
+
+[VolatilityLabelStone]
+other = "石头般"
+
+[VolatilityLabelStable]
+other = "稳定"
+
+[VolatilityLabelModerate]
+other = "适中"
+
+[VolatilityLabelLivelySpread]
+other = "波动活跃"
+
+[VolatilityLabelUneven]
+other = "不均匀"
+
+[VolatilityLabelChaotic]
+other = "混乱"
+
+[VolatilityLabelRandom]
+other = "纯随机"
+
+[IrkLabelZero]
+other = "零"
+
+[IrkLabelMinimal]
+other = "最小"
+
+[IrkLabelVerySmall]
+other = "很小"
+
+[IrkLabelSmall]
+other = "小"
+
+[IrkLabelReduced]
+other = "缩小"
+
+[IrkLabelAverage]
+other = "平均"
+
+[IrkLabelIncreased]
+other = "增加"
+
+[IrkLabelLarge]
+other = "大"
+
+[IrkLabelVeryLarge]
+other = "很大"
+
+[IrkLabelMaximum]
+other = "最大"
+
+[IrkLabelUltimate]
+other = "极限"
+
+[GrowthSpeedLabelCosmic]
+other = "宇宙级"
+
+[GrowthSpeedLabelExtreme]
+other = "极端"
+
+[GrowthSpeedLabelVeryFast]
+other = "很快"
+
+[GrowthSpeedLabelFast]
+other = "快"
+
+[GrowthSpeedLabelModerate]
+other = "中等"
+
+[GrowthSpeedLabelAverage]
+other = "一般"
+
+[GrowthSpeedLabelSlow]
+other = "慢"
+
+[GrowthSpeedLabelVerySlow]
+other = "很慢"
+
+[GrowthSpeedLabelTurtle]
+other = "龟速"
+
+[GrowthSpeedLabelStalled]
+other = "原地不动"
+
+[AchievementNameNotRubbedYet]
+other = "还没磨破"
+
+[AchievementDescNotRubbedYet]
+other = "撸鸡巴 10 次"
+
+[AchievementNameHalfHundred]
+other = "半百"
+
+[AchievementDescHalfHundred]
+other = "拿到 50cm 鸡巴"
+
+[AchievementNameDiary]
+other = "日记本"
+
+[AchievementDescDiary]
+other = "撸鸡巴 31 次"
+
+[AchievementNameGoldenHundred]
+other = "黄金一百"
+
+[AchievementDescGoldenHundred]
+other = "累计 100cm"
+
+[AchievementNameSkillfulHands]
+other = "巧手"
+
+[AchievementDescSkillfulHands]
+other = "撸鸡巴 100 次"
+
+[AchievementNameEarlyBird]
+other = "早起鸟"
+
+[AchievementDescEarlyBird]
+other = "6:00 MSK 前撸鸡巴 20 次"
+
+[AchievementNameLightning]
+other = "闪电"
+
+[AchievementDescLightning]
+other = "比上一次鸡巴暴涨 50cm"
+
+[AchievementNameSniper]
+other = "狙击手"
+
+[AchievementDescSniper]
+other = "正好 30cm 五次"
+
+[AchievementNameDejaVu]
+other = "既视感"
+
+[AchievementDescDejaVu]
+other = "连续两天相同鸡巴"
+
+[AchievementNameSpeedrunner]
+other = "速通"
+
+[AchievementDescSpeedrunner]
+other = "午夜后 30 秒内撸鸡巴五次"
+
+[AchievementNameMidnightPuller]
+other = "命悬一线"
+
+[AchievementDescMidnightPuller]
+other = "23:00 MSK 后撸鸡巴 10 次"
+
+[AchievementNameRounder]
+other = "圆整控"
+
+[AchievementDescRounder]
+other = "最近 31 次拿到所有整数 (10, 20, 30, 40, 50, 60)"
+
+[AchievementNameEverest]
+other = "珠峰"
+
+[AchievementDescEverest]
+other = "拿到全场最大鸡巴"
+
+[AchievementNameMarianaTrench]
+other = "马里亚纳海沟"
+
+[AchievementDescMarianaTrench]
+other = "拿到全场最小鸡巴"
+
+[AchievementNameNumberCollector]
+other = "数字收藏家"
+
+[AchievementDescNumberCollector]
+other = "拿到所有好看数字 (11, 22, 33, 44, 55)"
+
+[AchievementNameDayEqualsSize]
+other = "日期=尺寸"
+
+[AchievementDescDayEqualsSize]
+other = "鸡巴等于当月日期"
+
+[AchievementNameSolidThousand]
+other = "硬核一千"
+
+[AchievementDescSolidThousand]
+other = "累计 1000cm"
+
+[AchievementNameBullTrend]
+other = "牛市趋势"
+
+[AchievementDescBullTrend]
+other = "鸡巴连续 5 天增长"
+
+[AchievementNameBearMarket]
+other = "熊市"
+
+[AchievementDescBearMarket]
+other = "鸡巴连续 5 天下滑"
+
+[AchievementNameTraveler]
+other = "旅行者"
+
+[AchievementDescTraveler]
+other = "拿到全部 61 个尺寸 (0-60cm)"
+
+[AchievementNameFreeze]
+other = "起鸡皮疙瘩"
+
+[AchievementDescFreeze]
+other = "连续 5 次小于 20cm"
+
+[AchievementNameFiveK]
+other = "五千"
+
+[AchievementDescFiveK]
+other = "累计 5000cm"
+
+[AchievementNameOldtimer]
+other = "老油条"
+
+[AchievementDescOldtimer]
+other = "参加 3 个赛季"
+
+[AchievementNameAnniversary]
+other = "周年"
+
+[AchievementDescAnniversary]
+other = "撸鸡巴 365 次"
+
+[AchievementNameContrastShower]
+other = "冷热交替"
+
+[AchievementDescContrastShower]
+other = "60+cm 后立刻出 0-3cm"
+
+[AchievementNamePythagoras]
+other = "毕达哥拉斯"
+
+[AchievementDescPythagoras]
+other = "连续三次形成勾股三元组 (3-4-5, 5-12-13, 8-15-17, 等等)"
+
+[AchievementNameLeetSpeak]
+other = "Leet speak"
+
+[AchievementDescLeetSpeak]
+other = "连续拿到 13cm 和 37cm"
+
+[AchievementNameMoscovite]
+other = "莫斯科人"
+
+[AchievementDescMoscovite]
+other = "一个月内拿到 50cm 五次"
+
+[AchievementNameHourPrecision]
+other = "小时精准"
+
+[AchievementDescHourPrecision]
+other = "鸡巴等于当前小时"
+
+[AchievementNameWonderStranger]
+other = "神秘奇迹"
+
+[AchievementDescWonderStranger]
+other = "撸鸡巴 500 次"
+
+[AchievementNameValentine]
+other = "情人节"
+
+[AchievementDescValentine]
+other = "情人节拿到 14cm"
+
+[AchievementNameNewYearGift]
+other = "新年礼物"
+
+[AchievementDescNewYearGift]
+other = "新年拿到 60cm+"
+
+[AchievementNameMensSolidarity]
+other = "男性团结"
+
+[AchievementDescMensSolidarity]
+other = "国际男性日 (11 月 19 日) 拿到 19cm"
+
+[AchievementNameFriday13th]
+other = "周五 13"
+
+[AchievementDescFriday13th]
+other = "周五 13 拿到 0cm"
+
+[AchievementNameLeapCock]
+other = "闰年鸡巴"
+
+[AchievementDescLeapCock]
+other = "2 月 29 日拿到任意鸡巴"
+
+[AchievementNameTurtle]
+other = "乌龟"
+
+[AchievementDescTurtle]
+other = "连续 10 次变化小于 5cm"
+
+[AchievementNameGoldenCock]
+other = "黄金鸡巴"
+
+[AchievementDescGoldenCock]
+other = "累计 10000cm"
+
+[AchievementNameSumOfPrevious]
+other = "前两次之和"
+
+[AchievementDescSumOfPrevious]
+other = "鸡巴等于前两次之和"
+
+[AchievementNameBazookaHands]
+other = "火箭筒之手"
+
+[AchievementDescBazookaHands]
+other = "撸鸡巴 1000 次"
+
+[AchievementNameTriple]
+other = "三连"
+
+[AchievementDescTriple]
+other = "连续三次同样大小"
+
+[AchievementNameVeteran]
+other = "老兵"
+
+[AchievementDescVeteran]
+other = "参加 5 个赛季"
+
+[AchievementNameMinutePrecision]
+other = "分钟精准"
+
+[AchievementDescMinutePrecision]
+other = "鸡巴等于当前分钟"
+
+[AchievementNamePoker]
+other = "扑克"
+
+[AchievementDescPoker]
+other = "连续四次同样大小"
+
+[AchievementNameKeeper]
+other = "守护者"
+
+[AchievementDescKeeper]
+other = "参加 10 个赛季"
+
+[AchievementNameCosmicCock]
+other = "宇宙鸡巴"
+
+[AchievementDescCosmicCock]
+other = "累计 20000cm"
+
+[AchievementNameMaximalist]
+other = "极限主义者"
+
+[AchievementDescMaximalist]
+other = "拿到 61cm 十次"
+
+[AchievementNameDiamondHands]
+other = "钻石手"
+
+[AchievementDescDiamondHands]
+other = "连续 7 次 40cm+"
+
+[AchievementNameDiamondEye]
+other = "钻石眼"
+
+[AchievementDescDiamondEye]
+other = "连续 5 次同样大小"
+
+[AchievementNameGreekMyth]
+other = "希腊神话"
+
+[AchievementDescGreekMyth]
+other = "累计 30000cm"
+
+[AchievementNameFibonacciFather]
+other = "斐波那契之父"
+
+[AchievementDescFibonacciFather]
+other = "最近 31 次拿到斐波那契序列 (1, 2, 3, 5, 8, 13, 21, 34, 55)"
+
+[AchievementNameAnnihilatorCannon]
+other = "湮灭炮"
+
+[AchievementDescAnnihilatorCannon]
+other = "撸鸡巴 5000 次"
+
+[RegionSize0]
+other = "Квантовый писюль 🤭"
+
+[RegionSize1]
+other = "Адыгейский пиксель"
+
+[RegionSize2]
+other = "Башкирская крошка"
+
+[RegionSize3]
+other = "Бурятская клёпка"
+
+[RegionSize4]
+other = "Алтайский орешек"
+
+[RegionSize5]
+other = "Дагестанский кинжал"
+
+[RegionSize6]
+other = "Ингушский леденец"
+
+[RegionSize7]
+other = "Кабардинский сучок"
+
+[RegionSize8]
+other = "Калмыцкий сухарик"
+
+[RegionSize9]
+other = "Карачаевский фитиль"
+
+[RegionSize10]
+other = "Карельская пипетка"
+
+[RegionSize11]
+other = "Коми-спичка"
+
+[RegionSize12]
+other = "Марийский скрепыш"
+
+[RegionSize13]
+other = "Мордовский обрубок"
+
+[RegionSize14]
+other = "Якутский крепыш"
+
+[RegionSize15]
+other = "Осетинская клюшка"
+
+[RegionSize16]
+other = "Татарский стержень"
+
+[RegionSize17]
+other = "Тувинский шуруп"
+
+[RegionSize18]
+other = "Удмуртский ствол"
+
+[RegionSize19]
+other = "Сибирская жердина"
+
+[RegionSize21]
+other = "Чувашский, крепкий"
+
+[RegionSize22]
+other = "Алтайский брус"
+
+[RegionSize23]
+other = "Краснодарская бита"
+
+[RegionSize24]
+other = "Красноярский валун"
+
+[RegionSize25]
+other = "Приморский хлыст"
+
+[RegionSize26]
+other = "Ставропольская палка"
+
+[RegionSize27]
+other = "Хабаровский посох"
+
+[RegionSize28]
+other = "Амурская палка"
+
+[RegionSize29]
+other = "Архангельский корабельный якорь"
+
+[RegionSize30]
+other = "Астраханская шпала"
+
+[RegionSize31]
+other = "Белгородский, по ГОСТу"
+
+[RegionSize32]
+other = "Брянский глушитель"
+
+[RegionSize33]
+other = "Владимирский, арматурный"
+
+[RegionSize34]
+other = "Волгоградский стояк"
+
+[RegionSize35]
+other = "Вологодская дубина"
+
+[RegionSize36]
+other = "Воронежская трость"
+
+[RegionSize37]
+other = "Ивановская колотушка"
+
+[RegionSize38]
+other = "Иркутский столп"
+
+[RegionSize39]
+other = "Калининградский маяк"
+
+[RegionSize40]
+other = "Калужский хуец"
+
+[RegionSize41]
+other = "Камчатская скала"
+
+[RegionSize42]
+other = "Кемеровский Эверест"
+
+[RegionSize43]
+other = "Кировская глыба"
+
+[RegionSize44]
+other = "Костромской истукан"
+
+[RegionSize45]
+other = "Курганский небоскрёб"
+
+[RegionSize46]
+other = "Курский богатырь"
+
+[RegionSize47]
+other = "Ленинградский болт"
+
+[RegionSize48]
+other = "Липецкий молот"
+
+[RegionSize49]
+other = "Магаданская высотка"
+
+[RegionSize50]
+other = "Московская Останкинская башня"
+
+[RegionSize51]
+other = "Мурманский айсберг"
+
+[RegionSize52]
+other = "Нижегородский Эльбрус"
+
+[RegionSize53]
+other = "Новгородская валына"
+
+[RegionSize54]
+other = "Новосибирский бивень"
+
+[RegionSize55]
+other = "Омский монумент"
+
+[RegionSize56]
+other = "Оренбургский дуб"
+
+[RegionSize57]
+other = "Орловский исполин"
+
+[RegionSize58]
+other = "Пензенский столп"
+
+[RegionSize59]
+other = "Пермский, галактический"
+
+[RegionSize60]
+other = "Псковская балымба"
+
+[RegionSizeUnknown]
+other = "Пиздец... 🥀"
