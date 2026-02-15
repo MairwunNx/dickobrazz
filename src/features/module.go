@@ -15,41 +15,13 @@ import (
 )
 
 var Module = fx.Module("features",
-	fx.Provide(
-		// Size
-		size.NewGenerateAction,
-		size.NewHandler,
-
-		// Ruler
-		ruler.NewGetAction,
-		ruler.NewHandler,
-
-		// Ladder
-		ladder.NewGetAction,
-		ladder.NewHandler,
-
-		// Race
-		race.NewGetAction,
-		race.NewHandler,
-
-		// Dynamics
-		dynamics.NewGetAction,
-		dynamics.NewHandler,
-
-		// Seasons
-		seasons.NewGetAction,
-		seasons.NewHandler,
-		seasons.NewCallbackHandler,
-
-		// Achievements
-		achievements.NewGetAction,
-		achievements.NewHandler,
-		achievements.NewCallbackHandler,
-
-		// Help
-		help.NewHandler,
-
-		// Privacy
-		privacy.NewHandler,
-	),
+	size.Module,
+	ruler.Module,
+	ladder.Module,
+	race.Module,
+	dynamics.Module,
+	seasons.Module,
+	achievements.Module,
+	help.Module,
+	privacy.Module,
 )
