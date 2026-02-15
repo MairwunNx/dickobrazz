@@ -8,6 +8,22 @@ Modern and high-tech cockmeter: you ask, and the bot provides a scientifically j
 
 Product inspired by episode 1504 (#213) of South Park series (T.M.I.).
 
+## Architecture
+
+This project follows **Feature-Action Architecture (FAA)** — a TypeScript/Bun/Golang adaptation of Feature-Sliced Design for backends. See `Feature-Action-Architecture/MANIFEST.md` for the full spec and `Feature-Action-Architecture/examples/ts-bun.md` or `golang-gin.md` with uber/fx. AI notes: `Feature-Action-Architecture/AI.md`.
+
+### Layer Hierarchy (downward imports only)
+
+```
+App → Features → Entities → Shared
+```
+
+- **App** (`src/app/`): HTTP server, router, route factory, DI container, request context via AsyncLocalStorage.
+- **Features** (`src/features/`): Business use cases. Each has `api/handler.ts`, `*.action.ts`, optionally `db/`, `lib/`, `types.ts`, `index.ts`.
+- **Entities** (`src/entities/`): Domain objects. Each has `model.ts` (Mongoose schema), `dal.ts` (CRUD), optionally `cache.ts`, `lib/`, `types.ts`.
+- **Shared** (`src/shared/`): Infrastructure (MongoDB, Redis, config, logging, metrics, random) and utilities (datetime, encoding, sync, API primitives).
+
+
 ### Features
 
 #### Core Functionality
