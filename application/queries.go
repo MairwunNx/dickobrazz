@@ -162,9 +162,9 @@ func (app *Application) InlineQueryCockSize(log *logging.Logger, update *tgbotap
 	text = text + "\n\n" + "_" + subtext + "_"
 
 	return InitializeInlineQueryWithThumbAndDesc(
-		app.localization.Localize(localizer, InlineTitleCockSize, nil),
+		app.localization.Localize(localizer, "InlineTitleCockSize", nil),
 		strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(text, ".", "\\."), "-", "\\-"), "!", "\\!"),
-		app.localization.Localize(localizer, DescCockSize, nil),
+		app.localization.Localize(localizer, "DescCockSize", nil),
 		"https://files.mairwunnx.com/raw/public/dickobrazz%2Fico_size.png",
 	)
 }
@@ -185,9 +185,9 @@ func (app *Application) InlineQueryCockLadder(log *logging.Logger, update *tgbot
 	showDescription := app.shouldShowDescription(log, query.From.ID, query.From.UserName)
 	text := app.GenerateCockLadderScoreboard(log, localizer, query.From.ID, data, showDescription)
 	return InitializeInlineQueryWithThumbAndDesc(
-		app.localization.Localize(localizer, InlineTitleCockLadder, nil),
+		app.localization.Localize(localizer, "InlineTitleCockLadder", nil),
 		text,
-		app.localization.Localize(localizer, DescCockLadder, nil),
+		app.localization.Localize(localizer, "DescCockLadder", nil),
 		"https://files.mairwunnx.com/raw/public/dickobrazz%2Fico_ladder.png",
 	)
 }
@@ -208,9 +208,9 @@ func (app *Application) InlineQueryCockRace(log *logging.Logger, update *tgbotap
 	showDescription := app.shouldShowDescription(log, query.From.ID, query.From.UserName)
 	text := app.GenerateCockRaceScoreboard(log, localizer, query.From.ID, data, showDescription)
 	return InitializeInlineQueryWithThumbAndDesc(
-		app.localization.Localize(localizer, InlineTitleCockRace, nil),
+		app.localization.Localize(localizer, "InlineTitleCockRace", nil),
 		text,
-		app.localization.Localize(localizer, DescCockRace, nil),
+		app.localization.Localize(localizer, "DescCockRace", nil),
 		"https://files.mairwunnx.com/raw/public/dickobrazz%2Fico_race.png",
 	)
 }
@@ -265,7 +265,7 @@ func (app *Application) InlineQueryCockDynamic(log *logging.Logger, update *tgbo
 	}
 	if personalRes.err != nil {
 		log.E("Failed to get personal dynamic", logging.InnerError, personalRes.err)
-		text := app.localization.Localize(localizer, MsgCockDynamicNoData, nil)
+		text := app.localization.Localize(localizer, "MsgCockDynamicNoData", nil)
 		return InitializeInlineQueryWithThumbAndDesc(
 			app.localization.Localize(localizer, InlineTitleCockDynamic, nil),
 			text,
@@ -450,9 +450,9 @@ func (app *Application) InlineQueryCockRuler(log *logging.Logger, update *tgbota
 	showDescription := app.shouldShowDescription(log, query.From.ID, query.From.UserName)
 	text := app.GenerateCockRulerText(log, localizer, query.From.ID, data, showDescription)
 	return InitializeInlineQueryWithThumbAndDesc(
-		app.localization.Localize(localizer, InlineTitleCockRuler, nil),
+		app.localization.Localize(localizer, "InlineTitleCockRuler", nil),
 		text,
-		app.localization.Localize(localizer, DescCockRuler, nil),
+		app.localization.Localize(localizer, "DescCockRuler", nil),
 		"https://files.mairwunnx.com/raw/public/dickobrazz%2Fico_ruler.png",
 	)
 }
@@ -546,12 +546,12 @@ func (app *Application) InlineQueryCockAchievements(log *logging.Logger, update 
 
 	article := tgbotapi.NewInlineQueryResultArticleMarkdownV2(
 		fmt.Sprintf("ach_%d_%d", userID, page),
-		app.localization.Localize(localizer, InlineTitleCockAchievements, nil),
+		app.localization.Localize(localizer, "InlineTitleCockAchievements", nil),
 		text,
 	)
 	article.ReplyMarkup = &kb
 	article.ThumbURL = "https://files.mairwunnx.com/raw/public/dickobrazz%2Fico_achievements.png"
-	article.Description = app.localization.Localize(localizer, DescCockAchievements, nil)
+	article.Description = app.localization.Localize(localizer, "DescCockAchievements", nil)
 
 	return article
 }
@@ -633,7 +633,7 @@ func (app *Application) handleHideCallback(log *logging.Logger, localizer *i18n.
 	}
 
 	if callback.From == nil || callback.From.ID != targetUserID {
-		callbackConfig := tgbotapi.NewCallback(callback.ID, app.localization.Localize(localizer, MsgCallbackNotForYou, nil))
+		callbackConfig := tgbotapi.NewCallback(callback.ID, app.localization.Localize(localizer, "MsgCallbackNotForYou", nil))
 		callbackConfig.ShowAlert = true
 		if _, err := app.bot.Request(callbackConfig); err != nil {
 			log.E("Failed to answer callback query", logging.InnerError, err)

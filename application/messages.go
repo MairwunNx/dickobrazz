@@ -48,40 +48,19 @@ const (
 	MsgCockRaceFooterActiveSeason = "MsgCockRaceFooterActiveSeason"
 	MsgCockRaceFooterNoSeason     = "MsgCockRaceFooterNoSeason"
 
-	MsgCockDynamicsTemplate = "MsgCockDynamicsTemplate"
-
-	MsgCockSeasonTemplate            = "MsgCockSeasonTemplate"
-	MsgCockSeasonWithWinnersTemplate = "MsgCockSeasonWithWinnersTemplate"
-	MsgCockSeasonTemplateFooter      = "MsgCockSeasonTemplateFooter"
-	MsgCockSeasonWinnerTemplate      = "MsgCockSeasonWinnerTemplate"
-	MsgCockSeasonNoSeasonsTemplate   = "MsgCockSeasonNoSeasonsTemplate"
-
 	MsgCockAchievementsTemplate           = "MsgCockAchievementsTemplate"
 	MsgCockAchievementsTemplateOtherPages = "MsgCockAchievementsTemplateOtherPages"
 
-	InlineTitleCockSize         = "InlineTitleCockSize"
-	InlineTitleCockRuler        = "InlineTitleCockRuler"
-	InlineTitleCockLadder       = "InlineTitleCockLadder"
-	InlineTitleCockRace         = "InlineTitleCockRace"
-	InlineTitleCockDynamic      = "InlineTitleCockDynamic"
-	InlineTitleCockSeason       = "InlineTitleCockSeason"
-	InlineTitleCockAchievements = "InlineTitleCockAchievements"
+	InlineTitleCockDynamic = "InlineTitleCockDynamic"
+	InlineTitleCockSeason = "InlineTitleCockSeason"
 
-	DescCockSize         = "DescCockSize"
-	DescCockRuler        = "DescCockRuler"
-	DescCockLadder       = "DescCockLadder"
-	DescCockRace         = "DescCockRace"
-	DescCockDynamic      = "DescCockDynamic"
-	DescCockSeason       = "DescCockSeason"
-	DescCockAchievements = "DescCockAchievements"
-
-	MsgCockDynamicNoData      = "MsgCockDynamicNoData"
+	DescCockDynamic = "DescCockDynamic"
+	DescCockSeason  = "DescCockSeason"
 	MsgSeasonUnknownStartDate = "MsgSeasonUnknownStartDate"
 	MsgSeasonButton           = "MsgSeasonButton"
 	MsgSeasonNotFound         = "MsgSeasonNotFound"
-	MsgCallbackInvalidFormat  = "MsgCallbackInvalidFormat"
-	MsgCallbackParseError     = "MsgCallbackParseError"
-	MsgCallbackNotForYou      = "MsgCallbackNotForYou"
+	MsgCallbackInvalidFormat = "MsgCallbackInvalidFormat"
+	MsgCallbackParseError    = "MsgCallbackParseError"
 
 	MsgUserPullingRecently = "MsgUserPullingRecently"
 	MsgUserPullingSince    = "MsgUserPullingSince"
@@ -246,7 +225,7 @@ func NewMsgCockDynamicsTemplate(
 		userFiveCocksChangeSymbol = ""
 	}
 
-	return localizationManager.Localize(localizer, MsgCockDynamicsTemplate, map[string]any{
+	return localizationManager.Localize(localizer, "MsgCockDynamicsTemplate", map[string]any{
 		/* 1-2: Общая динамика коков */
 		"TotalCock":  EscapeMarkdownV2(FormatDickSize(totalCock)),
 		"TotalUsers": EscapeMarkdownV2(FormatDickSize(totalUsers)),
@@ -330,7 +309,7 @@ func GetMedalByPosition(position int) string {
 }
 
 func NewMsgCockSeasonTemplate(localizationManager *localization.LocalizationManager, localizer *i18n.Localizer, pretenders string, startDate, endDate string, seasonNum int) string {
-	return localizationManager.Localize(localizer, MsgCockSeasonTemplate, map[string]any{
+	return localizationManager.Localize(localizer, "MsgCockSeasonTemplate", map[string]any{
 		"Pretenders": pretenders,
 		"StartDate":  startDate,
 		"EndDate":    endDate,
@@ -339,7 +318,7 @@ func NewMsgCockSeasonTemplate(localizationManager *localization.LocalizationMana
 }
 
 func NewMsgCockSeasonWithWinnersTemplate(localizationManager *localization.LocalizationManager, localizer *i18n.Localizer, winners string, startDate, endDate string, seasonNum int) string {
-	return localizationManager.Localize(localizer, MsgCockSeasonWithWinnersTemplate, map[string]any{
+	return localizationManager.Localize(localizer, "MsgCockSeasonWithWinnersTemplate", map[string]any{
 		"Winners":   winners,
 		"StartDate": startDate,
 		"EndDate":   endDate,
@@ -348,7 +327,7 @@ func NewMsgCockSeasonWithWinnersTemplate(localizationManager *localization.Local
 }
 
 func NewMsgCockSeasonWinnerTemplate(localizationManager *localization.LocalizationManager, localizer *i18n.Localizer, medal, nickname, totalSize string) string {
-	return localizationManager.Localize(localizer, MsgCockSeasonWinnerTemplate, map[string]any{
+	return localizationManager.Localize(localizer, "MsgCockSeasonWinnerTemplate", map[string]any{
 		"Medal":    medal,
 		"Nickname": EscapeMarkdownV2(nickname),
 		"Size":     EscapeMarkdownV2(totalSize),
@@ -356,9 +335,9 @@ func NewMsgCockSeasonWinnerTemplate(localizationManager *localization.Localizati
 }
 
 func NewMsgCockSeasonTemplateFooter(localizationManager *localization.LocalizationManager, localizer *i18n.Localizer) string {
-	return localizationManager.Localize(localizer, MsgCockSeasonTemplateFooter, nil)
+	return localizationManager.Localize(localizer, "MsgCockSeasonTemplateFooter", nil)
 }
 
 func NewMsgCockSeasonNoSeasonsTemplate(localizationManager *localization.LocalizationManager, localizer *i18n.Localizer) string {
-	return localizationManager.Localize(localizer, MsgCockSeasonNoSeasonsTemplate, nil)
+	return localizationManager.Localize(localizer, "MsgCockSeasonNoSeasonsTemplate", nil)
 }
