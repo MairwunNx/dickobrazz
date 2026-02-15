@@ -6,6 +6,7 @@ var Module = fx.Module("app",
 	fx.Provide(
 		NewTelegramBot,
 		NewRouter,
+		NewPoller,
 		NewApplication,
 	),
 )
