@@ -8,14 +8,18 @@ import (
 )
 
 var Module = fx.Module("collector",
-	fx.Provide(func(lc fx.Lifecycle) *StatsCollector {
-		sc := NewStatsCollector(context.Background(), time.Now())
+	fx.Invoke(func(lc fx.Lifecycle) {
+		ctx, cancel := context.WithCancel(context.Background())
+		sc := NewStatsCollector(ctx, time.Now())
 		lc.Append(fx.Hook{
-			OnStart: func(ctx context.Context) error {
+			OnStart: func(_ context.Context) error {
 				go sc.Start()
 				return nil
 			},
+			OnStop: func(_ context.Context) error {
+				cancel()
+				return nil
+			},
 		})
-		return sc
 	}),
 )
