@@ -19,7 +19,7 @@ type APIClient struct {
 func NewAPIClient(baseURL, csot string) *APIClient {
 	client := resty.New().
 		SetBaseURL(baseURL).
-		SetTimeout(5*time.Second).
+		SetTimeout(15*time.Second).
 		SetRetryCount(3).
 		SetRetryWaitTime(500*time.Millisecond).
 		SetRetryMaxWaitTime(2*time.Second).
