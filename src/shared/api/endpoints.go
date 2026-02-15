@@ -15,7 +15,7 @@ func (c *APIClient) GenerateCockSize(ctx context.Context, userID int64, username
 	if err != nil {
 		return nil, fmt.Errorf("generate cock size: %w", err)
 	}
-	if err := checkResponse(resp); err != nil {
+	if err := validateResponse(resp); err != nil {
 		return nil, err
 	}
 	return &result.Data, nil
@@ -33,7 +33,7 @@ func (c *APIClient) GetCockRuler(ctx context.Context, userID int64, username str
 	if err != nil {
 		return nil, fmt.Errorf("get cock ruler: %w", err)
 	}
-	if err := checkResponse(resp); err != nil {
+	if err := validateResponse(resp); err != nil {
 		return nil, err
 	}
 	return &result.Data, nil
@@ -51,7 +51,7 @@ func (c *APIClient) GetCockRace(ctx context.Context, userID int64, username stri
 	if err != nil {
 		return nil, fmt.Errorf("get cock race: %w", err)
 	}
-	if err := checkResponse(resp); err != nil {
+	if err := validateResponse(resp); err != nil {
 		return nil, err
 	}
 	return &result.Data, nil
@@ -69,7 +69,7 @@ func (c *APIClient) GetCockLadder(ctx context.Context, userID int64, username st
 	if err != nil {
 		return nil, fmt.Errorf("get cock ladder: %w", err)
 	}
-	if err := checkResponse(resp); err != nil {
+	if err := validateResponse(resp); err != nil {
 		return nil, err
 	}
 	return &result.Data, nil
@@ -84,7 +84,7 @@ func (c *APIClient) GetCockDynamicGlobal(ctx context.Context) (*CockDynamicGloba
 	if err != nil {
 		return nil, fmt.Errorf("get cock dynamic global: %w", err)
 	}
-	if err := checkResponse(resp); err != nil {
+	if err := validateResponse(resp); err != nil {
 		return nil, err
 	}
 	return &result.Data, nil
@@ -100,7 +100,7 @@ func (c *APIClient) GetCockDynamicPersonal(ctx context.Context, userID int64, us
 	if err != nil {
 		return nil, fmt.Errorf("get cock dynamic personal: %w", err)
 	}
-	if err := checkResponse(resp); err != nil {
+	if err := validateResponse(resp); err != nil {
 		return nil, err
 	}
 	return &result.Data, nil
@@ -116,7 +116,7 @@ func (c *APIClient) GetCockAchievements(ctx context.Context, userID int64, usern
 	if err != nil {
 		return nil, fmt.Errorf("get cock achievements: %w", err)
 	}
-	if err := checkResponse(resp); err != nil {
+	if err := validateResponse(resp); err != nil {
 		return nil, err
 	}
 	return &result.Data, nil
@@ -134,7 +134,7 @@ func (c *APIClient) GetCockSeasons(ctx context.Context, userID int64, username s
 	if err != nil {
 		return nil, fmt.Errorf("get cock seasons: %w", err)
 	}
-	if err := checkResponse(resp); err != nil {
+	if err := validateResponse(resp); err != nil {
 		return nil, err
 	}
 	return &result.Data, nil
@@ -150,7 +150,7 @@ func (c *APIClient) GetCockRespects(ctx context.Context, userID int64, username 
 	if err != nil {
 		return nil, fmt.Errorf("get cock respects: %w", err)
 	}
-	if err := checkResponse(resp); err != nil {
+	if err := validateResponse(resp); err != nil {
 		return nil, err
 	}
 	return &result.Data, nil
@@ -167,7 +167,7 @@ func (c *APIClient) UpdatePrivacy(ctx context.Context, userID int64, username st
 	if err != nil {
 		return nil, fmt.Errorf("update privacy: %w", err)
 	}
-	if err := checkResponse(resp); err != nil {
+	if err := validateResponse(resp); err != nil {
 		return nil, err
 	}
 	return &result.Data, nil
@@ -183,7 +183,7 @@ func (c *APIClient) GetProfile(ctx context.Context, userID int64, username strin
 	if err != nil {
 		return nil, fmt.Errorf("get profile: %w", err)
 	}
-	if err := checkResponse(resp); err != nil {
+	if err := validateResponse(resp); err != nil {
 		return nil, err
 	}
 	return &result.Data, nil
