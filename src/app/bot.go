@@ -11,7 +11,7 @@ const (
 	defaultAPIEndpoint = "https://api.telegram.org/bot%s/%s"
 )
 
-func InitializeTelegramBot(log *logging.Logger, cfg *config.Configuration) *tgbotapi.BotAPI {
+func NewTelegramBot(log *logging.Logger, cfg *config.Configuration) *tgbotapi.BotAPI {
 	token := cfg.Bot.Tg.Token
 	if token == "" {
 		log.F("Telegram token must be set and non-empty")
