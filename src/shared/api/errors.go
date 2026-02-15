@@ -2,7 +2,6 @@ package api
 
 import "fmt"
 
-// APIError представляет ошибку от API
 type APIError struct {
 	StatusCode int
 	Message    string
