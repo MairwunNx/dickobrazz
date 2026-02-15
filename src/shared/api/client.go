@@ -7,14 +7,12 @@ import (
 	"resty.dev/v3"
 )
 
-// APIClient — HTTP клиент для бэкэнда Dickobrazz
 type APIClient struct {
 	client  *resty.Client
 	baseURL string
 	csot    string
 }
 
-// NewAPIClient создаёт новый API клиент
 func NewAPIClient(baseURL, csot string) *APIClient {
 	client := resty.New().
 		SetBaseURL(baseURL).
@@ -33,7 +31,6 @@ func NewAPIClient(baseURL, csot string) *APIClient {
 	}
 }
 
-// setUserHeaders устанавливает заголовки пользователя на запрос
 func setUserHeaders(r *resty.Request, userID int64, username string) {
 	r.SetHeader("x-internal-user-id", strconv.FormatInt(userID, 10))
 	if username != "" {
@@ -41,7 +38,6 @@ func setUserHeaders(r *resty.Request, userID int64, username string) {
 	}
 }
 
-// checkResponse проверяет ответ на ошибки
 func checkResponse(resp *resty.Response) error {
 	if resp.IsError() {
 		return &APIError{
