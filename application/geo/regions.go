@@ -1,66 +1,23 @@
 package geo
 
-var regions = map[int]string{
-	0:  "RegionSize0",
-	1:  "RegionSize1",
-	2:  "RegionSize2",
-	3:  "RegionSize3",
-	4:  "RegionSize4",
-	5:  "RegionSize5",
-	6:  "RegionSize6",
-	7:  "RegionSize7",
-	8:  "RegionSize8",
-	9:  "RegionSize9",
-	10: "RegionSize10",
-	11: "RegionSize11",
-	12: "RegionSize12",
-	13: "RegionSize13",
-	14: "RegionSize14",
-	15: "RegionSize15",
-	16: "RegionSize16",
-	17: "RegionSize17",
-	18: "RegionSize18",
-	19: "RegionSize19",
-	21: "RegionSize21",
-	22: "RegionSize22",
-	23: "RegionSize23",
-	24: "RegionSize24",
-	25: "RegionSize25",
-	26: "RegionSize26",
-	27: "RegionSize27",
-	28: "RegionSize28",
-	29: "RegionSize29",
-	30: "RegionSize30",
-	31: "RegionSize31",
-	32: "RegionSize32",
-	33: "RegionSize33",
-	34: "RegionSize34",
-	35: "RegionSize35",
-	36: "RegionSize36",
-	37: "RegionSize37",
-	38: "RegionSize38",
-	39: "RegionSize39",
-	40: "RegionSize40",
-	41: "RegionSize41",
-	42: "RegionSize42",
-	43: "RegionSize43",
-	44: "RegionSize44",
-	45: "RegionSize45",
-	46: "RegionSize46",
-	47: "RegionSize47",
-	48: "RegionSize48",
-	49: "RegionSize49",
-	50: "RegionSize50",
-	51: "RegionSize51",
-	52: "RegionSize52",
-	53: "RegionSize53",
-	54: "RegionSize54",
-	55: "RegionSize55",
-	56: "RegionSize56",
-	57: "RegionSize57",
-	58: "RegionSize58",
-	59: "RegionSize59",
-	60: "RegionSize60",
+import "fmt"
+
+const (
+	maxRegionSize = 60
+	excludedSize  = 20 // намеренно исключён
+)
+
+var regions = initRegions()
+
+func initRegions() map[int]string {
+	m := make(map[int]string, maxRegionSize)
+	for i := 0; i <= maxRegionSize; i++ {
+		if i == excludedSize {
+			continue
+		}
+		m[i] = fmt.Sprintf("RegionSize%d", i)
+	}
+	return m
 }
 
 func GetRegionBySize(regionId int) string {
