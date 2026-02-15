@@ -18,6 +18,8 @@ func NewPoller(bot *tgbotapi.BotAPI, router *Router, log *logging.Logger) *Polle
 }
 
 func (p *Poller) Start(ctx context.Context) {
+	p.router.SetContext(ctx)
+
 	updates := tgbotapi.NewUpdate(0)
 	updates.Timeout = 60
 

@@ -82,6 +82,10 @@ func NewRouter(p RouterParams) *Router {
 	}
 }
 
+func (r *Router) SetContext(ctx context.Context) {
+	r.ctx = ctx
+}
+
 func (r *Router) shouldShowDescription(log *logging.Logger, userID int64, username string) bool {
 	profile, err := r.api.GetProfile(r.ctx, userID, username)
 	if err != nil {
