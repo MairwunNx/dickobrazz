@@ -4,7 +4,8 @@
       "mcp__ide__getDiagnostics",
       "Bash(go fmt:*)",
       "Bash(go mod tidy:*)",
-      "Bash(go build:*)"
+      "Bash(go build:*)",
+      "Bash(find:*)"
     ]
   }
 }
