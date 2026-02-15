@@ -5,7 +5,8 @@
       "Bash(go fmt:*)",
       "Bash(go mod tidy:*)",
       "Bash(go build:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(wc:*)"
     ]
   }
 }
