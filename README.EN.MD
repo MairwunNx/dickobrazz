@@ -3,66 +3,50 @@
 [![AI Capable](https://img.shields.io/badge/AI-Capable-brightgreen?style=flat&logo=openai&logoColor=white)](https://github.com/mairwunnx/dickobrazz)
 [![Docker](https://img.shields.io/badge/Docker-Available-2496ED?style=flat&logo=docker&logoColor=white)](https://github.com/MairwunNx/dickobrazz/pkgs/container/dickobrazz)
 [![GitHub Release](https://img.shields.io/github/v/release/mairwunnx/dickobrazz?style=flat&logo=github&color=blue)](https://github.com/mairwunnx/dickobrazz/releases)
-[![Go Version](https://img.shields.io/badge/Go-1.25-00ADD8?style=flat&logo=go&logoColor=white)](https://go.dev/)
-[![MongoDB](https://img.shields.io/badge/MongoDB-8.2.3-47A248?style=flat&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
-[![Redis](https://img.shields.io/badge/Redis-8.4-DC382D?style=flat&logo=redis&logoColor=white)](https://redis.io/)
+[![Go Version](https://img.shields.io/badge/Go-1.26-00ADD8?style=flat&logo=go&logoColor=white)](https://go.dev/)
 
 **Language**: [🇷🇺 Russian](README.MD) | 🇺🇸 English | [🇨🇳 中文](README.CN.MD)
 
-🌶️ Dickobrazz bot, also known as dickobot, can accurately measure your unit, tap, or tackle down to the centimeter. Don't be offended if you can't boast a big device - it's just a joke.
+🌶️ Dickobrazz bot, also known as dickobot, can estimate your "size" down to a centimeter. Do not worry if it is not huge today - it is just a joke.
 
-> Modern and high-tech cockmeter: you ask, and the bot provides a scientifically justified size and even jokingly compares your unit size with Russian region numbers. No ruler or microscope needed anymore!
+> A modern and high-tech cockmeter: you ask, the bot returns a scientifically "validated" size and even jokingly maps it to a Russian region number. No ruler or microscope needed.
 
-> Product inspired by episode 1504 (#213) of South Park series (T.M.I.).
+> Product inspired by South Park episode 1504 (#213), T.M.I.
 
 ## Features
 
-### Core Functionality
+### Cock Size
 
-- **Cock Size** — generates sizes from 0 to 61* cm with corresponding seasonal emojis.
-- **Daily Limits** — one size per day, resets at midnight Moscow time.
-- **Seasonal Emojis** — different emojis depending on the season.
-- **GSC** — integration with Global System of Cocks (extending beyond telegram).
-- **Regional Mapping** — compares size with Russian region numbers.
+Every day the bot gives a unique value from 0 to 61 cm. The value resets at midnight MSK, includes seasonal emojis, and maps to a Russian region number.
 
-> * - a bug that became a feature. It was planned up to 60 inclusive, but turned out to be 61 :).
+### Leaderboards and Competitions
 
-### Gamification and Competitions
+- **Cock Ruler** — top-13 best sizes for the current day
+- **Cock Ladder** — all-time ranking by total accumulated size
+- **Cock Race** — 3-month seasonal competition with accumulated sizes
+- **Season System** — every 3 months a new season with winners and rewards
+- **Cock-Respect™** — points for season wins and completed achievements
 
-- **Cock Ruler** — top-13 best sizes for the current day (daily ranking).
-- **Cock Ladder** — eternal ranking by total accumulated size over all time.
-- **Cock Race** — seasonal competition (3 months) with size summation.
-- **Season System** — every 3 months a new season with winners and rewards.
-- **Cock-Respect™** — point system for season victories and achievement completion.
-- **Cock Achievements** — achievement system with respect rewards.
+### Achievements
+
+50+ unique achievements: from the first measurement to rare numeric combinations. Every achievement grants respect points and includes progress tracking.
 
 ### Advanced Analytics
 
-- **CRI (Cock Rating Index)** — personal rating relative to all users with position description (analog of T.M.I. from South Park).
-- **Detailed Statistics** — total accumulated cock, 5-day average cock, median, records.
-- **Cock Assets** — daily change dynamics and last 5 cocks dynamics (percentage and absolute value).
-- **Luck Coefficient** — how lucky the user is with sizes (based on last 5 cocks).
-- **Cock Volatility** — size stability (low = stable, high = fluctuating).
-- **Growth Speed** — average growth rate (cm/day) over the last 5 days.
-- **Dominance Percentage** — user's contribution share to overall system statistics.
-- **Pulling Period** — how long the user has been participating in measurements.
-- **Cock Distribution** — percentage of big (>30 cm) and small (≤30 cm) cocks in the system.
-
-### Technical Reliability
-
-- **Double Randomization** — Random.org + ChaCha8 fallback for maximum randomness.
-- **High-Performance Database** — MongoDB with aggregation pipelines.
-- **Caching** — Redis with TinyLFU for fast responses.
+- **CRI (Cock Rating Index)** — personal rating (T.M.I.-style metric from South Park)
+- **Detailed statistics** — average size, median, records, and change dynamics
+- **Luck coefficient**, **cock volatility**, **growth speed**
+- **Dominance percentage** — user contribution share in overall system stats
 
 ## Usage
 
-Dickobrazz works through **inline queries** in Telegram. Simply type `@dickobrazz_bot` in any chat and select the desired option:
+Dickobrazz works through **inline queries** in Telegram. Type `@dickobrazz_bot` in any chat and choose an option:
 
 ### Available inline commands
 
-- **Cock Size** — get your size for today with regional mapping
+- **Cock Size** — get your size for today with region mapping
 - **Cock Ruler** — top-13 players for the current day (daily ranking)
-- **Cock Ladder** — eternal ranking by total accumulated size over all time
+- **Cock Ladder** — all-time ranking by total accumulated size
 - **Cock Race** — current season ranking (3 months)
 - **Cock Dynamics** — detailed personal statistics and analytics
 - **Cock Seasons** — season history and winners with navigation
@@ -70,10 +54,10 @@ Dickobrazz works through **inline queries** in Telegram. Simply type `@dickobraz
 
 ### How it works
 
-1. Open any chat in Telegram
-2. Type `@dickobrazz_bot` 
-3. Choose the option you're interested in from the list
-4. Send the result to chat or view privately
+1. Open any Telegram chat
+2. Type `@dickobrazz_bot`
+3. Choose the needed option from the list
+4. Send it to chat or view privately
 
 ## Run & Deployment 🚀
 
@@ -90,7 +74,7 @@ cd dickobrazz
 ### Dev Containers (recommended for development) 🧰
 
 **Requirements**:
-- **2 GB RAM** for containers
+- **1 GB RAM** for containers
 - Running **Docker**
 - **VS Code** or **Cursor**
 
@@ -102,8 +86,10 @@ cd dickobrazz
 - File: `.devcontainer/devcontainer.env`
 - Minimum required:
 ```bash
-TELEGRAM_TOKEN="your_telegram_bot_token"
-RANDOMORG_TOKEN="your_random_org_api_key"
+BOT_CSOT="your_internal_csot_token"
+BOT_SERVER_BASE_URL="https://api.dickobrazz.com"
+BOT_TG_TOKEN="your_telegram_bot_token"
+BOT_TG_ENV="test"
 ```
 
 **Run dev bot** *(uses `.devcontainer/devcontainer.env`)*:
@@ -124,11 +110,11 @@ go run program.go
 - File: `.env`
 - Minimum required:
 ```bash
-TELEGRAM_TOKEN="your_telegram_bot_token"
-RANDOMORG_TOKEN="your_random_org_api_key"
+BOT_CSOT="your_internal_csot_token"
+BOT_SERVER_BASE_URL="https://api.dickobrazz.com"
+BOT_TG_TOKEN="your_telegram_bot_token"
+BOT_TG_ENV="production"
 ```
-
-> **Note**: configure other environment variables if needed (Redis and MongoDB passwords).
 
 **Start**:
 ```bash
@@ -139,36 +125,21 @@ docker compose up -d
 
 ### Ready image + your own services 🧩
 
-Use the ready image if MongoDB and Redis are deployed separately:
+Use the ready image from GitHub Container Registry:
 
 ```yaml
 services:
   dickobrazz:
-    image: ghcr.io/mairwunnx/dickobrazz:1.30.3
+    image: ghcr.io/mairwunnx/dickobrazz:latest
     env_file: .env
-    environment:
-      DD_DB_HOST: dickobrazz-mongo
-      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
-      MONGODB_URI: ${MONGODB_URI}
-      RANDOMORG_TOKEN: ${RANDOMORG_TOKEN}
-      REDIS_ADDRESS: ${REDIS_ADDRESS}
-      REDIS_PASSWORD: ${REDIS_PASSWORD}
-      TELEGRAM_TOKEN: ${TELEGRAM_TOKEN}
-      TZ: ${TZ}
 ```
-
-> **Note**: pass all environment variables from `.env` or any other convenient way.
-
-**Important**: **MongoDB** must be `8.2+`, and **Redis** must be `8.2+`.
 
 ---
 
 ### Build from source 🛠️
 
 **Requirements**:
-- Go `1.25+`
+- Go `1.26+`
 
 ```bash
 go build -o dickobrazz program.go
@@ -187,40 +158,40 @@ docker build -t dickobrazz .
 
 ## Tech Stack
 
-- **Go 1.25** — main development language
+- **Go 1.26** — core development language
 - **Telegram Bot API (tgbotapi/v5)** — Telegram integration
-- **MongoDB + Mongo Driver** — main database with aggregations
-- **Redis + go-redis/cache** — caching with TinyLFU
-- **Random.org API** — source of true randomness
-- **ChaCha8** — cryptographically strong PRNG for fallback
+- **Resty** — HTTP client for backend interaction
+- **uber/fx** — dependency injection and lifecycle management
+- **Prometheus** — metrics and monitoring
+- **go-i18n** — internationalization (6 languages)
 - **Docker + Docker Compose** — containerization and orchestration
-- **Structured Logging (slog)** — JSON logging with context
+- **Structured Logging (slog)** — context-aware JSON logging
 
 ## AI Participation
 
-AI was used to create part of the documentation and commits, as well as to optimize some MongoDB aggregation pipelines and improve statistics algorithms.
+AI was used to create parts of documentation and commits, and to optimize some MongoDB aggregation pipelines and statistics algorithms.
 
-Also, as of September 23, 2025, AI hints (prompts/rules) have been added to the `.cursor/rules/` folder, which can help when implementing new features using LLM agents in the future.
+Also, as of September 23, 2025, AI hints (prompts/rules) were added to `.cursor/rules/`. They can help when implementing new features with LLM agents in the future.
 
 ## Links to Related Projects
 
-[Xi Manager](https://github.com/mairwunnx/xi) — 🀄️ AI-powered Telegram bot styled as Xi's personal assistant. Personal assistant to the great leader, ready to answer questions from ordinary people.
+[Xi Manager](https://github.com/mairwunnx/xi) — 🀄️ AI-powered Telegram bot styled as Xi's personal assistant. A personal assistant for the great leader, ready to answer questions from ordinary people.
 
-[Louisepizdon](https://github.com/MairwunNx/louisepizdon) — 🥀 Louisepizdon, AI-powered Telegram bot that's more honest than your grandmother. Will evaluate you properly, analyzing the pricing of your clothes from photos!
+[Louisepizdon](https://github.com/MairwunNx/louisepizdon) — 🥀 Louisepizdon, an AI-powered Telegram bot that is more honest than your grandmother. It evaluates you "fairly" and breaks down your outfit pricing from photos.
 
 ## From the "Same Author" Series
 
-[Mo'Bosses](https://github.com/mairwunnx/mobosses) — 🏆 **Mo'Bosses** is the best RPG plugin that turns ordinary mobs into epic bosses with **advanced player progression system**. Unlike other plugins, here every fight matters, and every level unlocks new possibilities! ⚔
+[Mo'Bosses](https://github.com/mairwunnx/mobosses) — 🏆 **Mo'Bosses** is the best RPG plugin that turns ordinary mobs into epic bosses with an **advanced player progression system**. Unlike other plugins, every fight matters here, and every level unlocks new possibilities. ⚔
 
-[Mo'Joins](https://github.com/mairwunnx/mojoins) — 🎉 Custom join/leave messages: messages, sounds, particles, fireworks and post-join protection. All for PaperMC.
+[Mo'Joins](https://github.com/mairwunnx/mojoins) — 🎉 Custom join/leave effects: messages, sounds, particles, fireworks, and protection after join. All for PaperMC.
 
-[Mo'Afks](https://github.com/mairwunnx/moafks) — 🛡️ Pause in online time is now possible. Plugin for PaperMC that gives players safe AFK mode: damage immunity, no collisions, ignored by mobs, auto-inactivity detection and neat visual effects.
+[Mo'Afks](https://github.com/mairwunnx/moafks) — 🛡️ Online-time pause is now possible. A PaperMC plugin that provides safe AFK mode: damage immunity, no collisions, mob ignore, automatic inactivity detection, and neat visual effects.
 
-[McBuddy Server](https://github.com/mcbuddy-ai/mcbuddy-server) — 🛠️⚡ Backend for MCBuddy AI assistant with OpenRouter integration and request processing
+[McBuddy Server](https://github.com/mcbuddy-ai/mcbuddy-server) — 🛠️⚡ Backend for the MCBuddy AI assistant with OpenRouter integration and request handling
 
-[McBuddy Telegram](https://github.com/mcbuddy-ai/mcbuddy-bot) — 🤖📱 Telegram bot for communicating with MCBuddy outside the game
+[McBuddy Telegram](https://github.com/mcbuddy-ai/mcbuddy-bot) — 🤖📱 Telegram bot to talk with MCBuddy outside the game
 
-[McBuddy Spigot](https://github.com/mcbuddy-ai/mcbuddy-spigot) — 💬 Spigot plugin for MCBuddy integration — adds `/ask` command for AI assistant questions directly in Minecraft server chat! 🎮
+[McBuddy Spigot](https://github.com/mcbuddy-ai/mcbuddy-spigot) — 💬 Spigot plugin for MCBuddy integration — adds `/ask` command for AI assistant questions directly in Minecraft server chat. 🎮
 
 ---
 
@@ -228,6 +199,6 @@ Also, as of September 23, 2025, AI hints (prompts/rules) have been added to the 
 
 🇷🇺 **Made in Russia with love.** ❤️
 
-**Dickobrazz** is about honest randomness and healthy competition. No cheating, just math and luck.
+**Dickobrazz** is about honest randomness and healthy competition. No cheating, only math and luck.
 
 > 🫡 Made by Pavel Erokhin (Павел Ерохин), aka mairwunnx.
