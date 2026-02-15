@@ -7,7 +7,7 @@ require (
 	github.com/nicksnyder/go-i18n/v2 v2.6.1
 	github.com/pelletier/go-toml/v2 v2.2.4
 	github.com/prometheus/client_golang v1.23.2
-	golang.org/x/text v0.33.0
+	golang.org/x/text v0.34.0
 	gopkg.in/yaml.v3 v3.0.1
 	resty.dev/v3 v3.0.0-beta.6
 )
