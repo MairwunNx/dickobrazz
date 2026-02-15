@@ -3,9 +3,11 @@ package features
 import (
 	"dickobrazz/src/features/achievements"
 	"dickobrazz/src/features/dynamics"
+	"dickobrazz/src/features/health"
 	"dickobrazz/src/features/help"
 	"dickobrazz/src/features/ladder"
 	"dickobrazz/src/features/privacy"
+	"dickobrazz/src/features/promserver"
 	"dickobrazz/src/features/race"
 	"dickobrazz/src/features/ruler"
 	"dickobrazz/src/features/seasons"
@@ -24,4 +26,6 @@ var Module = fx.Module("features",
 	achievements.Module,
 	help.Module,
 	privacy.Module,
+	health.Module,
+	promserver.Module,
 )
