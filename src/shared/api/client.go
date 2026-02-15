@@ -38,7 +38,7 @@ func setUserHeaders(r *resty.Request, userID int64, username string) {
 	}
 }
 
-func checkResponse(resp *resty.Response) error {
+func validateResponse(resp *resty.Response) error {
 	if resp.IsError() {
 		return &APIError{
 			StatusCode: resp.StatusCode(),
