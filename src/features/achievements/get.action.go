@@ -2,7 +2,7 @@ package achievements
 
 import (
 	"context"
-	"dickobrazz/src/entities/achievement"
+	"dickobrazz/src/shared/achievement"
 	"dickobrazz/src/shared/api"
 	"dickobrazz/src/shared/localization"
 	"dickobrazz/src/shared/logging"
