@@ -1,7 +1,7 @@
 FROM alpine:3.23 AS certs
 RUN apk --no-cache add ca-certificates tzdata
 
-FROM golang:1.25.5-alpine3.21 AS builder
+FROM golang:1.26.0-alpine3.21 AS builder
 
 RUN apk --no-cache add git
 COPY go.mod go.sum ./
