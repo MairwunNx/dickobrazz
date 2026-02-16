@@ -10,7 +10,7 @@ RUN go mod download
 COPY program.go ./
 COPY .version ./
 COPY .git ./
-COPY application/ ./application/
+COPY src/ ./src/
 
 RUN mkdir -p /app
 RUN go build -o /app/dickobrazz \
@@ -18,10 +18,10 @@ RUN go build -o /app/dickobrazz \
     -gcflags "all=-N -l" \
     -tags timetzdata \
     -ldflags="-s -w \
-        -X dickobrazz/application/logging.Version=$(cat .version) \
-        -X dickobrazz/application/logging.BuildAt=$(date +%Y-%m-%d_%H:%M:%S) \
-        -X dickobrazz/application/logging.GoVersion=$(go version | awk '{print $3}') \
-        -X dickobrazz/application/logging.BuildRv=$(git describe --always --long)"
+        -X dickobrazz/src/shared/logging.Version=$(cat .version) \
+        -X dickobrazz/src/shared/logging.BuildAt=$(date +%Y-%m-%d_%H:%M:%S) \
+        -X dickobrazz/src/shared/logging.GoVersion=$(go version | awk '{print $3}') \
+        -X dickobrazz/src/shared/logging.BuildRv=$(git describe --always --long)"
 RUN chmod +x /app/dickobrazz
 
 FROM busybox:1.37-musl

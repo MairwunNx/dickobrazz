@@ -65,8 +65,7 @@ Dickobrazz работает через **inline queries** в Telegram. Прос�
 
 Если репозиторий еще не клонирован:
 ```bash
-git clone https://github.com/mairwunnx/dickobrazz
-cd dickobrazz
+git clone https://github.com/mairwunnx/dickobrazz.git
 ```
 
 ---
