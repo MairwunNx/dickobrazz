@@ -27,14 +27,17 @@ func NewApplication(lc fx.Lifecycle, log *logging.Logger, poller *Poller) *Appli
 		poller: poller,
 	}
 
+	lc.Append(fx.Hook{
+		OnStart: func(_ context.Context) error {
+			go app.poller.Start(app.ctx)
+			return nil
+		},
+		OnStop: func(_ context.Context) error {
+			app.cancel()
+			app.log.I("Gracefully shutting down... Bye!")
+			return nil
+		},
+	})
+
 	return app
-}
-
-func (app *Application) Shutdown() {
-	app.cancel()
-	app.log.I("Gracefully shutting down... Bye!")
-}
-
-func (app *Application) Run() {
-	app.poller.Start(app.ctx)
 }

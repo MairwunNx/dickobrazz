@@ -13,9 +13,6 @@ func main() {
 		shared.Module,
 		features.Module,
 		app.Module,
-		fx.Invoke(func(a *app.Application) {
-			defer a.Shutdown()
-			a.Run()
-		}),
+		fx.Invoke(func(_ *app.Application) {}),
 	).Run()
 }
