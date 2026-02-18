@@ -21,6 +21,7 @@ import (
 	"time"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"go.uber.org/fx"
 )
 
 type Router struct {
@@ -44,6 +45,8 @@ type Router struct {
 }
 
 type RouterParams struct {
+	fx.In
+
 	Bot *tgbotapi.BotAPI
 	Log *logging.Logger
 	Loc *localization.LocalizationManager

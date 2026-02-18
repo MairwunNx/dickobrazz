@@ -10,9 +10,12 @@ services:
     cap_add: [ "SYS_PTRACE" ]
     command: ["sleep", "infinity"]
     container_name: dickobrazz-dev
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     env_file: [ devcontainer.env ]
     environment:
       DD_DB_HOST: dickobrazz-mongo
+      BOT_SERVER_BASE_URL: "http://host.docker.internal:3030/"
     networks: [ base ]
     ports: [ "8090:8090" ]
     security_opt: [ "seccomp:unconfined" ]
