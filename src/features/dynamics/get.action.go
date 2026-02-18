@@ -29,6 +29,10 @@ func (a *GetAction) Execute(ctx context.Context, log *logging.Logger, localizer 
 		data *api.CockDynamicPersonalData
 		err  error
 	}
+	type seasonsResult struct {
+		data *api.CockSeasonsData
+		err  error
+	}
 	type respectsResult struct {
 		data *api.RespectData
 		err  error
@@ -36,6 +40,7 @@ func (a *GetAction) Execute(ctx context.Context, log *logging.Logger, localizer 
 
 	globalCh := make(chan globalResult, 1)
 	personalCh := make(chan personalResult, 1)
+	seasonsCh := make(chan seasonsResult, 1)
 	respectsCh := make(chan respectsResult, 1)
 
 	go func() {
@@ -47,12 +52,17 @@ func (a *GetAction) Execute(ctx context.Context, log *logging.Logger, localizer 
 		personalCh <- personalResult{data, err}
 	}()
 	go func() {
+		data, err := a.api.GetCockSeasons(ctx, userID, username, 15, 1)
+		seasonsCh <- seasonsResult{data, err}
+	}()
+	go func() {
 		data, err := a.api.GetCockRespects(ctx, userID, username)
 		respectsCh <- respectsResult{data, err}
 	}()
 
 	globalRes := <-globalCh
 	personalRes := <-personalCh
+	seasonsRes := <-seasonsCh
 	respectsRes := <-respectsCh
 
 	if globalRes.err != nil {
@@ -71,6 +81,10 @@ func (a *GetAction) Execute(ctx context.Context, log *logging.Logger, localizer 
 	userCockRespect := 0
 	if respectsRes.err == nil && respectsRes.data != nil {
 		userCockRespect = int(respectsRes.data.TotalRespect)
+	}
+	userSeasonWins := 0
+	if seasonsRes.err == nil && seasonsRes.data != nil {
+		userSeasonWins = seasonsRes.data.UserSeasonWins
 	}
 
 	individualRecordTotal := personal.Record.Size
@@ -103,7 +117,7 @@ func (a *GetAction) Execute(ctx context.Context, log *logging.Logger, localizer 
 		global.Distribution.HugePercent, global.Distribution.LittlePercent,
 		overallRecordDate, overallRecordTotal,
 		personal.Dominance,
-		0, userCockRespect,
+		userSeasonWins, userCockRespect,
 		global.TotalCocksCount, personal.CocksCount,
 		personal.LuckCoefficient, personal.Volatility,
 		personal.GrowthSpeed, global.GrowthSpeed,
