@@ -5,7 +5,7 @@ go 1.26
 require (
 	github.com/go-telegram-bot-api/telegram-bot-api/v5 v5.5.1
 	github.com/nicksnyder/go-i18n/v2 v2.6.1
-	github.com/pelletier/go-toml/v2 v2.2.4
+	github.com/pelletier/go-toml/v2 v2.3.0
 	github.com/prometheus/client_golang v1.23.2
 	go.uber.org/fx v1.24.0
 	golang.org/x/text v0.34.0
